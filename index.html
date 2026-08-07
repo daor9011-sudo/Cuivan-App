@@ -474,7 +474,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 
 <!-- Modal editar consulta (Historial) -->
 <div class="modal-overlay2" id="modal-editar-consulta">
-  <div class="modal2" style="max-width:480px">
+  <div class="modal2" style="max-width:540px">
     <h3>✏️ Editar consulta</h3>
     <div class="fi2" style="margin-bottom:10px"><label class="lbl2">Paciente</label><input class="app-input" id="ec-paciente"/></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
@@ -506,10 +506,10 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         <button type="button" id="ec-btn-quitar2pago" style="background:none;border:none;color:var(--g4);cursor:pointer;font-size:10px;font-weight:700;margin-top:5px;text-decoration:underline;text-underline-offset:2px">quitar ✕</button>
       </div>
     </div>
-    <div class="modal-footer2" style="justify-content:center;gap:8px;border-top:1px solid var(--g2);padding-top:14px">
-      <button class="appbtn appbtn-danger-soft" id="btn-eliminar-consulta" style="flex:1;text-align:center">🗑️ Eliminar</button>
-      <button class="appbtn appbtn-s" id="btn-ec-cerrar" style="flex:1;text-align:center">Cancelar</button>
-      <button class="appbtn appbtn-p" id="btn-ec-guardar" style="flex:1;text-align:center">Guardar cambios</button>
+    <div class="modal-footer2" style="justify-content:center;gap:8px;border-top:1px solid var(--g2);padding-top:14px;flex-wrap:nowrap">
+      <button class="appbtn appbtn-danger-soft" id="btn-eliminar-consulta" style="white-space:nowrap">🗑️ Eliminar registro</button>
+      <button class="appbtn appbtn-s" id="btn-ec-cerrar" style="white-space:nowrap">Cancelar</button>
+      <button class="appbtn appbtn-p" id="btn-ec-guardar" style="white-space:nowrap">Guardar cambios</button>
     </div>
   </div>
 </div>
