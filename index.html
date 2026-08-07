@@ -1176,7 +1176,7 @@ function renderHistorial(rows){
 }
 function fmtFechaISO(iso){
   const [y,m,d] = iso.split('-');
-  return `${d}/${m}`;
+  return `${d}/${m}/${y}`;
 }
 document.getElementById('btn-refrescar-historial').addEventListener('click', cargarHistorial);
 document.getElementById('h-periodo').addEventListener('change', cargarHistorial);
