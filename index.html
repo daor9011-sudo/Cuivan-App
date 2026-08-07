@@ -845,6 +845,8 @@ function entrarAlShell(perfil){
   document.getElementById('btn-papelera-toggle').style.display = showPapelera ? 'inline-flex' : 'none';
   window.MI_ROL_ADMIN = perfil.rol === 'admin';
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
+  window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
+  document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
 
   cargarDoctores();
   cargarCatalogoServiciosCache();
@@ -1355,10 +1357,10 @@ async function cargarPersonal(){
         <button class="appbtn appbtn-danger-soft p-eliminar" style="font-size:11px;padding:6px 10px;white-space:nowrap">🗑️</button>
       </div>
     </div>
-    ${p.rol === 'admin' ? `
-    <div class="p-permiso-row" data-permiso-id="${p.id}" style="padding:4px 0 10px;margin-top:-4px;border-bottom:1px solid var(--g1)">
-      <label class="cbrow2" style="font-size:11px"><input type="checkbox" class="p-permiso-papelera" ${p.permisos?.puede_eliminar_papelera !== false ? 'checked':''}/><span style="font-weight:600;color:var(--g6)">🗑️ Puede vaciar/eliminar registros de la Papelera</span></label>
-    </div>` : ''}
+    <div class="p-permiso-row" data-permiso-id="${p.id}" style="padding:4px 0 10px;margin-top:-4px;border-bottom:1px solid var(--g1);display:flex;gap:16px;flex-wrap:wrap">
+      <label class="cbrow2" style="font-size:11px"><input type="checkbox" class="p-permiso-exportar" ${p.permisos?.puede_exportar !== false ? 'checked':''}/><span style="font-weight:600;color:var(--g6)">⬇️ Puede exportar/descargar el Historial</span></label>
+      ${p.rol === 'admin' ? `<label class="cbrow2" style="font-size:11px"><input type="checkbox" class="p-permiso-papelera" ${p.permisos?.puede_eliminar_papelera !== false ? 'checked':''}/><span style="font-weight:600;color:var(--g6)">🗑️ Puede vaciar/eliminar registros de la Papelera</span></label>` : ''}
+    </div>
   `).join('');
   cont.querySelectorAll('.p-guardar').forEach(btn=>{
     btn.addEventListener('click', async (e)=>{
@@ -1374,12 +1376,25 @@ async function cargarPersonal(){
     });
   });
 
+  async function actualizarPermiso(id, clave, valor, checkboxEl){
+    // lee los permisos actuales y solo cambia la clave indicada, sin borrar las demás
+    const { data: actual, error: readErr } = await sb.from('personal').select('permisos').eq('id', id).single();
+    if(readErr){ console.error('[CUIVAN] Error leyendo permisos:', readErr); toast('⚠️ No se pudo guardar el permiso'); checkboxEl.checked = !checkboxEl.checked; return; }
+    const nuevosPermisos = { ...(actual.permisos || {}), [clave]: valor };
+    const { error } = await sb.from('personal').update({ permisos: nuevosPermisos }).eq('id', id);
+    if(error){ console.error('[CUIVAN] Error actualizando permiso:', error); toast('⚠️ No se pudo guardar el permiso'); checkboxEl.checked = !checkboxEl.checked; return; }
+    toast('✅ Permiso actualizado');
+  }
   cont.querySelectorAll('.p-permiso-papelera').forEach(cb=>{
-    cb.addEventListener('change', async (e)=>{
+    cb.addEventListener('change', (e)=>{
       const id = e.target.closest('.p-permiso-row').dataset.permisoId;
-      const { error } = await sb.from('personal').update({ permisos: { puede_eliminar_papelera: e.target.checked } }).eq('id', id);
-      if(error){ console.error('[CUIVAN] Error actualizando permiso:', error); toast('⚠️ No se pudo guardar el permiso'); e.target.checked = !e.target.checked; return; }
-      toast('✅ Permiso actualizado');
+      actualizarPermiso(id, 'puede_eliminar_papelera', e.target.checked, e.target);
+    });
+  });
+  cont.querySelectorAll('.p-permiso-exportar').forEach(cb=>{
+    cb.addEventListener('change', (e)=>{
+      const id = e.target.closest('.p-permiso-row').dataset.permisoId;
+      actualizarPermiso(id, 'puede_exportar', e.target.checked, e.target);
     });
   });
 
