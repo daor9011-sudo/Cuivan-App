@@ -89,8 +89,9 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .soon-ico{font-size:32px;margin-bottom:10px}
 .toast2{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:12.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:2000;opacity:0;pointer-events:none;transition:.25s}
 .toast2.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
-.p-header{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 100px;gap:8px;padding:0 0 7px;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--g4);border-bottom:2px solid var(--g2)}
-.p-row{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 100px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--g1)}
+.p-header{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 190px;gap:8px;padding:0 0 7px;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--g4);border-bottom:2px solid var(--g2)}
+.p-row{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 190px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--g1)}
+.p-actions2{display:flex;gap:6px;flex-wrap:wrap}
 .p-row .cbwrap{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10.5px;color:var(--g6)}
 .p-row:last-child{border-bottom:none}
 .p-row input,.p-row select{font-size:12px;padding:6px 8px}
@@ -1035,9 +1036,12 @@ async function cargarPersonal(){
       </select>
       <label class="cbwrap"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/></label>
       <button class="appbtn appbtn-s p-guardar" style="font-size:11px;padding:6px 10px;white-space:nowrap">Guardar</button>
-      ${p.auth_user_id
-        ? `<button class="appbtn appbtn-s p-reset" style="font-size:11px;padding:6px 10px;white-space:nowrap">🔑 Reset</button>`
-        : `<button class="appbtn appbtn-p p-dar-acceso" style="font-size:11px;padding:6px 10px;white-space:nowrap">Dar acceso</button>`}
+      <div class="p-actions2">
+        ${p.auth_user_id
+          ? `<button class="appbtn appbtn-s p-reset" style="font-size:11px;padding:6px 10px;white-space:nowrap">🔑 Reset</button>
+             <button class="appbtn appbtn-s p-cambiar-correo" style="font-size:11px;padding:6px 10px;white-space:nowrap">✉️ Correo</button>`
+          : `<button class="appbtn appbtn-p p-dar-acceso" style="font-size:11px;padding:6px 10px;white-space:nowrap">Dar acceso</button>`}
+      </div>
     </div>
   `).join('');
   cont.querySelectorAll('.p-guardar').forEach(btn=>{
@@ -1064,6 +1068,12 @@ async function cargarPersonal(){
     btn.addEventListener('click', (e)=>{
       const row = e.target.closest('.p-row');
       abrirReset(row.dataset.auth, row.querySelector('.p-nombre').value);
+    });
+  });
+  cont.querySelectorAll('.p-cambiar-correo').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const row = e.target.closest('.p-row');
+      abrirCambiarCorreo(row.dataset.id, row.dataset.auth, row.querySelector('.p-nombre').value);
     });
   });
 }
@@ -1101,6 +1111,13 @@ function abrirReset(authUserId, nombre){
   llamarPersonalAdmin({ action:'reset_password', auth_user_id: authUserId, new_password: password })
     .then(()=>{ toast('✅ Contraseña restablecida'); })
     .catch(err=>{ console.error('[CUIVAN] Error reseteando:', err); toast('⚠️ ' + err.message); });
+}
+function abrirCambiarCorreo(personalId, authUserId, nombre){
+  const nuevoCorreo = prompt(`Nuevo correo para ${nombre}:`);
+  if(!nuevoCorreo) return;
+  llamarPersonalAdmin({ action:'change_email', personal_id: personalId, auth_user_id: authUserId, new_email: nuevoCorreo })
+    .then(()=>{ toast('✅ Correo actualizado'); cargarPersonal(); })
+    .catch(err=>{ console.error('[CUIVAN] Error cambiando correo:', err); toast('⚠️ ' + err.message); });
 }
 
 document.getElementById('np-con-acceso').addEventListener('change', (e)=>{
