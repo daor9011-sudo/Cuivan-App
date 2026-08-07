@@ -89,9 +89,10 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .soon-ico{font-size:32px;margin-bottom:10px}
 .toast2{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:12.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:2000;opacity:0;pointer-events:none;transition:.25s}
 .toast2.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
-.p-header{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 190px;gap:8px;padding:0 0 7px;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--g4);border-bottom:2px solid var(--g2)}
-.p-row{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 190px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--g1)}
+.p-header{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 250px;gap:8px;padding:0 0 7px;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--g4);border-bottom:2px solid var(--g2)}
+.p-row{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 250px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--g1)}
 .p-actions2{display:flex;gap:6px;flex-wrap:wrap}
+.p-email{font-size:9.5px;color:var(--g4);margin-top:2px}
 .p-row .cbwrap{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10.5px;color:var(--g6)}
 .p-row:last-child{border-bottom:none}
 .p-row input,.p-row select{font-size:12px;padding:6px 8px}
@@ -335,8 +336,8 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       </div>
       <div style="overflow-x:auto">
         <table class="h2-table">
-          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th></tr></thead>
-          <tbody id="h-tbody"><tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
+          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th><th></th></tr></thead>
+          <tbody id="h-tbody"><tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -419,6 +420,9 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         </select>
       </div>
       <div id="servicios-lista" style="margin-top:10px"></div>
+
+      <div class="tab-title" style="margin-top:6px">📜 Actividad reciente</div>
+      <div id="audit-lista"></div>
     </div>
   </main>
   <div class="app-footer">
@@ -427,6 +431,35 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 </div>
 
 <div class="toast2" id="toast2"></div>
+
+<!-- Modal editar consulta (Historial) -->
+<div class="modal-overlay2" id="modal-editar-consulta">
+  <div class="modal2" style="max-width:480px">
+    <h3>✏️ Editar consulta</h3>
+    <div class="fi2" style="margin-bottom:10px"><label class="lbl2">Paciente</label><input class="app-input" id="ec-paciente"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" id="ec-fecha" placeholder="dd/mm/aaaa"/></div>
+      <div class="fi2"><label class="lbl2">Atendido por</label><select class="app-input" id="ec-doctor"></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="fi2"><label class="lbl2">Motivo</label>
+        <select class="app-input" id="ec-motivo"><option>Consulta</option><option>Procedimientos</option><option>Vacunas</option><option>Producto Farmacia</option><option>Otro</option></select>
+      </div>
+      <div class="fi2"><label class="lbl2">Tipo de consulta</label><input class="app-input" id="ec-tipo"/></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="fi2"><label class="lbl2">Monto</label><div class="mon2"><span>$</span><input class="app-input" id="ec-monto" type="number"/></div></div>
+      <div class="fi2"><label class="lbl2">Medio de pago</label><select class="app-input" id="ec-pago"><option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option></select></div>
+    </div>
+    <div class="modal-footer2" style="justify-content:space-between">
+      <button class="appbtn appbtn-s" id="btn-eliminar-consulta" style="background:#e53e3e">🗑️ Eliminar registro</button>
+      <div style="display:flex;gap:8px">
+        <button class="appbtn appbtn-s" id="btn-ec-cerrar">Cancelar</button>
+        <button class="appbtn appbtn-p" id="btn-ec-guardar">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal aviso legal -->
 <div class="modal-overlay2" id="modal-aviso-legal">
@@ -926,11 +959,11 @@ document.getElementById('btn-limpiar-registro').addEventListener('click', limpia
 async function cargarHistorial(){
   const tbody = document.getElementById('h-tbody');
   const kpisEl = document.getElementById('h-kpis');
-  tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
   const periodo = parseInt(document.getElementById('h-periodo').value) || 0;
   let query = sb
     .from('consultas')
-    .select('fecha, motivo, tipo_consulta, monto, medio_pago, pacientes(id, nombre), personal!consultas_doctor_id_fkey(nombre)')
+    .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, pacientes(id, nombre), personal!consultas_doctor_id_fkey(nombre)')
     .eq('deleted', false)
     .order('fecha', { ascending: false })
     .limit(300);
@@ -938,7 +971,7 @@ async function cargarHistorial(){
   const { data, error } = await query;
   if(error){
     console.error('[CUIVAN] Error cargando historial:', error);
-    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
     kpisEl.innerHTML = '';
     return;
   }
@@ -957,7 +990,7 @@ function aplicarFiltrosHistorial(){
   const kpisEl = document.getElementById('h-kpis');
   const periodoTxt = document.getElementById('h-periodo').selectedOptions[0].text;
   if(rows.length === 0){
-    document.getElementById('h-tbody').innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
+    document.getElementById('h-tbody').innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
     kpisEl.innerHTML = '';
     document.getElementById('h2-subt').textContent = periodoTxt + ' · 0 registros';
     return;
@@ -986,8 +1019,12 @@ function renderHistorial(rows){
       <td>${esc2(r.tipo_consulta || '—')}</td>
       <td><b style="color:var(--teal)">$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</b></td>
       <td>${PAGO_ICON[r.medio_pago]||''} ${esc2(r.medio_pago)}</td>
+      <td><button class="h-editar-btn" data-id="${r.id}" style="background:none;border:none;color:#0B6E6E;cursor:pointer;font-size:13px" title="Editar">✏️</button></td>
     </tr>
   `).join('');
+  tbody.querySelectorAll('.h-editar-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> abrirEditarConsulta(btn.dataset.id));
+  });
 }
 function fmtFechaISO(iso){
   const [y,m,d] = iso.split('-');
@@ -1028,7 +1065,10 @@ async function cargarPersonal(){
   if(error){ console.error('[CUIVAN] Error cargando personal:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
   cont.innerHTML = data.map(p => `
     <div class="p-row" data-id="${p.id}" data-auth="${p.auth_user_id || ''}">
-      <input class="app-input p-nombre" value="${esc2(p.nombre)}"/>
+      <div>
+        <input class="app-input p-nombre" value="${esc2(p.nombre)}"/>
+        <div class="p-email">✉️ ${p.email ? esc2(p.email) : 'Sin correo (sin acceso)'}</div>
+      </div>
       <select class="app-input p-rol">
         <option value="recepcion" ${p.rol==='recepcion'?'selected':''}>Recepción</option>
         <option value="doctor" ${p.rol==='doctor'?'selected':''}>Doctor/a</option>
@@ -1041,6 +1081,7 @@ async function cargarPersonal(){
           ? `<button class="appbtn appbtn-s p-reset" style="font-size:11px;padding:6px 10px;white-space:nowrap">🔑 Reset</button>
              <button class="appbtn appbtn-s p-cambiar-correo" style="font-size:11px;padding:6px 10px;white-space:nowrap">✉️ Correo</button>`
           : `<button class="appbtn appbtn-p p-dar-acceso" style="font-size:11px;padding:6px 10px;white-space:nowrap">Dar acceso</button>`}
+        <button class="appbtn appbtn-s p-eliminar" style="font-size:11px;padding:6px 10px;white-space:nowrap;background:#e53e3e">🗑️</button>
       </div>
     </div>
   `).join('');
@@ -1074,6 +1115,12 @@ async function cargarPersonal(){
     btn.addEventListener('click', (e)=>{
       const row = e.target.closest('.p-row');
       abrirCambiarCorreo(row.dataset.id, row.dataset.auth, row.querySelector('.p-nombre').value);
+    });
+  });
+  cont.querySelectorAll('.p-eliminar').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const row = e.target.closest('.p-row');
+      abrirEliminarPersonal(row.dataset.id, row.dataset.auth, row.querySelector('.p-nombre').value);
     });
   });
 }
@@ -1119,6 +1166,17 @@ function abrirCambiarCorreo(personalId, authUserId, nombre){
     .then(()=>{ toast('✅ Correo actualizado'); cargarPersonal(); })
     .catch(err=>{ console.error('[CUIVAN] Error cambiando correo:', err); toast('⚠️ ' + err.message); });
 }
+function abrirEliminarPersonal(personalId, authUserId, nombre){
+  const ok = confirm(`¿Eliminar definitivamente a "${nombre}"? Esta acción no se puede deshacer.\n\nSi tiene consultas registradas, no se podrá eliminar (para no romper el historial) — en ese caso, desactívalo en su lugar.`);
+  if(!ok) return;
+  llamarPersonalAdmin({ action:'delete_user', personal_id: personalId, auth_user_id: authUserId || null, nombre_snapshot: nombre })
+    .then((res)=>{
+      toast(res.warning ? '⚠️ ' + res.warning : '✅ Eliminado');
+      cargarPersonal();
+      cargarDoctores();
+    })
+    .catch(err=>{ console.error('[CUIVAN] Error eliminando:', err); toast('⚠️ ' + err.message); });
+}
 
 document.getElementById('np-con-acceso').addEventListener('change', (e)=>{
   document.getElementById('np-acceso-wrap').style.display = e.target.checked ? 'grid' : 'none';
@@ -1129,7 +1187,7 @@ document.getElementById('btn-crear-personal-sin-acceso').addEventListener('click
   const nombre = document.getElementById('np-nombre').value.trim();
   const rol = document.getElementById('np-rol').value;
   if(!nombre){ toast('⚠️ Falta el nombre'); return; }
-  const { error } = await sb.from('personal').insert({ nombre, rol, email: `sin-acceso+${Date.now()}@cuivan.local`, activo: true, auth_user_id: null });
+  const { error } = await sb.from('personal').insert({ nombre, rol, email: null, activo: true, auth_user_id: null });
   if(error){ console.error('[CUIVAN] Error agregando personal:', error); toast('⚠️ No se pudo agregar'); return; }
   toast('✅ Agregado (sin acceso)');
   document.getElementById('np-nombre').value = '';
@@ -1219,8 +1277,41 @@ document.getElementById('btn-personal-header').addEventListener('click', ()=>{
   document.getElementById('app-screen-personal').classList.add('act');
   cargarPersonal();
   cargarServicios();
+  cargarAuditLog();
 });
 
+// ── Actividad reciente (audit_log), solo admin ──
+const AUDIT_LABEL = {
+  crear_personal: '➕ Dio de alta a',
+  reset_password: '🔑 Restableció contraseña de',
+  cambiar_correo: '✉️ Cambió el correo de',
+  eliminar_personal: '🗑️ Eliminó a',
+  eliminar_personal_auth_fallo: '⚠️ Eliminó de personal (falló borrar acceso) a'
+};
+async function cargarAuditLog(){
+  const cont = document.getElementById('audit-lista');
+  cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
+  const { data, error } = await sb
+    .from('audit_log')
+    .select('accion, detalle, created_at, personal:actor_id(nombre)')
+    .order('created_at', { ascending: false })
+    .limit(60);
+  if(error){ console.error('[CUIVAN] Error cargando audit_log:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+  if(!data || data.length === 0){ cont.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Sin actividad registrada todavía.</div>'; return; }
+  cont.innerHTML = data.map(a => {
+    const quien = a.personal ? a.personal.nombre : 'Sistema';
+    const label = AUDIT_LABEL[a.accion] || a.accion;
+    const detalleTxt = a.detalle ? Object.entries(a.detalle).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join(' · ') : '';
+    const fecha = new Date(a.created_at);
+    const fechaTxt = fecha.toLocaleString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    return `
+      <div style="padding:8px 0;border-bottom:1px solid var(--g1);font-size:11.5px">
+        <b style="color:var(--navy)">${esc2(quien)}</b> <span style="color:var(--g6)">${label}</span>
+        <div style="color:var(--g4);font-size:10.5px;margin-top:2px">${esc2(detalleTxt)} · ${fechaTxt}</div>
+      </div>
+    `;
+  }).join('');
+}
 // ═══════════════════════════════════════════════════════════
 // CIERRE
 // ═══════════════════════════════════════════════════════════
@@ -1436,6 +1527,76 @@ document.getElementById('btn-prm-aplicar').addEventListener('click', cargarPRM);
 
 // ── Modal de trazabilidad: historial de visitas + bitácora CRM (gestiones) ──
 let TRAZA_PACIENTE_ID = null;
+// ── Editar / eliminar una consulta desde Historial ──
+let EDITANDO_CONSULTA = null;
+function abrirEditarConsulta(consultaId){
+  const row = (window._historialFiltrado || window._historialData || []).find(r => r.id === consultaId);
+  if(!row){ toast('⚠️ No se encontró el registro'); return; }
+  EDITANDO_CONSULTA = row;
+
+  document.getElementById('ec-paciente').value = row.pacientes ? row.pacientes.nombre : '';
+  document.getElementById('ec-fecha').value = fmtFechaCompletaISO(row.fecha);
+  document.getElementById('ec-doctor').innerHTML = document.getElementById('r-doctor').innerHTML;
+  document.getElementById('ec-doctor').value = row.doctor_id || '';
+  document.getElementById('ec-motivo').value = row.motivo;
+  document.getElementById('ec-tipo').value = row.tipo_consulta || '';
+  document.getElementById('ec-monto').value = row.monto;
+  document.getElementById('ec-pago').value = row.medio_pago;
+
+  document.getElementById('modal-editar-consulta').classList.add('show');
+}
+function fmtFechaCompletaISO(iso){
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+document.getElementById('btn-ec-cerrar').addEventListener('click', ()=>{
+  document.getElementById('modal-editar-consulta').classList.remove('show');
+});
+document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
+  if(!EDITANDO_CONSULTA) return;
+  const nuevoNombre = document.getElementById('ec-paciente').value.trim();
+  const fechaVal = document.getElementById('ec-fecha').value.trim();
+  const doctorId = document.getElementById('ec-doctor').value;
+  const btn = document.getElementById('btn-ec-guardar');
+  if(!nuevoNombre || !fechaVal || !doctorId){ toast('⚠️ Completa paciente, fecha y doctor'); return; }
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    if(EDITANDO_CONSULTA.pacientes && nuevoNombre !== EDITANDO_CONSULTA.pacientes.nombre){
+      await sb.from('pacientes').update({ nombre: nuevoNombre }).eq('id', EDITANDO_CONSULTA.paciente_id);
+    }
+    const { error } = await sb.from('consultas').update({
+      fecha: dmyToISO(fechaVal),
+      doctor_id: doctorId,
+      motivo: document.getElementById('ec-motivo').value,
+      tipo_consulta: document.getElementById('ec-tipo').value.trim() || null,
+      monto: parseFloat(document.getElementById('ec-monto').value) || 0,
+      medio_pago: document.getElementById('ec-pago').value,
+      edited_by: await miPersonalId(),
+      edited_at: new Date().toISOString()
+    }).eq('id', EDITANDO_CONSULTA.id);
+    if(error) throw error;
+    toast('✅ Consulta actualizada');
+    document.getElementById('modal-editar-consulta').classList.remove('show');
+    cargarHistorial();
+  } catch(err){
+    console.error('[CUIVAN] Error editando consulta:', err);
+    toast('⚠️ No se pudo guardar: ' + err.message);
+  }
+  btn.disabled = false; btn.textContent = 'Guardar cambios';
+});
+document.getElementById('btn-eliminar-consulta').addEventListener('click', async ()=>{
+  if(!EDITANDO_CONSULTA) return;
+  const ok = confirm('¿Eliminar este registro del historial? Se puede recuperar solo desde la base de datos por un administrador.');
+  if(!ok) return;
+  const { error } = await sb.from('consultas').update({
+    deleted: true, deleted_at: new Date().toISOString(), deleted_by: await miPersonalId()
+  }).eq('id', EDITANDO_CONSULTA.id);
+  if(error){ console.error('[CUIVAN] Error eliminando consulta:', error); toast('⚠️ No se pudo eliminar'); return; }
+  toast('✅ Registro eliminado');
+  document.getElementById('modal-editar-consulta').classList.remove('show');
+  cargarHistorial();
+});
+
 async function abrirTrazabilidad(pacienteId){
   TRAZA_PACIENTE_ID = pacienteId;
   const info = (window._prmData || []).find(p => p.id === pacienteId);
