@@ -256,7 +256,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     <div class="card screen2 act" id="app-screen-registro">
       <div class="tab-title">📝 Registrar Consulta / Servicio</div>
       <div class="b1-grid">
-        <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" type="text" id="r-fecha"/></div>
+        <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" type="date" id="r-fecha"/></div>
         <div class="fi2"><label class="lbl2">Atendido por</label>
           <select class="app-input" id="r-doctor"><option value="">Cargando...</option></select>
         </div>
@@ -485,7 +485,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     <h3>✏️ Editar consulta</h3>
     <div class="fi2" style="margin-bottom:10px"><label class="lbl2">Paciente</label><input class="app-input" id="ec-paciente"/></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" id="ec-fecha" placeholder="dd/mm/aaaa"/></div>
+      <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" type="date" id="ec-fecha"/></div>
       <div class="fi2"><label class="lbl2">Atendido por</label><select class="app-input" id="ec-doctor"></select></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
@@ -848,7 +848,7 @@ function entrarAlShell(perfil){
 
   cargarDoctores();
   cargarCatalogoServiciosCache();
-  document.getElementById('r-fecha').value = todayLocal();
+  document.getElementById('r-fecha').value = isoLocal(new Date());
   activarRealtime();
 }
 
@@ -1038,22 +1038,20 @@ async function guardarRegistro(){
 
   btn.disabled = true; btn.textContent = 'Guardando...';
   try {
-    // 1) upsert paciente por teléfono
-    let { data: pacienteRow, error: pacErr } = await sb.from('pacientes').select('id').eq('telefono', telefono).maybeSingle();
+    // 1) upsert paciente por teléfono — un solo viaje a la base en vez de 2-3
+    const { data: pacienteRow, error: pacErr } = await sb
+      .from('pacientes')
+      .upsert(
+        { nombre: paciente, telefono, tipo_paciente: document.getElementById('r-tipopaciente').value },
+        { onConflict: 'telefono' }
+      )
+      .select('id')
+      .single();
     if(pacErr) throw pacErr;
-    if(!pacienteRow){
-      const { data: nuevoPac, error: insPacErr } = await sb.from('pacientes').insert({
-        nombre: paciente, telefono, tipo_paciente: document.getElementById('r-tipopaciente').value
-      }).select('id').single();
-      if(insPacErr) throw insPacErr;
-      pacienteRow = nuevoPac;
-    } else {
-      await sb.from('pacientes').update({ nombre: paciente, tipo_paciente: document.getElementById('r-tipopaciente').value }).eq('id', pacienteRow.id);
-    }
 
     // 2) insert consulta
     const { error: consErr } = await sb.from('consultas').insert({
-      fecha: dmyToISO(fecha),
+      fecha: fecha,
       paciente_id: pacienteRow.id,
       doctor_id: doctorId,
       motivo: document.getElementById('r-motivo').value,
@@ -1099,7 +1097,7 @@ function limpiarRegistro(){
   document.getElementById('r-pago2-wrap').style.display = 'none';
   document.getElementById('r-factura').checked = false;
   document.getElementById('r-nfact-wrap').style.display = 'none';
-  document.getElementById('r-fecha').value = todayLocal();
+  document.getElementById('r-fecha').value = isoLocal(new Date());
   refrescarResumen();
 }
 document.getElementById('btn-guardar-registro').addEventListener('click', guardarRegistro);
@@ -1929,7 +1927,7 @@ function abrirEditarConsulta(consultaId){
   EDITANDO_CONSULTA = row;
 
   document.getElementById('ec-paciente').value = row.pacientes ? row.pacientes.nombre : '';
-  document.getElementById('ec-fecha').value = fmtFechaCompletaISO(row.fecha);
+  document.getElementById('ec-fecha').value = row.fecha;
   document.getElementById('ec-doctor').innerHTML = document.getElementById('r-doctor').innerHTML;
   document.getElementById('ec-doctor').value = row.doctor_id || '';
   document.getElementById('ec-motivo').value = row.motivo;
@@ -1979,7 +1977,7 @@ document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
       await sb.from('pacientes').update({ nombre: nuevoNombre }).eq('id', EDITANDO_CONSULTA.paciente_id);
     }
     const { error } = await sb.from('consultas').update({
-      fecha: dmyToISO(fechaVal),
+      fecha: fechaVal,
       doctor_id: doctorId,
       motivo: document.getElementById('ec-motivo').value,
       tipo_consulta: valorTipoConsultaEC() || null,
