@@ -474,7 +474,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 
 <!-- Modal editar consulta (Historial) -->
 <div class="modal-overlay2" id="modal-editar-consulta">
-  <div class="modal2" style="max-width:540px">
+  <div class="modal2" style="max-width:500px">
     <h3>✏️ Editar consulta</h3>
     <div class="fi2" style="margin-bottom:10px"><label class="lbl2">Paciente</label><input class="app-input" id="ec-paciente"/></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
@@ -889,6 +889,9 @@ document.getElementById('app-nav').addEventListener('click',(e)=>{
   document.querySelectorAll('.screen2').forEach(x=>x.classList.remove('act'));
   document.getElementById('app-screen-'+b.dataset.screen2).classList.add('act');
   if(b.dataset.screen2 === 'historial') cargarHistorial();
+  if(b.dataset.screen2 === 'cierre') cargarCierre(cierreDiasActual);
+  if(b.dataset.screen2 === 'dash') cargarDashboard();
+  if(b.dataset.screen2 === 'prm') cargarPRM();
 });
 
 document.getElementById('btn-logout').addEventListener('click', async ()=>{
@@ -1202,6 +1205,7 @@ document.getElementById('btn-export-historial').addEventListener('click', async 
 
 // ── Papelera: consultas eliminadas (soft-delete), restaurar o borrar definitivo ──
 let PAPELERA_ABIERTA = false;
+let _papeleraAutoHideTimer = null;
 document.getElementById('btn-papelera-toggle').addEventListener('click', ()=>{
   PAPELERA_ABIERTA = !PAPELERA_ABIERTA;
   document.getElementById('h-papelera-panel').style.display = PAPELERA_ABIERTA ? 'block' : 'none';
@@ -1223,8 +1227,14 @@ async function cargarPapelera(){
   }
   if(!data || data.length === 0){
     panel.innerHTML = '<div class="papelera-box"><div class="papelera-title">🗑 Papelera</div><div style="color:var(--g4);font-size:12px">La papelera está vacía</div></div>';
+    if(_papeleraAutoHideTimer) clearTimeout(_papeleraAutoHideTimer);
+    _papeleraAutoHideTimer = setTimeout(()=>{
+      PAPELERA_ABIERTA = false;
+      document.getElementById('h-papelera-panel').style.display = 'none';
+    }, 3000);
     return;
   }
+  if(_papeleraAutoHideTimer){ clearTimeout(_papeleraAutoHideTimer); _papeleraAutoHideTimer = null; }
   panel.innerHTML = `
     <div class="papelera-box">
       <div class="papelera-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -1968,14 +1978,6 @@ document.getElementById('btn-traza-registrar').addEventListener('click', async (
 });
 
 // ── conectar carga por pestaña ──
-document.getElementById('app-nav').addEventListener('click',(e)=>{
-  const b = e.target.closest('button');
-  if(!b || b.classList.contains('locked') || !b.dataset.screen2) return;
-  if(b.dataset.screen2 === 'cierre') cargarCierre(cierreDiasActual);
-  if(b.dataset.screen2 === 'dash') cargarDashboard();
-  if(b.dataset.screen2 === 'prm') cargarPRM();
-});
-
 document.getElementById('link-aviso-legal-1').addEventListener('click', ()=>{
   document.getElementById('modal-aviso-legal').classList.add('show');
 });
