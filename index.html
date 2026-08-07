@@ -438,6 +438,17 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       </div>
       <div id="servicios-lista" style="margin-top:10px"></div>
 
+      <div class="tab-title" style="margin-top:6px">🕐 Horario de acceso (Recepción)</div>
+      <div class="fac2" style="margin-bottom:14px">
+        <label class="cbrow2" style="margin-bottom:10px"><input type="checkbox" id="horario-activo"/><span style="font-weight:600">Restringir el acceso de Recepción a un horario</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end">
+          <div class="fi2"><label class="lbl2">Desde</label><input class="app-input" type="time" id="horario-inicio"/></div>
+          <div class="fi2"><label class="lbl2">Hasta</label><input class="app-input" type="time" id="horario-fin"/></div>
+          <button class="appbtn appbtn-p" id="btn-guardar-horario">Guardar</button>
+        </div>
+        <p style="font-size:10.5px;color:var(--g4);margin-top:8px;line-height:1.5">Solo afecta a cuentas con rol Recepción — doctoras y admins siempre tienen acceso, sin importar la hora. Si el horario cruza medianoche (ej. 20:00 a 08:45), funciona igual.</p>
+      </div>
+
       <div class="tab-title" style="margin-top:6px">📜 Actividad reciente</div>
       <div id="audit-lista"></div>
     </div>
@@ -624,6 +635,13 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <button class="btn btn-ghost" data-goto="login">Volver al login</button>
     </div>
 
+    <div class="screen" id="s-fuera-horario" style="text-align:center">
+      <div class="recovered-icon" style="background:#FDF6EC">🕐</div>
+      <div style="font-family:var(--font-d);font-weight:800;font-size:15.5px;margin-bottom:6px">Fuera de horario de atención</div>
+      <p style="font-size:12.5px;color:var(--g6);line-height:1.5;margin-bottom:20px">Tu cuenta de Recepción solo tiene acceso de <b id="fh-horario">—</b>. Vuelve a intentarlo dentro de ese horario.</p>
+      <button class="btn btn-ghost" data-goto="login">Volver al login</button>
+    </div>
+
   </div>
 </div>
 </div>
@@ -702,7 +720,8 @@ async function doLogin(){
     await sb.auth.signOut();
     return;
   }
-  entrarAlShell(perfil);
+  const ok = await intentarEntrar(perfil);
+  if(!ok) setErr('login-err', '');
 }
 
 document.getElementById('btn-login').addEventListener('click', doLogin);
@@ -745,7 +764,7 @@ async function doLogin_bySession(session){
     console.error('[CUIVAN] Error consultando personal (sesión existente):', error);
   }
   if(perfil && perfil.activo){
-    entrarAlShell(perfil);
+    intentarEntrar(perfil);
   }
 }
 
@@ -824,6 +843,39 @@ document.getElementById('prompt-modal-btn-cancelar').addEventListener('click', (
   document.getElementById('prompt-modal-overlay').classList.remove('show');
   promptModalCallback = null;
 });
+
+// ── Candado de horario (solo Recepción) ──
+function horaDentroDeRango(inicioStr, finStr){
+  const ahora = new Date();
+  const [hi, mi] = inicioStr.split(':').map(Number);
+  const [hf, mf] = finStr.split(':').map(Number);
+  const minutosAhora = ahora.getHours()*60 + ahora.getMinutes();
+  const minutosInicio = hi*60 + mi;
+  const minutosFin = hf*60 + mf;
+  if(minutosInicio <= minutosFin){
+    return minutosAhora >= minutosInicio && minutosAhora <= minutosFin;
+  }
+  // horario que cruza medianoche (ej. 20:00 a 08:45)
+  return minutosAhora >= minutosInicio || minutosAhora <= minutosFin;
+}
+async function intentarEntrar(perfil){
+  if(perfil.rol === 'recepcion'){
+    const { data: horario, error: hErr } = await sb.from('horario_acceso').select('hora_inicio, hora_fin, activo').order('updated_at', { ascending:false }).limit(1).maybeSingle();
+    if(hErr) console.error('[CUIVAN] Error consultando horario_acceso:', hErr);
+    if(horario && horario.activo){
+      const inicio = horario.hora_inicio.slice(0,5);
+      const fin = horario.hora_fin.slice(0,5);
+      if(!horaDentroDeRango(horario.hora_inicio, horario.hora_fin)){
+        await sb.auth.signOut();
+        document.getElementById('fh-horario').textContent = `${inicio} a ${fin}`;
+        showScreen('fuera-horario');
+        return false;
+      }
+    }
+  }
+  entrarAlShell(perfil);
+  return true;
+}
 
 function entrarAlShell(perfil){
   MI_PERFIL = perfil;
@@ -1587,6 +1639,28 @@ document.getElementById('btn-personal-header').addEventListener('click', ()=>{
   cargarPersonal();
   cargarServicios();
   cargarAuditLog();
+  cargarHorarioAcceso();
+});
+
+// ── Horario de acceso (solo Recepción se restringe) ──
+async function cargarHorarioAcceso(){
+  const { data, error } = await sb.from('horario_acceso').select('hora_inicio, hora_fin, activo').order('updated_at', { ascending:false }).limit(1).maybeSingle();
+  if(error){ console.error('[CUIVAN] Error cargando horario:', error); return; }
+  if(!data) return;
+  document.getElementById('horario-activo').checked = data.activo;
+  document.getElementById('horario-inicio').value = data.hora_inicio?.slice(0,5) || '08:45';
+  document.getElementById('horario-fin').value = data.hora_fin?.slice(0,5) || '20:00';
+}
+document.getElementById('btn-guardar-horario').addEventListener('click', async ()=>{
+  const activo = document.getElementById('horario-activo').checked;
+  const inicio = document.getElementById('horario-inicio').value;
+  const fin = document.getElementById('horario-fin').value;
+  if(activo && (!inicio || !fin)){ toast('⚠️ Completa las horas de inicio y fin'); return; }
+  const { error } = await sb.from('horario_acceso').insert({
+    hora_inicio: inicio || '08:45', hora_fin: fin || '20:00', activo, updated_by: await miPersonalId()
+  });
+  if(error){ console.error('[CUIVAN] Error guardando horario:', error); toast('⚠️ No se pudo guardar'); return; }
+  toast('✅ Horario actualizado');
 });
 
 // ── Actividad reciente (audit_log), solo admin ──
