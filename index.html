@@ -16,8 +16,69 @@
   --red:#e53e3e;--green:#38a169;
   --font-d:'Bricolage Grotesque',sans-serif;--font-b:'Instrument Sans',sans-serif;
 }
-body{font-family:var(--font-b);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px;
-  background:radial-gradient(circle at 20% 10%,#183660 0%,#0B1628 55%,#080f1c 100%);color:var(--navy)}
+body{font-family:var(--font-b);min-height:100vh;color:var(--navy);background:#eef1f7}
+#auth-view{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px;
+  background:radial-gradient(circle at 20% 10%,#183660 0%,#0B1628 55%,#080f1c 100%)}
+#auth-view.hide{display:none}
+#app-view{display:none}
+#app-view.act{display:block}
+
+/* ══════════ SHELL DE LA APP (post-login) ══════════ */
+.s3-strip{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;background:linear-gradient(120deg,#0B1628 0%,#132a4d 55%,#0d3452 100%);color:#fff;position:relative}
+.s3-strip::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--teal),transparent 70%)}
+.s3-brand{display:flex;align-items:center;gap:9px;font-family:var(--font-d);font-weight:700;font-size:13px}
+.s3-brand .dotmark{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(42,191,191,.25)}
+.s3-right{display:flex;align-items:center;gap:12px;font-size:11px;color:rgba(255,255,255,.7);font-weight:600}
+.s3-role-chip{background:rgba(42,191,191,.2);color:var(--teal);font-weight:800;letter-spacing:.5px;padding:4px 11px;border-radius:6px;text-transform:uppercase;font-size:10px;box-shadow:inset 0 0 0 1px rgba(42,191,191,.35)}
+.s3-logout{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer}
+.s3-logout:hover{border-color:var(--teal);color:var(--teal)}
+.s3-navrow{background:linear-gradient(#fbfcfe,#f4f6fb);border-bottom:1px solid var(--g2);padding:14px 26px;display:flex;justify-content:center}
+.s3-segment{display:flex;background:var(--g1);border-radius:12px;padding:4px;gap:4px;box-shadow:inset 0 1px 3px rgba(11,22,40,.08);flex-wrap:wrap}
+.s3-segment button{font-family:var(--font-b);border:none;background:none;color:var(--g6);padding:8px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px}
+.s3-segment button.navact{background:#fff;color:var(--navy);box-shadow:0 3px 10px rgba(11,22,40,.16),0 0 0 1px rgba(42,191,191,.15)}
+.s3-segment button.locked{opacity:.35;cursor:not-allowed}
+
+main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(11,22,40,.04),0 12px 28px -8px rgba(11,22,40,.14);padding:20px 22px 18px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--navy2))}
+.tab-title{font-family:var(--font-d);font-size:15.5px;font-weight:800;color:var(--navy);padding-bottom:9px;margin-bottom:14px;border-bottom:1px solid var(--g2);display:flex;align-items:center;gap:7px;justify-content:space-between}
+.screen2{display:none}
+.screen2.act{display:block}
+
+.b1-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.b1-summary{background:linear-gradient(150deg,var(--navy),#132a4d);border-radius:9px;padding:11px 12px;color:#fff;display:flex;flex-direction:column;gap:5px;justify-content:center;box-shadow:inset 0 0 0 1px rgba(42,191,191,.2)}
+.b1-summary .se{font-size:9px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--teal)}
+.b1-summary .sv{font-size:12.5px;font-weight:700;line-height:1.25}
+.b1-summary .sm{font-size:10px;color:rgba(255,255,255,.6);line-height:1.4}
+.fi2{display:flex;flex-direction:column;gap:4px}
+.lbl2{font-size:10px;color:var(--g6);letter-spacing:.7px;text-transform:uppercase;font-weight:700}
+.app-input{background:#fff;border:1.5px solid var(--g2);border-radius:7px;padding:7px 10px;color:var(--navy);font-size:12.5px;font-family:var(--font-b);outline:none;width:100%;box-shadow:inset 0 1px 2px rgba(11,22,40,.03)}
+.app-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(42,191,191,.14);outline:none}
+.mon2{position:relative}.mon2 span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--g4);font-weight:800;pointer-events:none;font-size:12.5px}
+.mon2 input{padding-left:21px}
+
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px;padding-top:10px;border-top:1px dashed var(--g2);align-items:start}
+.fac2{padding:9px 12px;background:linear-gradient(135deg,var(--g1),#eef3fb);border-radius:9px;border:1px solid var(--g2);height:100%}
+.cbrow2{display:flex;align-items:center;gap:7px;cursor:pointer}
+.cbrow2 input[type=checkbox]{width:14px;height:14px;accent-color:var(--teal);cursor:pointer;flex-shrink:0}
+
+.appbtn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-weight:700;font-size:.82rem;transition:.18s;font-family:var(--font-b)}
+.appbtn-p{background:linear-gradient(135deg,var(--teal),#22a8a8);color:var(--navy);box-shadow:0 6px 14px -4px rgba(42,191,191,.55)}
+.appbtn-s{background:var(--navy2);color:#fff;box-shadow:0 6px 14px -4px rgba(27,58,107,.45)}
+
+.filt2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.filt2 input,.filt2 select{width:auto;padding:6px 10px;font-size:11.5px}
+.htable2{width:100%;border-collapse:collapse;font-size:12px}
+.htable2 th{text-align:left;padding:8px 10px;color:var(--g4);font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;border-bottom:1px solid var(--g2);font-weight:700;background:#fafbfd}
+.htable2 td{padding:8px 10px;border-bottom:1px solid var(--g1);color:var(--navy);vertical-align:middle}
+.htable2 tr:hover td{background:#f0f9f9}
+.pill2{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:600}
+.pt2{background:var(--teal-soft);color:#0B6E6E}
+.pn2{background:rgba(27,58,107,.08);color:var(--navy2)}
+.soon{text-align:center;padding:50px 20px;color:var(--g4)}
+.soon-ico{font-size:32px;margin-bottom:10px}
+.toast2{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:12.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:2000;opacity:0;pointer-events:none;transition:.25s}
+.toast2.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
 
 .wrap{width:100%;max-width:400px;position:relative}
 .glow{position:absolute;inset:-40px;background:radial-gradient(circle,rgba(42,191,191,.15),transparent 70%);filter:blur(10px);pointer-events:none}
@@ -75,12 +136,126 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 </head>
 <body>
 
+<div id="app-view">
+  <div class="s3-strip">
+    <div class="s3-brand"><span class="dotmark"></span>CUIVAN Consultas</div>
+    <div class="s3-right">
+      <span class="s3-role-chip" id="app-role-chip">—</span>
+      <span id="app-user-name">—</span>
+      <button class="s3-logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="s3-navrow">
+    <div class="s3-segment" id="app-nav">
+      <button class="navact" data-screen2="registro"><span>📝</span>Registro</button>
+      <button data-screen2="historial"><span>🗂️</span>Historial</button>
+      <button data-screen2="cierre"><span>🧾</span>Cierre</button>
+      <button class="locked" data-screen2="dash"><span>📊</span>Dashboard</button>
+      <button data-screen2="prm"><span>💬</span>PRM / CRM</button>
+      <button class="locked" data-screen2="personal"><span>👥</span>Personal</button>
+    </div>
+  </div>
+
+  <main class="appmain">
+    <!-- ══ REGISTRO ══ -->
+    <div class="card screen2 act" id="app-screen-registro">
+      <div class="tab-title">📝 Registrar Consulta / Servicio</div>
+      <div class="b1-grid">
+        <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" type="text" id="r-fecha"/></div>
+        <div class="fi2"><label class="lbl2">Atendido por</label>
+          <select class="app-input" id="r-doctor"><option value="">Cargando...</option></select>
+        </div>
+        <div class="fi2"><label class="lbl2">Motivo</label>
+          <select class="app-input" id="r-motivo">
+            <option>Consulta</option><option>Procedimientos</option><option>Cardiología</option>
+            <option>Vacunas</option><option>Producto Farmacia</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="fi2"><label class="lbl2">Paciente</label><input class="app-input" type="text" id="r-paciente" placeholder="Nombre completo"/></div>
+        <div class="fi2"><label class="lbl2">Teléfono <span style="color:#e53e3e">*</span></label><input class="app-input" type="tel" id="r-telefono" placeholder="10 dígitos"/></div>
+        <div class="fi2"><label class="lbl2">Tipo de Consulta</label><input class="app-input" type="text" id="r-tipoconsulta" placeholder="ej. Subsecuente"/></div>
+        <div class="fi2"><label class="lbl2">Tipo de Paciente</label>
+          <select class="app-input" id="r-tipopaciente">
+            <option>Particular</option><option>Broker</option><option>VRIM</option>
+            <option>Integra Salud</option><option>Vitalife</option>
+          </select>
+        </div>
+        <div class="fi2"><label class="lbl2">Monto ($)</label><div class="mon2"><span>$</span><input class="app-input" type="number" id="r-monto" value="0"/></div></div>
+        <div class="b1-summary">
+          <div class="se">Resumen en vivo</div>
+          <div class="sv" id="r-rs-paciente">Sin nombre aún</div>
+          <div class="sm" id="r-rs-linea">—</div>
+          <div class="sm" id="r-rs-monto" style="font-weight:700;color:var(--teal);font-size:13px">$0.00</div>
+        </div>
+      </div>
+      <div class="row4">
+        <div class="fi2"><label class="lbl2">💳 Medio de pago</label>
+          <select class="app-input" id="r-mediopago"><option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option></select>
+        </div>
+        <div class="fi2"><label class="lbl2">Notas / Observaciones</label><textarea class="app-input" id="r-notas" style="min-height:38px;resize:vertical" placeholder="Opcional..."></textarea></div>
+        <div class="fac2">
+          <label class="cbrow2"><input type="checkbox" id="r-factura"/><span style="font-size:.82rem;font-weight:600">¿Requiere factura?</span></label>
+          <div id="r-nfact-wrap" style="display:none;margin-top:7px">
+            <label class="lbl2">No. de factura</label>
+            <input class="app-input" type="text" id="r-numfactura" placeholder="Ej. F-0042"/>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="appbtn appbtn-p" id="btn-guardar-registro">Guardar registro</button>
+        <button class="appbtn appbtn-s" id="btn-limpiar-registro">Limpiar</button>
+      </div>
+    </div>
+
+    <!-- ══ HISTORIAL ══ -->
+    <div class="card screen2" id="app-screen-historial">
+      <div class="tab-title"><span>🗂️ Historial de consultas</span><button class="appbtn appbtn-s" id="btn-refrescar-historial" style="font-size:11px;padding:6px 12px">↻ Refrescar</button></div>
+      <div class="filt2">
+        <input class="app-input" type="text" id="h-buscar" placeholder="Buscar paciente..."/>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="htable2">
+          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th></tr></thead>
+          <tbody id="h-tbody"><tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ CIERRE (próximamente) ══ -->
+    <div class="card screen2" id="app-screen-cierre">
+      <div class="tab-title">🧾 Resultados Operativos</div>
+      <div class="soon"><div class="soon-ico">🚧</div>Este módulo se conecta en la siguiente pieza.</div>
+    </div>
+
+    <!-- ══ DASHBOARD (próximamente) ══ -->
+    <div class="card screen2" id="app-screen-dash">
+      <div class="tab-title">📊 Dashboard de Indicadores</div>
+      <div class="soon"><div class="soon-ico">🚧</div>Este módulo se conecta en la siguiente pieza.</div>
+    </div>
+
+    <!-- ══ PRM/CRM (próximamente) ══ -->
+    <div class="card screen2" id="app-screen-prm">
+      <div class="tab-title">💬 PRM — Pacientes inactivos</div>
+      <div class="soon"><div class="soon-ico">🚧</div>Este módulo se conecta en la siguiente pieza.</div>
+    </div>
+
+    <!-- ══ PERSONAL (próximamente) ══ -->
+    <div class="card screen2" id="app-screen-personal">
+      <div class="tab-title">👥 Personal</div>
+      <div class="soon"><div class="soon-ico">🚧</div>Este módulo (alta/edición de usuarios y catálogo de servicios) se conecta en una pieza aparte.</div>
+    </div>
+  </main>
+</div>
+
+<div class="toast2" id="toast2"></div>
+
 <div id="loading-panel">
   <img src="data:image/png;base64,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" alt="Mediconsulting" style="height:48px;margin-bottom:36px;opacity:0.95;">
   <div class="spinner-grande"></div>
   <div class="loading-text">Cargando...</div>
 </div>
 
+<div id="auth-view">
 <div class="wrap">
   <div class="glow"></div>
   <div class="card">
@@ -139,14 +314,8 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <button class="btn btn-ghost" data-goto="login">Volver al login</button>
     </div>
 
-    <!-- ══ 4. SESIÓN INICIADA (placeholder hasta conectar el shell de la app) ══ -->
-    <div class="screen" id="s-ok" style="text-align:center">
-      <div class="recovered-icon">✅</div>
-      <div style="font-family:var(--font-d);font-weight:800;font-size:15.5px;margin-bottom:6px">Sesión iniciada</div>
-      <p style="font-size:12.5px;color:var(--g6);line-height:1.5;margin-bottom:6px" id="ok-name">—</p>
-      <p style="font-size:11px;color:var(--g4);line-height:1.5">El shell de la app (Registro, Historial, Cierre, Dashboard, PRM/CRM) se conecta en la siguiente pieza.</p>
-    </div>
   </div>
+</div>
 </div>
 
 <script>
@@ -219,8 +388,7 @@ async function doLogin(){
     await sb.auth.signOut();
     return;
   }
-  document.getElementById('ok-name').textContent = perfil.nombre + ' · ' + perfil.rol;
-  showScreen('ok');
+  entrarAlShell(perfil);
 }
 
 document.getElementById('btn-login').addEventListener('click', doLogin);
@@ -263,10 +431,217 @@ async function doLogin_bySession(session){
     console.error('[CUIVAN] Error consultando personal (sesión existente):', error);
   }
   if(perfil && perfil.activo){
-    document.getElementById('ok-name').textContent = perfil.nombre + ' · ' + perfil.rol;
-    showScreen('ok');
+    entrarAlShell(perfil);
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// SHELL DE LA APP (post-login)
+// ═══════════════════════════════════════════════════════════
+let MI_PERFIL = null;
+
+function toast(msg){
+  const t = document.getElementById('toast2');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 3200);
+}
+
+function entrarAlShell(perfil){
+  MI_PERFIL = perfil;
+  document.getElementById('auth-view').classList.add('hide');
+  document.getElementById('app-view').classList.add('act');
+  document.getElementById('app-role-chip').textContent = perfil.rol;
+  document.getElementById('app-user-name').textContent = perfil.nombre;
+
+  const showDash = perfil.rol !== 'recepcion';
+  const showPersonal = perfil.rol === 'admin';
+  document.querySelector('[data-screen2="dash"]').classList.toggle('locked', !showDash);
+  document.querySelector('[data-screen2="personal"]').classList.toggle('locked', !showPersonal);
+
+  cargarDoctores();
+  document.getElementById('r-fecha').value = todayLocal();
+}
+
+function todayLocal(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
+}
+
+document.getElementById('app-nav').addEventListener('click',(e)=>{
+  const b = e.target.closest('button');
+  if(!b || b.classList.contains('locked') || !b.dataset.screen2) return;
+  document.querySelectorAll('#app-nav button').forEach(x=>x.classList.remove('navact'));
+  b.classList.add('navact');
+  document.querySelectorAll('.screen2').forEach(x=>x.classList.remove('act'));
+  document.getElementById('app-screen-'+b.dataset.screen2).classList.add('act');
+  if(b.dataset.screen2 === 'historial') cargarHistorial();
+});
+
+document.getElementById('btn-logout').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  window.location.reload();
+});
+
+// ── Doctores para "Atendido por" (orden alfabético) ──
+async function cargarDoctores(){
+  const sel = document.getElementById('r-doctor');
+  const { data, error } = await sb.from('personal').select('id, nombre').eq('rol','doctor').eq('activo', true).order('nombre');
+  if(error){ console.error('[CUIVAN] Error cargando doctores:', error); sel.innerHTML = '<option value="">Error al cargar</option>'; return; }
+  if(!data || data.length === 0){ sel.innerHTML = '<option value="">Sin doctores registrados</option>'; return; }
+  sel.innerHTML = data.map(d => `<option value="${d.id}">${esc2(d.nombre)}</option>`).join('');
+  refrescarResumen();
+}
+function esc2(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ── Resumen en vivo del formulario de Registro ──
+function refrescarResumen(){
+  const paciente = document.getElementById('r-paciente').value.trim() || 'Sin nombre aún';
+  const doctorSel = document.getElementById('r-doctor');
+  const doctorTxt = doctorSel.options[doctorSel.selectedIndex] ? doctorSel.options[doctorSel.selectedIndex].text : '—';
+  const motivo = document.getElementById('r-motivo').value;
+  const tipoConsulta = document.getElementById('r-tipoconsulta').value.trim() || '—';
+  const monto = parseFloat(document.getElementById('r-monto').value) || 0;
+  document.getElementById('r-rs-paciente').textContent = paciente;
+  document.getElementById('r-rs-linea').textContent = `${doctorTxt} · ${motivo} · ${tipoConsulta}`;
+  document.getElementById('r-rs-monto').textContent = '$' + monto.toLocaleString('es-MX',{minimumFractionDigits:2});
+}
+['r-paciente','r-doctor','r-motivo','r-tipoconsulta','r-monto'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', refrescarResumen);
+  document.getElementById(id).addEventListener('change', refrescarResumen);
+});
+document.getElementById('r-factura').addEventListener('change', (e)=>{
+  document.getElementById('r-nfact-wrap').style.display = e.target.checked ? 'block' : 'none';
+});
+
+// ── Guardar registro (upsert paciente por teléfono + insert consulta) ──
+function dmyToISO(dmy){
+  const [d,m,y] = dmy.split('/');
+  return `${y}-${m}-${d}`;
+}
+
+async function guardarRegistro(){
+  const btn = document.getElementById('btn-guardar-registro');
+  const paciente = document.getElementById('r-paciente').value.trim();
+  const telefono = document.getElementById('r-telefono').value.trim();
+  const doctorId = document.getElementById('r-doctor').value;
+  const fecha = document.getElementById('r-fecha').value.trim();
+
+  if(!paciente){ toast('⚠️ Falta el nombre del paciente'); return; }
+  if(!telefono){ toast('⚠️ Falta el teléfono (identificador del paciente)'); return; }
+  if(!doctorId){ toast('⚠️ Selecciona quién atendió'); return; }
+
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    // 1) upsert paciente por teléfono
+    let { data: pacienteRow, error: pacErr } = await sb.from('pacientes').select('id').eq('telefono', telefono).maybeSingle();
+    if(pacErr) throw pacErr;
+    if(!pacienteRow){
+      const { data: nuevoPac, error: insPacErr } = await sb.from('pacientes').insert({
+        nombre: paciente, telefono, tipo_paciente: document.getElementById('r-tipopaciente').value
+      }).select('id').single();
+      if(insPacErr) throw insPacErr;
+      pacienteRow = nuevoPac;
+    } else {
+      await sb.from('pacientes').update({ nombre: paciente, tipo_paciente: document.getElementById('r-tipopaciente').value }).eq('id', pacienteRow.id);
+    }
+
+    // 2) insert consulta
+    const { error: consErr } = await sb.from('consultas').insert({
+      fecha: dmyToISO(fecha),
+      paciente_id: pacienteRow.id,
+      doctor_id: doctorId,
+      motivo: document.getElementById('r-motivo').value,
+      tipo_consulta: document.getElementById('r-tipoconsulta').value.trim() || null,
+      monto: parseFloat(document.getElementById('r-monto').value) || 0,
+      medio_pago: document.getElementById('r-mediopago').value,
+      factura: document.getElementById('r-factura').checked,
+      num_factura: document.getElementById('r-numfactura').value.trim() || null,
+      notas: document.getElementById('r-notas').value.trim() || null,
+      created_by: MI_PERFIL ? await miPersonalId() : null
+    });
+    if(consErr) throw consErr;
+
+    toast('✅ Registro guardado');
+    limpiarRegistro();
+  } catch(err){
+    console.error('[CUIVAN] Error guardando registro:', err);
+    toast('⚠️ No se pudo guardar: ' + (err.message || 'error desconocido'));
+  }
+  btn.disabled = false; btn.textContent = 'Guardar registro';
+}
+
+async function miPersonalId(){
+  const { data } = await sb.auth.getSession();
+  const uid = data.session.user.id;
+  const { data: row } = await sb.from('personal').select('id').eq('auth_user_id', uid).single();
+  return row ? row.id : null;
+}
+
+function limpiarRegistro(){
+  document.getElementById('r-paciente').value = '';
+  document.getElementById('r-telefono').value = '';
+  document.getElementById('r-tipoconsulta').value = '';
+  document.getElementById('r-monto').value = '0';
+  document.getElementById('r-notas').value = '';
+  document.getElementById('r-numfactura').value = '';
+  document.getElementById('r-factura').checked = false;
+  document.getElementById('r-nfact-wrap').style.display = 'none';
+  document.getElementById('r-fecha').value = todayLocal();
+  refrescarResumen();
+}
+document.getElementById('btn-guardar-registro').addEventListener('click', guardarRegistro);
+document.getElementById('btn-limpiar-registro').addEventListener('click', limpiarRegistro);
+
+// ── Historial (lectura real) ──
+async function cargarHistorial(){
+  const tbody = document.getElementById('h-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
+  const { data, error } = await sb
+    .from('consultas')
+    .select('fecha, motivo, tipo_consulta, monto, medio_pago, pacientes(nombre), personal(nombre)')
+    .eq('deleted', false)
+    .order('fecha', { ascending: false })
+    .limit(100);
+  if(error){
+    console.error('[CUIVAN] Error cargando historial:', error);
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
+    return;
+  }
+  if(!data || data.length === 0){
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Sin registros todavía</td></tr>';
+    return;
+  }
+  window._historialData = data;
+  renderHistorial(data);
+}
+function renderHistorial(rows){
+  const tbody = document.getElementById('h-tbody');
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${fmtFechaISO(r.fecha)}</td>
+      <td>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</td>
+      <td>${esc2(r.personal ? r.personal.nombre : '—')}</td>
+      <td><span class="pill2 pt2">${esc2(r.motivo)}</span></td>
+      <td>${esc2(r.tipo_consulta || '—')}</td>
+      <td>$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+      <td><span class="pill2 pn2">${esc2(r.medio_pago)}</span></td>
+    </tr>
+  `).join('');
+}
+function fmtFechaISO(iso){
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}`;
+}
+document.getElementById('btn-refrescar-historial').addEventListener('click', cargarHistorial);
+document.getElementById('h-buscar').addEventListener('input', (e)=>{
+  const q = e.target.value.trim().toLowerCase();
+  if(!window._historialData) return;
+  const filtrado = window._historialData.filter(r => (r.pacientes?.nombre || '').toLowerCase().includes(q));
+  renderHistorial(filtrado);
+});
 </script>
 </body>
 </html>
