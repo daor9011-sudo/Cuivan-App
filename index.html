@@ -30,7 +30,7 @@ body{font-family:var(--font-b);min-height:100vh;color:var(--navy);background:#ee
 .s3-brand .dotmark{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(42,191,191,.25)}
 .s3-right{display:flex;align-items:center;gap:12px;font-size:11px;color:rgba(255,255,255,.7);font-weight:600}
 .s3-role-chip{background:rgba(42,191,191,.2);color:var(--teal);font-weight:800;letter-spacing:.5px;padding:4px 11px;border-radius:6px;text-transform:uppercase;font-size:10px;box-shadow:inset 0 0 0 1px rgba(42,191,191,.35)}
-.s3-logout{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer}
+.s3-logout{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .s3-logout:hover{border-color:var(--teal);color:var(--teal)}
 .s3-navrow{background:linear-gradient(#fbfcfe,#f4f6fb);border-bottom:1px solid var(--g2);padding:14px 26px;display:flex;justify-content:center}
 .s3-segment{display:flex;background:var(--g1);border-radius:12px;padding:4px;gap:4px;box-shadow:inset 0 1px 3px rgba(11,22,40,.08);flex-wrap:wrap}
@@ -79,6 +79,13 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .soon-ico{font-size:32px;margin-bottom:10px}
 .toast2{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:12.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:2000;opacity:0;pointer-events:none;transition:.25s}
 .toast2.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+.p-row{display:grid;grid-template-columns:1.6fr 1fr 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--g1)}
+.p-row:last-child{border-bottom:none}
+.p-row input,.p-row select{font-size:12px;padding:6px 8px}
+.p-row .cbwrap{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--g6)}
+.svc-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--g1);font-size:12px}
+.svc-row:last-child{border-bottom:none}
+.svc-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;font-weight:700}
 
 .wrap{width:100%;max-width:400px;position:relative}
 .glow{position:absolute;inset:-40px;background:radial-gradient(circle,rgba(42,191,191,.15),transparent 70%);filter:blur(10px);pointer-events:none}
@@ -142,6 +149,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     <div class="s3-right">
       <span class="s3-role-chip" id="app-role-chip">—</span>
       <span id="app-user-name">—</span>
+      <button class="s3-logout" id="btn-personal-header" style="display:none">👥 Personal</button>
       <button class="s3-logout" id="btn-logout">Cerrar sesión</button>
     </div>
   </div>
@@ -152,7 +160,6 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <button data-screen2="cierre"><span>🧾</span>Cierre</button>
       <button class="locked" data-screen2="dash"><span>📊</span>Dashboard</button>
       <button data-screen2="prm"><span>💬</span>PRM / CRM</button>
-      <button class="locked" data-screen2="personal"><span>👥</span>Personal</button>
     </div>
   </div>
 
@@ -239,10 +246,20 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <div class="soon"><div class="soon-ico">🚧</div>Este módulo se conecta en la siguiente pieza.</div>
     </div>
 
-    <!-- ══ PERSONAL (próximamente) ══ -->
+    <!-- ══ PERSONAL ══ -->
     <div class="card screen2" id="app-screen-personal">
       <div class="tab-title">👥 Personal</div>
-      <div class="soon"><div class="soon-ico">🚧</div>Este módulo (alta/edición de usuarios y catálogo de servicios) se conecta en una pieza aparte.</div>
+      <div class="lbl2" style="margin-bottom:8px">Usuarios registrados</div>
+      <div id="personal-lista" style="margin-bottom:20px"></div>
+      <p style="font-size:11px;color:var(--g4);margin-bottom:20px;line-height:1.5">Aquí editas nombre, rol y estatus de cuentas existentes. Dar de alta una cuenta nueva con acceso real (correo + contraseña) necesita una Edge Function aparte — todavía no está conectada.</p>
+
+      <div class="tab-title" style="margin-top:6px">🧾 Catálogo de servicios</div>
+      <div class="row4" style="border-top:none;padding-top:0;margin-top:0;grid-template-columns:1fr 1fr auto">
+        <div class="fi2"><label class="lbl2">Motivo</label><input class="app-input" id="cs-motivo" placeholder="Ej. Consulta"/></div>
+        <div class="fi2"><label class="lbl2">Tipo de consulta</label><input class="app-input" id="cs-tipo" placeholder="Ej. Subsecuente"/></div>
+        <div class="fi2"><label class="lbl2">&nbsp;</label><button class="appbtn appbtn-p" id="btn-add-servicio">+ Agregar</button></div>
+      </div>
+      <div id="servicios-lista" style="margin-top:14px"></div>
     </div>
   </main>
 </div>
@@ -457,7 +474,7 @@ function entrarAlShell(perfil){
   const showDash = perfil.rol !== 'recepcion';
   const showPersonal = perfil.rol === 'admin';
   document.querySelector('[data-screen2="dash"]').classList.toggle('locked', !showDash);
-  document.querySelector('[data-screen2="personal"]').classList.toggle('locked', !showPersonal);
+  document.getElementById('btn-personal-header').style.display = showPersonal ? 'inline-flex' : 'none';
 
   cargarDoctores();
   document.getElementById('r-fecha').value = todayLocal();
@@ -601,7 +618,7 @@ async function cargarHistorial(){
   tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
   const { data, error } = await sb
     .from('consultas')
-    .select('fecha, motivo, tipo_consulta, monto, medio_pago, pacientes(nombre), personal(nombre)')
+    .select('fecha, motivo, tipo_consulta, monto, medio_pago, pacientes(nombre), personal!consultas_doctor_id_fkey(nombre)')
     .eq('deleted', false)
     .order('fecha', { ascending: false })
     .limit(100);
@@ -641,6 +658,81 @@ document.getElementById('h-buscar').addEventListener('input', (e)=>{
   if(!window._historialData) return;
   const filtrado = window._historialData.filter(r => (r.pacientes?.nombre || '').toLowerCase().includes(q));
   renderHistorial(filtrado);
+});
+
+// ── Personal: lista + edición (nombre/rol/activo) ──
+async function cargarPersonal(){
+  const cont = document.getElementById('personal-lista');
+  cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
+  const { data, error } = await sb.from('personal').select('id, nombre, rol, activo').order('rol').order('nombre');
+  if(error){ console.error('[CUIVAN] Error cargando personal:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+  cont.innerHTML = data.map(p => `
+    <div class="p-row" data-id="${p.id}">
+      <input class="app-input p-nombre" value="${esc2(p.nombre)}"/>
+      <select class="app-input p-rol">
+        <option value="recepcion" ${p.rol==='recepcion'?'selected':''}>Recepción</option>
+        <option value="doctor" ${p.rol==='doctor'?'selected':''}>Doctor/a</option>
+        <option value="admin" ${p.rol==='admin'?'selected':''}>Admin</option>
+      </select>
+      <label class="cbwrap"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/>Activo</label>
+      <button class="appbtn appbtn-s p-guardar" style="font-size:11px;padding:6px 12px">Guardar</button>
+    </div>
+  `).join('');
+  cont.querySelectorAll('.p-guardar').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      const row = e.target.closest('.p-row');
+      const id = row.dataset.id;
+      const nombre = row.querySelector('.p-nombre').value.trim();
+      const rol = row.querySelector('.p-rol').value;
+      const activo = row.querySelector('.p-activo').checked;
+      const { error } = await sb.from('personal').update({ nombre, rol, activo }).eq('id', id);
+      if(error){ console.error('[CUIVAN] Error actualizando personal:', error); toast('⚠️ No se pudo guardar'); return; }
+      toast('✅ Actualizado');
+      cargarDoctores();
+    });
+  });
+}
+
+// ── Catálogo de servicios: alta y lista (admin) ──
+async function cargarServicios(){
+  const cont = document.getElementById('servicios-lista');
+  cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
+  const { data, error } = await sb.from('catalogo_servicios').select('id, motivo, tipo_consulta, activo').order('motivo').order('tipo_consulta');
+  if(error){ console.error('[CUIVAN] Error cargando catálogo:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+  if(!data || data.length === 0){ cont.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Sin servicios en el catálogo todavía.</div>'; return; }
+  cont.innerHTML = data.map(s => `
+    <div class="svc-row" data-id="${s.id}">
+      <span>${esc2(s.motivo)}</span>
+      <span>${esc2(s.tipo_consulta)}</span>
+      <button class="svc-del">Eliminar</button>
+    </div>
+  `).join('');
+  cont.querySelectorAll('.svc-del').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      const id = e.target.closest('.svc-row').dataset.id;
+      const { error } = await sb.from('catalogo_servicios').delete().eq('id', id);
+      if(error){ toast('⚠️ No se pudo eliminar'); return; }
+      cargarServicios();
+    });
+  });
+}
+document.getElementById('btn-add-servicio').addEventListener('click', async ()=>{
+  const motivo = document.getElementById('cs-motivo').value.trim();
+  const tipo = document.getElementById('cs-tipo').value.trim();
+  if(!motivo || !tipo){ toast('⚠️ Completa motivo y tipo de consulta'); return; }
+  const { error } = await sb.from('catalogo_servicios').insert({ motivo, tipo_consulta: tipo });
+  if(error){ console.error('[CUIVAN] Error agregando servicio:', error); toast('⚠️ No se pudo agregar'); return; }
+  document.getElementById('cs-motivo').value = '';
+  document.getElementById('cs-tipo').value = '';
+  cargarServicios();
+});
+
+document.getElementById('btn-personal-header').addEventListener('click', ()=>{
+  document.querySelectorAll('#app-nav button').forEach(x=>x.classList.remove('navact'));
+  document.querySelectorAll('.screen2').forEach(x=>x.classList.remove('act'));
+  document.getElementById('app-screen-personal').classList.add('act');
+  cargarPersonal();
+  cargarServicios();
 });
 </script>
 </body>
