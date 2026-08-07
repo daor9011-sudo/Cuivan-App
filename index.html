@@ -687,6 +687,36 @@ function entrarAlShell(perfil){
   cargarDoctores();
   cargarCatalogoServiciosCache();
   document.getElementById('r-fecha').value = todayLocal();
+  activarRealtime();
+}
+
+// ── Realtime: refresca en vivo la pantalla activa cuando alguien más registra algo ──
+let REALTIME_CHANNEL = null;
+function pantallaActivaId(){
+  const el = document.querySelector('.screen2.act');
+  return el ? el.id.replace('app-screen-', '') : null;
+}
+function refrescarPantallaActiva(){
+  const activa = pantallaActivaId();
+  if(activa === 'historial') cargarHistorial();
+  if(activa === 'cierre') cargarCierre(cierreDiasActual);
+  if(activa === 'dash') cargarDashboard();
+  if(activa === 'prm') cargarPRM();
+}
+function activarRealtime(){
+  if(REALTIME_CHANNEL) return; // ya está activo, no duplicar
+  REALTIME_CHANNEL = sb
+    .channel('cuivan-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'consultas' }, () => {
+      refrescarPantallaActiva();
+      toast('🔄 Datos actualizados en vivo');
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'gestiones' }, () => {
+      if(document.getElementById('modal-traza').classList.contains('show') && TRAZA_PACIENTE_ID){
+        abrirTrazabilidad(TRAZA_PACIENTE_ID);
+      }
+    })
+    .subscribe();
 }
 
 function todayLocal(){
@@ -707,6 +737,7 @@ document.getElementById('app-nav').addEventListener('click',(e)=>{
 });
 
 document.getElementById('btn-logout').addEventListener('click', async ()=>{
+  if(REALTIME_CHANNEL){ sb.removeChannel(REALTIME_CHANNEL); REALTIME_CHANNEL = null; }
   await sb.auth.signOut();
   window.location.reload();
 });
