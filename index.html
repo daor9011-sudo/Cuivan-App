@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -86,6 +87,18 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .svc-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--g1);font-size:12px}
 .svc-row:last-child{border-bottom:none}
 .svc-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;font-weight:700}
+.kpi-tile{border-radius:11px;padding:13px 14px;background:#fff;border:1.5px solid var(--g2)}
+.kpi-tile .ico{font-size:16px;margin-bottom:5px}
+.kpi-tile .lbl3{font-size:9px;font-weight:700;letter-spacing:.4px;color:var(--g6);text-transform:uppercase;margin-bottom:2px}
+.kpi-tile .val{font-size:18px;font-weight:800;color:var(--navy);font-family:var(--font-d)}
+.cierre-card2{background:#fff;border:1px solid var(--g2);border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:4px solid var(--teal)}
+.cierre-card2 .top{display:flex;justify-content:space-between;align-items:center}
+.cierre-card2 .name{font-size:12.5px;font-weight:700;color:var(--navy)}
+.cierre-card2 .total{font-size:14px;font-weight:800;color:var(--teal);font-family:var(--font-d)}
+.cierre-card2 .meta{font-size:10.5px;color:var(--g4)}
+.prm-item2{background:#fff;border:1px solid var(--g2);border-radius:9px;padding:11px 13px;margin-bottom:8px}
+.prm-top2{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.prm-badge2{background:rgba(239,159,39,.14);color:#8a5a0d;font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
 
 .wrap{width:100%;max-width:400px;position:relative}
 .glow{position:absolute;inset:-40px;background:radial-gradient(circle,rgba(42,191,191,.15),transparent 70%);filter:blur(10px);pointer-events:none}
@@ -148,9 +161,9 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     <div class="s3-brand"><span class="dotmark"></span>CUIVAN Consultas</div>
     <div class="s3-right">
       <span class="s3-role-chip" id="app-role-chip">—</span>
-      <span id="app-user-name">—</span>
+      <span id="app-user-name">👤 —</span>
       <button class="s3-logout" id="btn-personal-header" style="display:none">👥 Personal</button>
-      <button class="s3-logout" id="btn-logout">Cerrar sesión</button>
+      <button class="s3-logout" id="btn-logout">🚪 Cerrar sesión</button>
     </div>
   </div>
   <div class="s3-navrow">
@@ -228,22 +241,39 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       </div>
     </div>
 
-    <!-- ══ CIERRE (próximamente) ══ -->
+    <!-- ══ CIERRE ══ -->
     <div class="card screen2" id="app-screen-cierre">
-      <div class="tab-title">🧾 Resultados Operativos</div>
-      <div class="soon"><div class="soon-ico">🚧</div>Este módulo se conecta en la siguiente pieza.</div>
+      <div class="tab-title"><span>🧾 Resultados Operativos</span></div>
+      <div class="filt2">
+        <button class="appbtn appbtn-s cierre-periodo" data-dias="1" style="font-size:11px;padding:6px 12px">Día</button>
+        <button class="appbtn appbtn-s cierre-periodo" data-dias="7" style="font-size:11px;padding:6px 12px">Semana</button>
+        <button class="appbtn appbtn-p cierre-periodo" data-dias="15" style="font-size:11px;padding:6px 12px">Quincena</button>
+        <button class="appbtn appbtn-s cierre-periodo" data-dias="30" style="font-size:11px;padding:6px 12px">Mes</button>
+      </div>
+      <div class="dash-kpi-row" id="cierre-kpis" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+      <div id="cierre-lista"></div>
     </div>
 
-    <!-- ══ DASHBOARD (próximamente) ══ -->
+    <!-- ══ DASHBOARD ══ -->
     <div class="card screen2" id="app-screen-dash">
       <div class="tab-title">📊 Dashboard de Indicadores</div>
-      <div class="soon"><div class="soon-ico">🚧</div>Este módulo se conecta en la siguiente pieza.</div>
+      <div class="dash-kpi-row" id="dash-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px"></div>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="fac2"><div class="lbl2" style="margin-bottom:8px">📈 Tendencia 14 días</div><div style="height:130px"><canvas id="ch-dash-trend"></canvas></div></div>
+        <div class="fac2"><div class="lbl2" style="margin-bottom:8px">🩺 Ingreso por doctor</div><div style="height:130px"><canvas id="ch-dash-doc"></canvas></div></div>
+      </div>
+      <div class="fac2"><div class="lbl2" style="margin-bottom:8px">💳 Medios de pago</div><div style="height:140px;max-width:320px;margin:0 auto"><canvas id="ch-dash-pago"></canvas></div></div>
     </div>
 
-    <!-- ══ PRM/CRM (próximamente) ══ -->
+    <!-- ══ PRM/CRM ══ -->
     <div class="card screen2" id="app-screen-prm">
       <div class="tab-title">💬 PRM — Pacientes inactivos</div>
-      <div class="soon"><div class="soon-ico">🚧</div>Este módulo se conecta en la siguiente pieza.</div>
+      <div class="filt2">
+        <label class="lbl2" style="align-self:center">Días sin visita:</label>
+        <input class="app-input" type="number" id="prm-dias" value="60" style="width:70px"/>
+        <button class="appbtn appbtn-p" id="btn-prm-aplicar" style="font-size:11px;padding:6px 12px">Aplicar</button>
+      </div>
+      <div id="prm-lista"></div>
     </div>
 
     <!-- ══ PERSONAL ══ -->
@@ -468,8 +498,9 @@ function entrarAlShell(perfil){
   MI_PERFIL = perfil;
   document.getElementById('auth-view').classList.add('hide');
   document.getElementById('app-view').classList.add('act');
-  document.getElementById('app-role-chip').textContent = perfil.rol;
-  document.getElementById('app-user-name').textContent = perfil.nombre;
+  const roleEmoji = { admin:'🛡️', doctor:'🩺', recepcion:'📋' }[perfil.rol] || '👤';
+  document.getElementById('app-role-chip').textContent = roleEmoji + ' ' + perfil.rol;
+  document.getElementById('app-user-name').textContent = '👤 ' + perfil.nombre;
 
   const showDash = perfil.rol !== 'recepcion';
   const showPersonal = perfil.rol === 'admin';
@@ -733,6 +764,173 @@ document.getElementById('btn-personal-header').addEventListener('click', ()=>{
   document.getElementById('app-screen-personal').classList.add('act');
   cargarPersonal();
   cargarServicios();
+});
+
+// ═══════════════════════════════════════════════════════════
+// CIERRE
+// ═══════════════════════════════════════════════════════════
+let cierreDiasActual = 15;
+function isoDesdeHace(dias){
+  const d = new Date();
+  d.setDate(d.getDate() - dias + 1);
+  return d.toISOString().slice(0,10);
+}
+async function cargarCierre(dias){
+  cierreDiasActual = dias;
+  document.querySelectorAll('.cierre-periodo').forEach(b=>{
+    b.classList.toggle('appbtn-p', Number(b.dataset.dias) === dias);
+    b.classList.toggle('appbtn-s', Number(b.dataset.dias) !== dias);
+  });
+  const desde = isoDesdeHace(dias);
+  const { data, error } = await sb
+    .from('consultas')
+    .select('monto, medio_pago, pacientes(nombre), personal!consultas_doctor_id_fkey(id, nombre)')
+    .eq('deleted', false)
+    .gte('fecha', desde);
+  const kpisEl = document.getElementById('cierre-kpis');
+  const listaEl = document.getElementById('cierre-lista');
+  if(error){
+    console.error('[CUIVAN] Error cargando cierre:', error);
+    listaEl.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>';
+    return;
+  }
+  const totalIngreso = data.reduce((a,r)=>a+Number(r.monto||0),0);
+  const totalConsultas = data.length;
+  const ticketProm = totalConsultas ? totalIngreso/totalConsultas : 0;
+  kpisEl.innerHTML = `
+    <div class="kpi-tile"><div class="ico">💰</div><div class="lbl3">Ingreso total</div><div class="val">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+    <div class="kpi-tile"><div class="ico">🧾</div><div class="lbl3">Consultas</div><div class="val">${totalConsultas}</div></div>
+    <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket promedio</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+  `;
+  // agrupar por doctor
+  const porDoctor = {};
+  data.forEach(r=>{
+    const doc = r.personal ? r.personal.nombre : 'Sin doctor';
+    if(!porDoctor[doc]) porDoctor[doc] = { total:0, n:0 };
+    porDoctor[doc].total += Number(r.monto||0);
+    porDoctor[doc].n += 1;
+  });
+  const doctores = Object.entries(porDoctor).sort((a,b)=>b[1].total-a[1].total);
+  if(doctores.length === 0){
+    listaEl.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Sin consultas en este período.</div>';
+    return;
+  }
+  listaEl.innerHTML = doctores.map(([nombre, d]) => `
+    <div class="cierre-card2">
+      <div class="top"><span class="name">${esc2(nombre)}</span><span class="total">$${d.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>
+      <div class="meta">${d.n} paciente(s)</div>
+    </div>
+  `).join('');
+}
+document.querySelectorAll('.cierre-periodo').forEach(b=>{
+  b.addEventListener('click', ()=> cargarCierre(Number(b.dataset.dias)));
+});
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+let dashCharts = {};
+async function cargarDashboard(){
+  const desde = isoDesdeHace(14);
+  const { data, error } = await sb
+    .from('consultas')
+    .select('fecha, monto, medio_pago, pacientes(id), personal!consultas_doctor_id_fkey(nombre)')
+    .eq('deleted', false)
+    .gte('fecha', desde);
+  const kpisEl = document.getElementById('dash-kpis');
+  if(error){ console.error('[CUIVAN] Error cargando dashboard:', error); kpisEl.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+
+  const totalIngreso = data.reduce((a,r)=>a+Number(r.monto||0),0);
+  const pacientesUnicos = new Set(data.map(r=>r.pacientes?.id)).size;
+  const ticketProm = data.length ? totalIngreso/data.length : 0;
+  const porDoc = {};
+  data.forEach(r=>{ const n = r.personal?.nombre || '—'; porDoc[n] = (porDoc[n]||0) + Number(r.monto||0); });
+  const docTop = Object.entries(porDoc).sort((a,b)=>b[1]-a[1])[0];
+
+  kpisEl.innerHTML = `
+    <div class="kpi-tile"><div class="ico">💰</div><div class="lbl3">Ingreso 14d</div><div class="val">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:0})}</div></div>
+    <div class="kpi-tile"><div class="ico">👥</div><div class="lbl3">Pacientes</div><div class="val">${pacientesUnicos}</div></div>
+    <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket prom.</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:0})}</div></div>
+    <div class="kpi-tile"><div class="ico">🏆</div><div class="lbl3">Doctor top</div><div class="val" style="font-size:13px">${docTop ? esc2(docTop[0]) : '—'}</div></div>
+  `;
+
+  // tendencia por día
+  const porDia = {};
+  for(let i=0;i<14;i++){ const d=new Date(); d.setDate(d.getDate()-i); porDia[d.toISOString().slice(0,10)] = 0; }
+  data.forEach(r=>{ if(porDia[r.fecha] !== undefined) porDia[r.fecha] += Number(r.monto||0); });
+  const diasOrdenados = Object.keys(porDia).sort();
+
+  const TEAL='#2ABFBF', NAVY2='#1B3A6B', NAVY3='#22488a', TEAL_L='#9FE1CB', SLATE='#94a3b8', NAVY='#0B1628';
+  Object.values(dashCharts).forEach(c=>c.destroy());
+  dashCharts.trend = new Chart(document.getElementById('ch-dash-trend'), {
+    type:'line',
+    data:{ labels: diasOrdenados.map(d=>d.slice(5)), datasets:[{ data: diasOrdenados.map(d=>porDia[d]), borderColor:TEAL, backgroundColor:'rgba(42,191,191,.12)', fill:true, tension:.4, pointRadius:0, borderWidth:2.5 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ ticks:{ font:{size:9} } }, x:{ ticks:{ maxTicksLimit:7, font:{size:9} }, grid:{display:false} } } }
+  });
+  const docLabels = Object.keys(porDoc);
+  dashCharts.doc = new Chart(document.getElementById('ch-dash-doc'), {
+    type:'bar',
+    data:{ labels: docLabels, datasets:[{ data: docLabels.map(l=>porDoc[l]), backgroundColor:[TEAL,NAVY2,NAVY3,SLATE,'#5DCAA5'], borderRadius:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ ticks:{ font:{size:9} } }, x:{ ticks:{font:{size:9}}, grid:{display:false} } } }
+  });
+  const porPago = {};
+  data.forEach(r=>{ porPago[r.medio_pago] = (porPago[r.medio_pago]||0) + Number(r.monto||0); });
+  dashCharts.pago = new Chart(document.getElementById('ch-dash-pago'), {
+    type:'doughnut',
+    data:{ labels: Object.keys(porPago), datasets:[{ data: Object.values(porPago), backgroundColor:[TEAL,NAVY2,TEAL_L,SLATE], borderWidth:3, borderColor:'#fff' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:10} } } }, cutout:'55%' }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRM — Pacientes inactivos
+// ═══════════════════════════════════════════════════════════
+async function cargarPRM(){
+  const dias = parseInt(document.getElementById('prm-dias').value) || 60;
+  const cont = document.getElementById('prm-lista');
+  cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
+  const { data, error } = await sb
+    .from('consultas')
+    .select('fecha, paciente_id, pacientes(id, nombre, telefono)')
+    .eq('deleted', false)
+    .order('fecha', { ascending:false });
+  if(error){ console.error('[CUIVAN] Error cargando PRM:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+
+  // última visita por paciente
+  const ultima = {};
+  data.forEach(r=>{
+    if(!r.pacientes) return;
+    const id = r.pacientes.id;
+    if(!ultima[id] || r.fecha > ultima[id].fecha) ultima[id] = { fecha: r.fecha, nombre: r.pacientes.nombre, telefono: r.pacientes.telefono };
+  });
+  const hoy = new Date();
+  const inactivos = Object.entries(ultima).map(([id, info])=>{
+    const diasSin = Math.floor((hoy - new Date(info.fecha)) / 86400000);
+    return { id, ...info, diasSin };
+  }).filter(p => p.diasSin >= dias).sort((a,b)=>b.diasSin - a.diasSin);
+
+  if(inactivos.length === 0){
+    cont.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Ningún paciente supera ese umbral de inactividad.</div>';
+    return;
+  }
+  cont.innerHTML = inactivos.map(p => `
+    <div class="prm-item2">
+      <div class="prm-top2">
+        <div><b style="font-size:12.5px;color:var(--navy)">${esc2(p.nombre)}</b><div style="font-size:10.5px;color:var(--g6)">Última visita: ${fmtFechaISO(p.fecha)} · ${esc2(p.telefono||'—')}</div></div>
+        <span class="prm-badge2">${p.diasSin} días sin visita</span>
+      </div>
+    </div>
+  `).join('');
+}
+document.getElementById('btn-prm-aplicar').addEventListener('click', cargarPRM);
+
+// ── conectar carga por pestaña ──
+document.getElementById('app-nav').addEventListener('click',(e)=>{
+  const b = e.target.closest('button');
+  if(!b || b.classList.contains('locked') || !b.dataset.screen2) return;
+  if(b.dataset.screen2 === 'cierre') cargarCierre(cierreDiasActual);
+  if(b.dataset.screen2 === 'dash') cargarDashboard();
+  if(b.dataset.screen2 === 'prm') cargarPRM();
 });
 </script>
 </body>
