@@ -96,7 +96,10 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .p-row{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 250px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--g1)}
 .p-actions2{display:flex;gap:6px;flex-wrap:wrap}
 .p-email{font-size:9.5px;color:var(--g4);margin-top:2px}
-.p-row .cbwrap{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10.5px;color:var(--g6)}
+.p-row .cbwrap,.p-row-sin .cbwrap{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10.5px;color:var(--g6)}
+.p-activo-label{flex-direction:column;gap:2px !important}
+.p-activo-txt{font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--g4)}
+.p-activo-label input:checked ~ .p-activo-txt{color:#2E7D4F}
 .p-row:last-child{border-bottom:none}
 .p-row input,.p-row select{font-size:12px;padding:6px 8px}
 .p-row-sin{display:grid;grid-template-columns:2.2fr 80px 100px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--g1)}
@@ -1429,7 +1432,7 @@ async function cargarPersonal(){
         <option value="doctor" ${p.rol==='doctor'?'selected':''}>Doctor/a</option>
         <option value="admin" ${p.rol==='admin'?'selected':''}>Admin</option>
       </select>
-      <label class="cbwrap"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/></label>
+      <label class="cbwrap p-activo-label"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/><span class="p-activo-txt">${p.activo?'Activo':'Inactivo'}</span></label>
       <button class="appbtn appbtn-s p-guardar" style="font-size:11px;padding:6px 10px;white-space:nowrap">Guardar</button>
       <div class="p-actions2">
         <button class="appbtn appbtn-s p-reset" style="font-size:11px;padding:6px 10px;white-space:nowrap">🔑 Reset</button>
@@ -1447,7 +1450,7 @@ async function cargarPersonal(){
   contSin.innerHTML = sinAcceso.map(p => `
     <div class="p-row-sin" data-id="${p.id}">
       <input class="app-input p-nombre" value="${esc2(p.nombre)}"/>
-      <label class="cbwrap"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/></label>
+      <label class="cbwrap p-activo-label"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/><span class="p-activo-txt">${p.activo?'Activo':'Inactivo'}</span></label>
       <div style="display:flex;gap:6px;justify-content:flex-end">
         <button class="appbtn appbtn-s p-guardar" style="font-size:10.5px;padding:6px 9px;white-space:nowrap">Guardar</button>
         <button class="appbtn appbtn-p p-dar-acceso" style="font-size:10.5px;padding:6px 9px;white-space:nowrap">Dar acceso</button>
@@ -1486,7 +1489,9 @@ async function cargarPersonal(){
         const id = row.dataset.id;
         const { error } = await sb.from('personal').update({ activo: e.target.checked }).eq('id', id);
         if(error){ console.error('[CUIVAN] Error actualizando activo:', error); toast('⚠️ No se pudo guardar'); e.target.checked = !e.target.checked; return; }
-        toast(e.target.checked ? '✅ Activado' : '✅ Desactivado');
+        const txt = e.target.closest('.p-activo-label')?.querySelector('.p-activo-txt');
+        if(txt) txt.textContent = e.target.checked ? 'Activo' : 'Inactivo';
+        toast(e.target.checked ? '✅ Activado — ya aparece en Registro' : '✅ Desactivado — ya no aparece en Registro');
         cargarDoctores();
       });
     });
