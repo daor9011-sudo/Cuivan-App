@@ -76,6 +76,8 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .appbtn-p{background:linear-gradient(135deg,var(--teal),#22a8a8);color:var(--navy);box-shadow:0 6px 14px -4px rgba(42,191,191,.55)}
 .appbtn-danger-soft{background:#FEF0EF;color:#C0392B;border:1px solid #FBBFBB;box-shadow:none}
 .appbtn-danger-soft:hover{background:#FCE0DF}
+.papelera-box{background:#FDF8F7;border:1px solid #F5C2BC;border-radius:10px;padding:12px 14px}
+.papelera-title{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#C0392B;margin-bottom:8px}
 .appbtn-s{background:var(--navy2);color:#fff;box-shadow:0 6px 14px -4px rgba(27,58,107,.45)}
 
 .filt2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
@@ -334,8 +336,10 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
           <option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option>
         </select>
         <button class="appbtn appbtn-s" id="btn-refrescar-historial" style="font-size:11px;padding:6px 12px">↻</button>
+        <button class="appbtn appbtn-s" id="btn-papelera-toggle" style="font-size:11px;padding:6px 12px;display:none">🗑 Papelera</button>
         <button class="appbtn appbtn-p" id="btn-export-historial" style="font-size:11px;padding:6px 12px;margin-left:auto">⬇ Exportar Excel</button>
       </div>
+      <div id="h-papelera-panel" style="display:none;margin-bottom:14px"></div>
       <div style="overflow-x:auto">
         <table class="h2-table">
           <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th><th></th></tr></thead>
@@ -720,8 +724,11 @@ function entrarAlShell(perfil){
 
   const showDash = perfil.rol !== 'recepcion';
   const showPersonal = perfil.rol === 'admin';
+  const showPapelera = perfil.rol !== 'recepcion';
   document.querySelector('[data-screen2="dash"]').classList.toggle('locked', !showDash);
   document.getElementById('btn-personal-header').style.display = showPersonal ? 'inline-flex' : 'none';
+  document.getElementById('btn-papelera-toggle').style.display = showPapelera ? 'inline-flex' : 'none';
+  window.MI_ROL_ADMIN = perfil.rol === 'admin';
 
   cargarDoctores();
   cargarCatalogoServiciosCache();
@@ -1061,6 +1068,78 @@ document.getElementById('btn-export-historial').addEventListener('click', ()=>{
   XLSX.utils.book_append_sheet(wb, ws, 'Historial');
   XLSX.writeFile(wb, `CUIVAN_Historial_${todayLocal().replace(/\//g,'-')}.xlsx`);
 });
+
+// ── Papelera: consultas eliminadas (soft-delete), restaurar o borrar definitivo ──
+let PAPELERA_ABIERTA = false;
+document.getElementById('btn-papelera-toggle').addEventListener('click', ()=>{
+  PAPELERA_ABIERTA = !PAPELERA_ABIERTA;
+  document.getElementById('h-papelera-panel').style.display = PAPELERA_ABIERTA ? 'block' : 'none';
+  if(PAPELERA_ABIERTA) cargarPapelera();
+});
+async function cargarPapelera(){
+  const panel = document.getElementById('h-papelera-panel');
+  panel.innerHTML = '<div class="papelera-box"><div class="papelera-title">🗑 Papelera</div><div style="color:var(--g4);font-size:12px">Cargando...</div></div>';
+  const { data, error } = await sb
+    .from('consultas')
+    .select('id, fecha, motivo, monto, deleted_at, pacientes(nombre), personal!consultas_doctor_id_fkey(nombre), eliminador:deleted_by(nombre)')
+    .eq('deleted', true)
+    .order('deleted_at', { ascending: false })
+    .limit(100);
+  if(error){
+    console.error('[CUIVAN] Error cargando papelera:', error);
+    panel.innerHTML = '<div class="papelera-box"><div class="papelera-title">🗑 Papelera</div><div style="color:var(--red);font-size:12px">Error al cargar</div></div>';
+    return;
+  }
+  if(!data || data.length === 0){
+    panel.innerHTML = '<div class="papelera-box"><div class="papelera-title">🗑 Papelera</div><div style="color:var(--g4);font-size:12px">La papelera está vacía</div></div>';
+    return;
+  }
+  panel.innerHTML = `
+    <div class="papelera-box">
+      <div class="papelera-title">🗑 Papelera — ${data.length} registro(s) eliminado(s)</div>
+      <div style="overflow-x:auto">
+        <table class="htable2">
+          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Monto</th><th>Eliminado</th><th>Por</th><th></th></tr></thead>
+          <tbody>
+            ${data.map(c => `
+              <tr>
+                <td>${fmtFechaISO(c.fecha)}</td>
+                <td>${esc2(c.pacientes ? c.pacientes.nombre : '—')}</td>
+                <td>${esc2(c.personal ? c.personal.nombre : '—')}</td>
+                <td>${esc2(c.motivo)}</td>
+                <td>$${Number(c.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+                <td style="font-size:10.5px;color:var(--g4)">${c.deleted_at ? new Date(c.deleted_at).toLocaleString('es-MX') : '—'}</td>
+                <td style="font-size:10.5px;color:var(--g4)">${esc2(c.eliminador ? c.eliminador.nombre : '—')}</td>
+                <td style="white-space:nowrap">
+                  <button class="appbtn appbtn-s pap-restaurar" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">↺ Restaurar</button>
+                  ${window.MI_ROL_ADMIN ? `<button class="appbtn appbtn-danger-soft pap-eliminar-def" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">✕ Eliminar</button>` : ''}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  panel.querySelectorAll('.pap-restaurar').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const { error } = await sb.from('consultas').update({ deleted: false, deleted_at: null, deleted_by: null }).eq('id', btn.dataset.id);
+      if(error){ console.error('[CUIVAN] Error restaurando:', error); toast('⚠️ No se pudo restaurar'); return; }
+      toast('✅ Registro restaurado');
+      cargarPapelera();
+      cargarHistorial();
+    });
+  });
+  panel.querySelectorAll('.pap-eliminar-def').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const ok = confirm('¿Eliminar DEFINITIVAMENTE este registro? Esta acción no se puede deshacer bajo ninguna circunstancia.');
+      if(!ok) return;
+      llamarPersonalAdmin({ action:'hard_delete_consulta', consulta_id: btn.dataset.id })
+        .then(()=>{ toast('✅ Eliminado definitivamente'); cargarPapelera(); })
+        .catch(err=>{ console.error('[CUIVAN] Error en borrado definitivo:', err); toast('⚠️ ' + err.message); });
+    });
+  });
+}
 
 // ── Personal: lista + edición (nombre/rol/activo) ──
 async function cargarPersonal(){
