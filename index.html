@@ -137,6 +137,10 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .crm-gestiones2{max-height:130px;overflow-y:auto;margin-bottom:10px}
 .crm-item2{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--g1);font-size:11.5px}
 .modal-footer2{display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--g2)}
+.modal-icon-circle{width:44px;height:44px;border-radius:50%;background:var(--teal-soft);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px}
+.modal-icon-circle.danger{background:#FEF0EF}
+.cp-input-wrap{position:relative}
+.cp-toggle-ojo{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--g4);font-size:14px}
 
 /* ── Footer / disclaimer legal (idéntico patrón CANOPY: logo blanco flotante, sin caja) ── */
 .app-footer{background:var(--g1);border-top:1px solid var(--g2);padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;text-align:center;flex-shrink:0}
@@ -438,6 +442,36 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 
 <div class="toast2" id="toast2"></div>
 
+<!-- Modal genérico de confirmación (reemplaza confirm() nativo) -->
+<div class="modal-overlay2" id="confirm-modal-overlay">
+  <div class="modal2" style="max-width:380px;text-align:center">
+    <div class="modal-icon-circle" id="confirm-modal-icono" style="margin-left:auto;margin-right:auto">❓</div>
+    <h3 id="confirm-modal-titulo" style="margin-bottom:8px">¿Confirmar?</h3>
+    <div id="confirm-modal-mensaje" style="font-size:13px;color:var(--g6);line-height:1.5;margin-bottom:18px;text-align:left"></div>
+    <div class="modal-footer2" style="justify-content:center;border-top:none;padding-top:0;margin-top:0">
+      <button class="appbtn appbtn-s" id="confirm-modal-btn-cancelar">Cancelar</button>
+      <button class="appbtn appbtn-p" id="confirm-modal-btn-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal genérico de texto/contraseña (reemplaza prompt() nativo) -->
+<div class="modal-overlay2" id="prompt-modal-overlay">
+  <div class="modal2" style="max-width:380px;text-align:center">
+    <div class="modal-icon-circle" id="prompt-modal-icono" style="margin-left:auto;margin-right:auto">✏️</div>
+    <h3 id="prompt-modal-titulo" style="margin-bottom:8px"></h3>
+    <div id="prompt-modal-mensaje" style="font-size:13px;color:var(--g6);line-height:1.5;margin-bottom:14px;text-align:left"></div>
+    <div class="cp-input-wrap">
+      <input class="app-input" type="text" id="prompt-modal-input" style="text-align:left"/>
+      <button type="button" class="cp-toggle-ojo" id="prompt-modal-toggle-ojo">👁️</button>
+    </div>
+    <div class="modal-footer2" style="justify-content:center;border-top:none;padding-top:0;margin-top:16px">
+      <button class="appbtn appbtn-s" id="prompt-modal-btn-cancelar">Cancelar</button>
+      <button class="appbtn appbtn-p" id="prompt-modal-btn-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal editar consulta (Historial) -->
 <div class="modal-overlay2" id="modal-editar-consulta">
   <div class="modal2" style="max-width:480px">
@@ -709,6 +743,70 @@ function toast(msg){
   t.classList.add('show');
   setTimeout(()=> t.classList.remove('show'), 3200);
 }
+
+// ── Modales genéricos: reemplazan confirm()/prompt() nativos del navegador ──
+let confirmModalCallback = null;
+function mostrarConfirm(opciones, callback){
+  const { titulo='¿Confirmar?', mensaje='', textoConfirmar='Confirmar', icono='❓', danger=false } = opciones;
+  document.getElementById('confirm-modal-icono').textContent = icono;
+  document.getElementById('confirm-modal-icono').classList.toggle('danger', danger);
+  document.getElementById('confirm-modal-titulo').textContent = titulo;
+  document.getElementById('confirm-modal-mensaje').innerHTML = mensaje;
+  const btnOk = document.getElementById('confirm-modal-btn-ok');
+  btnOk.textContent = textoConfirmar;
+  btnOk.className = danger ? 'appbtn appbtn-danger-soft' : 'appbtn appbtn-p';
+  confirmModalCallback = callback;
+  document.getElementById('confirm-modal-overlay').classList.add('show');
+}
+document.getElementById('confirm-modal-btn-ok').addEventListener('click', ()=>{
+  const cb = confirmModalCallback;
+  document.getElementById('confirm-modal-overlay').classList.remove('show');
+  confirmModalCallback = null;
+  if(cb) cb();
+});
+document.getElementById('confirm-modal-btn-cancelar').addEventListener('click', ()=>{
+  document.getElementById('confirm-modal-overlay').classList.remove('show');
+  confirmModalCallback = null;
+});
+
+let promptModalCallback = null;
+function mostrarPrompt(opciones, callback){
+  const { titulo='', mensaje='', tipo='text', placeholder='', icono='✏️', valorInicial='' } = opciones;
+  document.getElementById('prompt-modal-icono').textContent = icono;
+  document.getElementById('prompt-modal-titulo').textContent = titulo;
+  document.getElementById('prompt-modal-mensaje').innerHTML = mensaje;
+  const input = document.getElementById('prompt-modal-input');
+  input.value = valorInicial || '';
+  input.type = tipo;
+  input.placeholder = placeholder;
+  const ojoBtn = document.getElementById('prompt-modal-toggle-ojo');
+  ojoBtn.style.display = tipo === 'password' ? 'block' : 'none';
+  ojoBtn.textContent = '👁️';
+  promptModalCallback = callback;
+  document.getElementById('prompt-modal-overlay').classList.add('show');
+  setTimeout(()=>{ input.focus(); input.select(); }, 60);
+}
+document.getElementById('prompt-modal-toggle-ojo').addEventListener('click', ()=>{
+  const input = document.getElementById('prompt-modal-input');
+  const btn = document.getElementById('prompt-modal-toggle-ojo');
+  const verla = input.type === 'password';
+  input.type = verla ? 'text' : 'password';
+  btn.textContent = verla ? '🙈' : '👁️';
+});
+document.getElementById('prompt-modal-input').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') document.getElementById('prompt-modal-btn-ok').click();
+});
+document.getElementById('prompt-modal-btn-ok').addEventListener('click', ()=>{
+  const valor = document.getElementById('prompt-modal-input').value;
+  const cb = promptModalCallback;
+  document.getElementById('prompt-modal-overlay').classList.remove('show');
+  promptModalCallback = null;
+  if(cb) cb(valor);
+});
+document.getElementById('prompt-modal-btn-cancelar').addEventListener('click', ()=>{
+  document.getElementById('prompt-modal-overlay').classList.remove('show');
+  promptModalCallback = null;
+});
 
 function entrarAlShell(perfil){
   MI_PERFIL = perfil;
@@ -1096,7 +1194,10 @@ async function cargarPapelera(){
   }
   panel.innerHTML = `
     <div class="papelera-box">
-      <div class="papelera-title">🗑 Papelera — ${data.length} registro(s) eliminado(s)</div>
+      <div class="papelera-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>🗑 Papelera — ${data.length} registro(s) eliminado(s)</span>
+        ${window.MI_ROL_ADMIN ? `<button class="appbtn appbtn-danger-soft" id="btn-vaciar-papelera" style="font-size:10.5px;padding:5px 10px;text-transform:none;letter-spacing:0;font-weight:700">Vaciar papelera</button>` : ''}
+      </div>
       <div style="overflow-x:auto">
         <table class="htable2">
           <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Monto</th><th>Eliminado</th><th>Por</th><th></th></tr></thead>
@@ -1121,6 +1222,22 @@ async function cargarPapelera(){
       </div>
     </div>
   `;
+  const btnVaciar = document.getElementById('btn-vaciar-papelera');
+  if(btnVaciar){
+    btnVaciar.addEventListener('click', ()=>{
+      mostrarConfirm({
+        titulo: '¿Vaciar toda la papelera?',
+        mensaje: `Se eliminarán DEFINITIVAMENTE los ${data.length} registro(s) de la papelera. Esta acción no se puede deshacer bajo ninguna circunstancia.`,
+        textoConfirmar: 'Sí, vaciar todo',
+        icono: '🗑️',
+        danger: true
+      }, ()=>{
+        llamarPersonalAdmin({ action:'empty_trash' })
+          .then((res)=>{ toast(`✅ Papelera vaciada (${res.count} registro(s))`); cargarPapelera(); })
+          .catch(err=>{ console.error('[CUIVAN] Error vaciando papelera:', err); toast('⚠️ ' + err.message); });
+      });
+    });
+  }
   panel.querySelectorAll('.pap-restaurar').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const { error } = await sb.from('consultas').update({ deleted: false, deleted_at: null, deleted_by: null }).eq('id', btn.dataset.id);
@@ -1132,11 +1249,17 @@ async function cargarPapelera(){
   });
   panel.querySelectorAll('.pap-eliminar-def').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const ok = confirm('¿Eliminar DEFINITIVAMENTE este registro? Esta acción no se puede deshacer bajo ninguna circunstancia.');
-      if(!ok) return;
-      llamarPersonalAdmin({ action:'hard_delete_consulta', consulta_id: btn.dataset.id })
-        .then(()=>{ toast('✅ Eliminado definitivamente'); cargarPapelera(); })
-        .catch(err=>{ console.error('[CUIVAN] Error en borrado definitivo:', err); toast('⚠️ ' + err.message); });
+      mostrarConfirm({
+        titulo: '¿Eliminar definitivamente?',
+        mensaje: 'Esta acción no se puede deshacer bajo ninguna circunstancia.',
+        textoConfirmar: 'Sí, eliminar',
+        icono: '🗑️',
+        danger: true
+      }, ()=>{
+        llamarPersonalAdmin({ action:'hard_delete_consulta', consulta_id: btn.dataset.id })
+          .then(()=>{ toast('✅ Eliminado definitivamente'); cargarPapelera(); })
+          .catch(err=>{ console.error('[CUIVAN] Error en borrado definitivo:', err); toast('⚠️ ' + err.message); });
+      });
     });
   });
 }
@@ -1228,38 +1351,48 @@ async function llamarPersonalAdmin(payload){
 }
 
 function abrirDarAcceso(personalId, nombre){
-  const email = prompt(`Correo de acceso para ${nombre}:`);
-  if(!email) return;
-  const password = prompt(`Contraseña temporal para ${nombre} (mínimo 8 caracteres):`);
-  if(!password) return;
-  llamarPersonalAdmin({ action:'create_user', personal_id: personalId, email, password })
-    .then(()=>{ toast('✅ Acceso creado'); cargarPersonal(); })
-    .catch(err=>{ console.error('[CUIVAN] Error dando acceso:', err); toast('⚠️ ' + err.message); });
+  mostrarPrompt({ titulo:'Correo de acceso', mensaje:`Correo para <b>${esc2(nombre)}</b>:`, tipo:'email', placeholder:'correo@cuivan.com', icono:'✉️' }, (email)=>{
+    if(!email) return;
+    mostrarPrompt({ titulo:'Contraseña temporal', mensaje:`Contraseña para <b>${esc2(nombre)}</b> (mínimo 8 caracteres):`, tipo:'password', placeholder:'••••••••', icono:'🔑' }, (password)=>{
+      if(!password) return;
+      llamarPersonalAdmin({ action:'create_user', personal_id: personalId, email, password })
+        .then(()=>{ toast('✅ Acceso creado'); cargarPersonal(); })
+        .catch(err=>{ console.error('[CUIVAN] Error dando acceso:', err); toast('⚠️ ' + err.message); });
+    });
+  });
 }
 function abrirReset(authUserId, nombre){
-  const password = prompt(`Nueva contraseña para ${nombre} (mínimo 8 caracteres):`);
-  if(!password) return;
-  llamarPersonalAdmin({ action:'reset_password', auth_user_id: authUserId, new_password: password })
-    .then(()=>{ toast('✅ Contraseña restablecida'); })
-    .catch(err=>{ console.error('[CUIVAN] Error reseteando:', err); toast('⚠️ ' + err.message); });
+  mostrarPrompt({ titulo:'Restablecer contraseña', mensaje:`Nueva contraseña para <b>${esc2(nombre)}</b> (mínimo 8 caracteres):`, tipo:'password', placeholder:'••••••••', icono:'🔑' }, (password)=>{
+    if(!password) return;
+    llamarPersonalAdmin({ action:'reset_password', auth_user_id: authUserId, new_password: password })
+      .then(()=>{ toast('✅ Contraseña restablecida'); })
+      .catch(err=>{ console.error('[CUIVAN] Error reseteando:', err); toast('⚠️ ' + err.message); });
+  });
 }
 function abrirCambiarCorreo(personalId, authUserId, nombre){
-  const nuevoCorreo = prompt(`Nuevo correo para ${nombre}:`);
-  if(!nuevoCorreo) return;
-  llamarPersonalAdmin({ action:'change_email', personal_id: personalId, auth_user_id: authUserId, new_email: nuevoCorreo })
-    .then(()=>{ toast('✅ Correo actualizado'); cargarPersonal(); })
-    .catch(err=>{ console.error('[CUIVAN] Error cambiando correo:', err); toast('⚠️ ' + err.message); });
+  mostrarPrompt({ titulo:'Cambiar correo', mensaje:`Nuevo correo para <b>${esc2(nombre)}</b>:`, tipo:'email', placeholder:'correo@cuivan.com', icono:'✉️' }, (nuevoCorreo)=>{
+    if(!nuevoCorreo) return;
+    llamarPersonalAdmin({ action:'change_email', personal_id: personalId, auth_user_id: authUserId, new_email: nuevoCorreo })
+      .then(()=>{ toast('✅ Correo actualizado'); cargarPersonal(); })
+      .catch(err=>{ console.error('[CUIVAN] Error cambiando correo:', err); toast('⚠️ ' + err.message); });
+  });
 }
 function abrirEliminarPersonal(personalId, authUserId, nombre){
-  const ok = confirm(`¿Eliminar definitivamente a "${nombre}"? Esta acción no se puede deshacer.\n\nSi tiene consultas registradas, no se podrá eliminar (para no romper el historial) — en ese caso, desactívalo en su lugar.`);
-  if(!ok) return;
-  llamarPersonalAdmin({ action:'delete_user', personal_id: personalId, auth_user_id: authUserId || null, nombre_snapshot: nombre })
-    .then((res)=>{
-      toast(res.warning ? '⚠️ ' + res.warning : '✅ Eliminado');
-      cargarPersonal();
-      cargarDoctores();
-    })
-    .catch(err=>{ console.error('[CUIVAN] Error eliminando:', err); toast('⚠️ ' + err.message); });
+  mostrarConfirm({
+    titulo: '¿Eliminar definitivamente?',
+    mensaje: `Vas a eliminar a <b>${esc2(nombre)}</b>. Esta acción no se puede deshacer.<br><br>Si tiene consultas registradas, no se podrá eliminar (para no romper el historial) — en ese caso, desactívalo en su lugar.`,
+    textoConfirmar: 'Sí, eliminar',
+    icono: '🗑️',
+    danger: true
+  }, ()=>{
+    llamarPersonalAdmin({ action:'delete_user', personal_id: personalId, auth_user_id: authUserId || null, nombre_snapshot: nombre })
+      .then((res)=>{
+        toast(res.warning ? '⚠️ ' + res.warning : '✅ Eliminado');
+        cargarPersonal();
+        cargarDoctores();
+      })
+      .catch(err=>{ console.error('[CUIVAN] Error eliminando:', err); toast('⚠️ ' + err.message); });
+  });
 }
 
 document.getElementById('np-con-acceso').addEventListener('change', (e)=>{
@@ -1707,17 +1840,23 @@ document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
   }
   btn.disabled = false; btn.textContent = 'Guardar cambios';
 });
-document.getElementById('btn-eliminar-consulta').addEventListener('click', async ()=>{
+document.getElementById('btn-eliminar-consulta').addEventListener('click', ()=>{
   if(!EDITANDO_CONSULTA) return;
-  const ok = confirm('¿Eliminar este registro del historial? Se puede recuperar solo desde la base de datos por un administrador.');
-  if(!ok) return;
-  const { error } = await sb.from('consultas').update({
-    deleted: true, deleted_at: new Date().toISOString(), deleted_by: await miPersonalId()
-  }).eq('id', EDITANDO_CONSULTA.id);
-  if(error){ console.error('[CUIVAN] Error eliminando consulta:', error); toast('⚠️ No se pudo eliminar'); return; }
-  toast('✅ Registro eliminado');
-  document.getElementById('modal-editar-consulta').classList.remove('show');
-  cargarHistorial();
+  mostrarConfirm({
+    titulo: '¿Eliminar este registro?',
+    mensaje: 'Se moverá a la Papelera — podrás restaurarlo desde ahí más adelante si hace falta.',
+    textoConfirmar: 'Sí, eliminar',
+    icono: '🗑️',
+    danger: true
+  }, async ()=>{
+    const { error } = await sb.from('consultas').update({
+      deleted: true, deleted_at: new Date().toISOString(), deleted_by: await miPersonalId()
+    }).eq('id', EDITANDO_CONSULTA.id);
+    if(error){ console.error('[CUIVAN] Error eliminando consulta:', error); toast('⚠️ No se pudo eliminar'); return; }
+    toast('✅ Registro movido a la Papelera');
+    document.getElementById('modal-editar-consulta').classList.remove('show');
+    cargarHistorial();
+  });
 });
 
 async function abrirTrazabilidad(pacienteId){
