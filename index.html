@@ -355,11 +355,18 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     <!-- ══ CIERRE ══ -->
     <div class="card screen2" id="app-screen-cierre">
       <div class="tab-title"><span>🧾 Resultados Operativos</span></div>
-      <div class="filt2">
-        <button class="appbtn appbtn-s cierre-periodo" data-dias="1" style="font-size:11px;padding:6px 12px">Día</button>
-        <button class="appbtn appbtn-s cierre-periodo" data-dias="7" style="font-size:11px;padding:6px 12px">Semana</button>
-        <button class="appbtn appbtn-p cierre-periodo" data-dias="15" style="font-size:11px;padding:6px 12px">Quincena</button>
-        <button class="appbtn appbtn-s cierre-periodo" data-dias="30" style="font-size:11px;padding:6px 12px">Mes</button>
+      <div class="filt2" style="align-items:center">
+        <button class="appbtn appbtn-p" id="btn-cierre-dia" style="font-size:11px;padding:6px 12px">📋 Día</button>
+        <button class="appbtn appbtn-s" id="btn-cierre-mes" style="font-size:11px;padding:6px 12px">📅 Mes</button>
+        <button class="appbtn appbtn-s" id="btn-cierre-prev" style="font-size:11px;padding:6px 10px">‹</button>
+        <span id="cierre-fecha-label" style="font-weight:700;font-size:12.5px;min-width:150px;text-align:center;color:var(--navy)">—</span>
+        <button class="appbtn appbtn-s" id="btn-cierre-next" style="font-size:11px;padding:6px 10px">›</button>
+        <input class="app-input" type="date" id="cierre-date-picker" style="width:auto"/>
+        <input class="app-input" type="month" id="cierre-month-picker" style="width:auto;display:none"/>
+        <button class="appbtn appbtn-s" id="btn-cierre-hoy" style="font-size:11px;padding:6px 12px">↻ Hoy</button>
+        <select class="app-input" id="cierre-doctor-filtro" style="margin-left:auto;width:auto">
+          <option value="">Todos los doctores</option>
+        </select>
       </div>
       <div class="dash-kpi-row" id="cierre-kpis" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
       <div id="cierre-lista"></div>
@@ -854,7 +861,7 @@ function pantallaActivaId(){
 function refrescarPantallaActiva(){
   const activa = pantallaActivaId();
   if(activa === 'historial') cargarHistorial();
-  if(activa === 'cierre') cargarCierre(cierreDiasActual);
+  if(activa === 'cierre') cargarCierre();
   if(activa === 'dash') cargarDashboard();
   if(activa === 'prm') cargarPRM();
 }
@@ -880,6 +887,18 @@ function todayLocal(){
   const mm = String(d.getMonth()+1).padStart(2,'0');
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
+// Fecha local en formato ISO (YYYY-MM-DD), SIN pasar por UTC — evita el bug de que
+// toISOString() se recorra un día hacia adelante por las tardes/noches en husos negativos.
+function isoLocal(d){
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+function isoDesdeHace(dias){
+  const d = new Date();
+  d.setDate(d.getDate() - dias + 1);
+  return isoLocal(d);
+}
 
 document.getElementById('app-nav').addEventListener('click',(e)=>{
   const b = e.target.closest('button');
@@ -889,7 +908,7 @@ document.getElementById('app-nav').addEventListener('click',(e)=>{
   document.querySelectorAll('.screen2').forEach(x=>x.classList.remove('act'));
   document.getElementById('app-screen-'+b.dataset.screen2).classList.add('act');
   if(b.dataset.screen2 === 'historial') cargarHistorial();
-  if(b.dataset.screen2 === 'cierre') cargarCierre(cierreDiasActual);
+  if(b.dataset.screen2 === 'cierre') cargarCierre();
   if(b.dataset.screen2 === 'dash') cargarDashboard();
   if(b.dataset.screen2 === 'prm') cargarPRM();
 });
@@ -903,10 +922,14 @@ document.getElementById('btn-logout').addEventListener('click', async ()=>{
 // ── Doctores para "Atendido por" (orden alfabético) ──
 async function cargarDoctores(){
   const sel = document.getElementById('r-doctor');
+  const selCierre = document.getElementById('cierre-doctor-filtro');
   const { data, error } = await sb.from('personal').select('id, nombre').eq('rol','doctor').eq('activo', true).order('nombre');
   if(error){ console.error('[CUIVAN] Error cargando doctores:', error); sel.innerHTML = '<option value="">Error al cargar</option>'; return; }
   if(!data || data.length === 0){ sel.innerHTML = '<option value="">Sin doctores registrados</option>'; return; }
   sel.innerHTML = data.map(d => `<option value="${d.id}">${esc2(d.nombre)}</option>`).join('');
+  if(selCierre){
+    selCierre.innerHTML = '<option value="">Todos los doctores</option>' + data.map(d => `<option value="${d.id}">${esc2(d.nombre)}</option>`).join('');
+  }
   refrescarResumen();
   actualizarTipoConsulta();
 }
@@ -1588,24 +1611,47 @@ async function cargarAuditLog(){
 // ═══════════════════════════════════════════════════════════
 // CIERRE
 // ═══════════════════════════════════════════════════════════
-let cierreDiasActual = 15;
-function isoDesdeHace(dias){
-  const d = new Date();
-  d.setDate(d.getDate() - dias + 1);
-  return d.toISOString().slice(0,10);
+let CIERRE_MODO = 'dia';
+let CIERRE_FECHA = new Date();
+
+function fmtMesLargoCierre(d){
+  const s = d.toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
-async function cargarCierre(dias){
-  cierreDiasActual = dias;
-  document.querySelectorAll('.cierre-periodo').forEach(b=>{
-    b.classList.toggle('appbtn-p', Number(b.dataset.dias) === dias);
-    b.classList.toggle('appbtn-s', Number(b.dataset.dias) !== dias);
-  });
-  const desde = isoDesdeHace(dias);
-  const { data, error } = await sb
+function fmtDiaLargoCierre(d){
+  const s = d.toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long'});
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function rangoCierreActual(){
+  if(CIERRE_MODO === 'dia'){
+    const iso = isoLocal(CIERRE_FECHA);
+    return { desde: iso, hasta: iso };
+  }
+  const y = CIERRE_FECHA.getFullYear(), m = CIERRE_FECHA.getMonth();
+  return { desde: isoLocal(new Date(y, m, 1)), hasta: isoLocal(new Date(y, m+1, 0)) };
+}
+function actualizarLabelCierre(){
+  const label = document.getElementById('cierre-fecha-label');
+  if(CIERRE_MODO === 'dia'){
+    label.textContent = fmtDiaLargoCierre(CIERRE_FECHA);
+    document.getElementById('cierre-date-picker').value = isoLocal(CIERRE_FECHA);
+  } else {
+    label.textContent = fmtMesLargoCierre(CIERRE_FECHA);
+    document.getElementById('cierre-month-picker').value = isoLocal(CIERRE_FECHA).slice(0,7);
+  }
+}
+async function cargarCierre(){
+  actualizarLabelCierre();
+  const { desde, hasta } = rangoCierreActual();
+  const doctorFiltro = document.getElementById('cierre-doctor-filtro').value;
+  let query = sb
     .from('consultas')
     .select('monto, medio_pago, monto_2, medio_pago_2, tipo_consulta, motivo, pacientes(nombre), personal!consultas_doctor_id_fkey(id, nombre)')
     .eq('deleted', false)
-    .gte('fecha', desde);
+    .gte('fecha', desde)
+    .lte('fecha', hasta);
+  if(doctorFiltro) query = query.eq('doctor_id', doctorFiltro);
+  const { data, error } = await query;
   const kpisEl = document.getElementById('cierre-kpis');
   const listaEl = document.getElementById('cierre-lista');
   if(error){
@@ -1677,9 +1723,50 @@ async function cargarCierre(dias){
     });
   });
 }
-document.querySelectorAll('.cierre-periodo').forEach(b=>{
-  b.addEventListener('click', ()=> cargarCierre(Number(b.dataset.dias)));
+
+document.getElementById('btn-cierre-dia').addEventListener('click', ()=>{
+  CIERRE_MODO = 'dia';
+  document.getElementById('btn-cierre-dia').className = 'appbtn appbtn-p';
+  document.getElementById('btn-cierre-mes').className = 'appbtn appbtn-s';
+  document.getElementById('cierre-date-picker').style.display = '';
+  document.getElementById('cierre-month-picker').style.display = 'none';
+  cargarCierre();
 });
+document.getElementById('btn-cierre-mes').addEventListener('click', ()=>{
+  CIERRE_MODO = 'mes';
+  document.getElementById('btn-cierre-mes').className = 'appbtn appbtn-p';
+  document.getElementById('btn-cierre-dia').className = 'appbtn appbtn-s';
+  document.getElementById('cierre-date-picker').style.display = 'none';
+  document.getElementById('cierre-month-picker').style.display = '';
+  cargarCierre();
+});
+document.getElementById('btn-cierre-prev').addEventListener('click', ()=>{
+  if(CIERRE_MODO === 'dia') CIERRE_FECHA.setDate(CIERRE_FECHA.getDate()-1);
+  else CIERRE_FECHA.setMonth(CIERRE_FECHA.getMonth()-1);
+  cargarCierre();
+});
+document.getElementById('btn-cierre-next').addEventListener('click', ()=>{
+  if(CIERRE_MODO === 'dia') CIERRE_FECHA.setDate(CIERRE_FECHA.getDate()+1);
+  else CIERRE_FECHA.setMonth(CIERRE_FECHA.getMonth()+1);
+  cargarCierre();
+});
+document.getElementById('btn-cierre-hoy').addEventListener('click', ()=>{
+  CIERRE_FECHA = new Date();
+  cargarCierre();
+});
+document.getElementById('cierre-date-picker').addEventListener('change', (e)=>{
+  if(!e.target.value) return;
+  const [y,m,d] = e.target.value.split('-').map(Number);
+  CIERRE_FECHA = new Date(y, m-1, d);
+  cargarCierre();
+});
+document.getElementById('cierre-month-picker').addEventListener('change', (e)=>{
+  if(!e.target.value) return;
+  const [y,m] = e.target.value.split('-').map(Number);
+  CIERRE_FECHA = new Date(y, m-1, 1);
+  cargarCierre();
+});
+document.getElementById('cierre-doctor-filtro').addEventListener('change', cargarCierre);
 
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD
@@ -1711,7 +1798,7 @@ async function cargarDashboard(){
 
   // tendencia por día
   const porDia = {};
-  for(let i=0;i<14;i++){ const d=new Date(); d.setDate(d.getDate()-i); porDia[d.toISOString().slice(0,10)] = 0; }
+  for(let i=0;i<14;i++){ const d=new Date(); d.setDate(d.getDate()-i); porDia[isoLocal(d)] = 0; }
   data.forEach(r=>{ if(porDia[r.fecha] !== undefined) porDia[r.fecha] += Number(r.monto||0); });
   const diasOrdenados = Object.keys(porDia).sort();
 
@@ -1968,7 +2055,7 @@ document.getElementById('btn-traza-registrar').addEventListener('click', async (
   const nota = document.getElementById('traza-resultado').value.trim();
   if(!nota){ toast('⚠️ Describe el resultado de la gestión'); return; }
   const { error } = await sb.from('gestiones').insert({
-    paciente_id: TRAZA_PACIENTE_ID, tipo, nota, fecha: new Date().toISOString().slice(0,10),
+    paciente_id: TRAZA_PACIENTE_ID, tipo, nota, fecha: isoLocal(new Date()),
     creado_por: await miPersonalId()
   });
   if(error){ console.error('[CUIVAN] Error registrando gestión:', error); toast('⚠️ No se pudo registrar'); return; }
