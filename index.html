@@ -222,8 +222,8 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <span class="s3-role-chip" id="app-role-chip">—</span>
       <span id="app-user-name"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>—</span>
       <button class="s3-logout" id="btn-personal-header" style="display:none">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Personal
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configuración
       </button>
       <button class="s3-logout" id="btn-logout">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -383,13 +383,13 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 
     <!-- ══ PERSONAL ══ -->
     <div class="card screen2" id="app-screen-personal">
-      <div class="tab-title">👥 Personal</div>
-      <div class="lbl2" style="margin-bottom:8px">Usuarios registrados</div>
+      <div class="tab-title">⚙️ Configuración</div>
+      <div class="lbl2" style="margin-bottom:8px">✏️ Editar usuarios</div>
       <div class="p-header"><span>Nombre</span><span>Rol</span><span style="text-align:center">Activo</span><span></span><span></span></div>
       <div id="personal-lista" style="margin-bottom:20px"></div>
       <p style="font-size:11px;color:var(--g4);margin-bottom:14px;line-height:1.5">Edita nombre/rol/activo directo en la lista. Para dar acceso real (correo + contraseña) a alguien que aún no lo tiene, usa "Dar acceso" en su fila.</p>
 
-      <div class="tab-title" style="margin-top:6px">➕ Alta de personal nuevo</div>
+      <div class="tab-title" style="margin-top:6px">➕ Crear usuario</div>
       <div class="row4" style="border-top:none;padding-top:0;margin-top:0;grid-template-columns:1fr 1fr 1fr">
         <div class="fi2"><label class="lbl2">Nombre</label><input class="app-input" id="np-nombre" placeholder="Ej. Dra. Nueva Doctora"/></div>
         <div class="fi2"><label class="lbl2">Rol</label>
@@ -402,7 +402,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         <div class="fi2"><label class="lbl2">Contraseña temporal</label><input class="app-input" id="np-password" type="text" placeholder="Mínimo 8 caracteres"/></div>
         <div class="fi2"><label class="lbl2">&nbsp;</label><button class="appbtn appbtn-p" id="btn-crear-personal">Crear</button></div>
       </div>
-      <div class="fi2" id="np-sin-acceso-wrap"><button class="appbtn appbtn-p" id="btn-crear-personal-sin-acceso" style="margin-top:6px">Agregar (sin acceso)</button></div>
+      <div class="fi2" id="np-sin-acceso-wrap" style="align-items:flex-start"><button class="appbtn appbtn-p" id="btn-crear-personal-sin-acceso" style="margin-top:6px;align-self:flex-start;width:auto">Agregar (sin acceso)</button></div>
 
       <div class="tab-title" style="margin-top:6px">🧾 Catálogo de servicios</div>
       <div class="row4" style="border-top:none;padding-top:0;margin-top:0;grid-template-columns:1fr 1fr auto">
