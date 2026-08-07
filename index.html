@@ -324,6 +324,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <div class="h2-filt">
         <input class="app-input" type="text" id="h-buscar" placeholder="Buscar paciente..." style="min-width:170px;background:#fff"/>
         <select class="app-input" id="h-periodo" style="background:#fff">
+          <option value="hoy">Hoy</option>
           <option value="7">Últimos 7 días</option>
           <option value="30" selected>Últimos 30 días</option>
           <option value="90">Últimos 90 días</option>
@@ -1162,14 +1163,20 @@ async function cargarHistorial(){
   const tbody = document.getElementById('h-tbody');
   const kpisEl = document.getElementById('h-kpis');
   tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
-  const periodo = parseInt(document.getElementById('h-periodo').value) || 0;
+  const periodoRaw = document.getElementById('h-periodo').value;
   let query = sb
     .from('consultas')
     .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, pacientes(id, nombre), personal!consultas_doctor_id_fkey(nombre)')
     .eq('deleted', false)
     .order('fecha', { ascending: false })
     .limit(300);
-  if(periodo > 0) query = query.gte('fecha', isoDesdeHace(periodo));
+  if(periodoRaw === 'hoy'){
+    const hoyIso = isoLocal(new Date());
+    query = query.gte('fecha', hoyIso).lte('fecha', hoyIso);
+  } else {
+    const periodo = parseInt(periodoRaw) || 0;
+    if(periodo > 0) query = query.gte('fecha', isoDesdeHace(periodo));
+  }
   const { data, error } = await query;
   if(error){
     console.error('[CUIVAN] Error cargando historial:', error);
