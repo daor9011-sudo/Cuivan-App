@@ -1,1 +1,1928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CUIVAN Consultas — Iniciar sesión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1628;--navy2:#1B3A6B;--navy3:#22488a;
+  --teal:#2ABFBF;--teal-soft:rgba(42,191,191,.14);
+  --w:#fff;--g1:#f4f6fb;--g2:#e2e8f4;--g4:#94a3b8;--g6:#64748b;
+  --red:#e53e3e;--green:#38a169;
+  --font-d:'Bricolage Grotesque',sans-serif;--font-b:'Instrument Sans',sans-serif;
+}
+body{font-family:var(--font-b);min-height:100vh;color:var(--navy);background:#eef1f7}
+#auth-view{min-height:100vh;display:flex;flex-direction:column;
+  background:radial-gradient(circle at 20% 10%,#183660 0%,#0B1628 55%,#080f1c 100%)}
+#auth-view.hide{display:none}
+#auth-view .auth-center{flex:1;display:flex;align-items:center;justify-content:center;padding:26px}
+#app-view{display:none;min-height:100vh}
+#app-view.act{display:flex;flex-direction:column}
+#app-view .appmain{flex:1;width:100%;align-self:stretch}
 
+/* ══════════ SHELL DE LA APP (post-login) ══════════ */
+.s3-strip{forced-color-adjust:none;min-height:58px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:8px 26px;background:linear-gradient(135deg,#0B1628,#1B3A6B);color:#fff;position:relative}
+.s3-strip::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--teal),transparent 70%)}
+.s3-brand-left{display:flex;align-items:center;justify-self:start}
+.s3-brand-left img{height:38px;display:block}
+.s3-brand-center{text-align:center;justify-self:center}
+.s3-brand-title{font-family:var(--font-d);font-weight:800;font-size:16px;letter-spacing:.4px}
+.s3-brand-title .w{color:#fff}
+.s3-brand-title .c{color:var(--teal)}
+.s3-brand-sub{font-size:10px;color:#fff;margin-top:2px;letter-spacing:.4px}
+.s3-right{display:flex;align-items:center;gap:12px;font-size:11px;color:rgba(255,255,255,.7);font-weight:600;justify-self:end;flex-wrap:wrap}
+.s3-role-chip{font-family:var(--font-b);background:rgba(42,191,191,.2);color:var(--teal);font-weight:800;letter-spacing:.5px;padding:4px 11px;border-radius:6px;font-size:10px;box-shadow:inset 0 0 0 1px rgba(42,191,191,.35);display:inline-flex;align-items:center;gap:4px}
+.s3-logout{font-family:var(--font-b);background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+#app-user-name{font-family:var(--font-b)}
+.s3-logout:hover{border-color:var(--teal);color:var(--teal)}
+.s3-navrow{background:linear-gradient(#fbfcfe,#f4f6fb);border-bottom:1px solid var(--g2);padding:14px 26px;display:flex;justify-content:center}
+.s3-segment{display:flex;background:var(--g1);border-radius:12px;padding:4px;gap:4px;box-shadow:inset 0 1px 3px rgba(11,22,40,.08);flex-wrap:wrap}
+.s3-segment button{font-family:var(--font-b);border:none;background:none;color:var(--g6);padding:8px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px}
+.s3-segment button.navact{background:#fff;color:var(--navy);box-shadow:0 3px 10px rgba(11,22,40,.16),0 0 0 1px rgba(42,191,191,.15)}
+.s3-segment button.locked{opacity:.35;cursor:not-allowed}
+
+main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(11,22,40,.04),0 12px 28px -8px rgba(11,22,40,.14);padding:20px 22px 18px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--navy2))}
+.tab-title{font-family:var(--font-d);font-size:15.5px;font-weight:800;color:var(--navy);padding-bottom:9px;margin-bottom:14px;border-bottom:1px solid var(--g2);display:flex;align-items:center;gap:7px;justify-content:space-between}
+.screen2{display:none}
+.screen2.act{display:block}
+
+.b1-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.b1-summary{background:linear-gradient(150deg,var(--navy),#132a4d);border-radius:9px;padding:11px 12px;color:#fff;display:flex;flex-direction:column;gap:5px;justify-content:center;box-shadow:inset 0 0 0 1px rgba(42,191,191,.2)}
+.b1-summary .se{font-size:9px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--teal)}
+.b1-summary .sv{font-size:12.5px;font-weight:700;line-height:1.25}
+.b1-summary .sm{font-size:10px;color:rgba(255,255,255,.6);line-height:1.4}
+.fi2{display:flex;flex-direction:column;gap:4px}
+.lbl2{font-size:10px;color:var(--g6);letter-spacing:.7px;text-transform:uppercase;font-weight:700}
+.app-input{background:#fff;border:1.5px solid var(--g2);border-radius:7px;padding:7px 10px;color:var(--navy);font-size:12.5px;font-family:var(--font-b);outline:none;width:100%;box-shadow:inset 0 1px 2px rgba(11,22,40,.03)}
+.app-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(42,191,191,.14);outline:none}
+.mon2{position:relative}.mon2 span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--g4);font-weight:800;pointer-events:none;font-size:12.5px}
+.mon2 input{padding-left:21px}
+
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px;padding-top:10px;border-top:1px dashed var(--g2);align-items:start}
+.fac2{padding:9px 12px;background:linear-gradient(135deg,var(--g1),#eef3fb);border-radius:9px;border:1px solid var(--g2);height:100%}
+.cbrow2{display:flex;align-items:center;gap:7px;cursor:pointer}
+.cbrow2 input[type=checkbox]{width:14px;height:14px;accent-color:var(--teal);cursor:pointer;flex-shrink:0}
+
+.appbtn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-weight:700;font-size:.82rem;transition:.18s;font-family:var(--font-b)}
+.appbtn-p{background:linear-gradient(135deg,var(--teal),#22a8a8);color:var(--navy);box-shadow:0 6px 14px -4px rgba(42,191,191,.55)}
+.appbtn-danger-soft{background:#FEF0EF;color:#C0392B;border:1px solid #FBBFBB;box-shadow:none}
+.appbtn-danger-soft:hover{background:#FCE0DF}
+.papelera-box{background:#FDF8F7;border:1px solid #F5C2BC;border-radius:10px;padding:12px 14px}
+.papelera-title{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#C0392B;margin-bottom:8px}
+.appbtn-s{background:var(--navy2);color:#fff;box-shadow:0 6px 14px -4px rgba(27,58,107,.45)}
+
+.filt2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.filt2 input,.filt2 select{width:auto;padding:6px 10px;font-size:11.5px}
+.htable2{width:100%;border-collapse:collapse;font-size:12px}
+.htable2 th{text-align:left;padding:8px 10px;color:var(--g4);font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;border-bottom:1px solid var(--g2);font-weight:700;background:#fafbfd}
+.htable2 td{padding:8px 10px;border-bottom:1px solid var(--g1);color:var(--navy);vertical-align:middle}
+.htable2 tr:hover td{background:#f0f9f9}
+.pill2{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:600}
+.pt2{background:var(--teal-soft);color:#0B6E6E}
+.pn2{background:rgba(27,58,107,.08);color:var(--navy2)}
+.soon{text-align:center;padding:50px 20px;color:var(--g4)}
+.soon-ico{font-size:32px;margin-bottom:10px}
+.toast2{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:12.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:2000;opacity:0;pointer-events:none;transition:.25s}
+.toast2.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+.p-header{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 250px;gap:8px;padding:0 0 7px;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--g4);border-bottom:2px solid var(--g2)}
+.p-row{display:grid;grid-template-columns:1.6fr 1fr 70px 88px 250px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--g1)}
+.p-actions2{display:flex;gap:6px;flex-wrap:wrap}
+.p-email{font-size:9.5px;color:var(--g4);margin-top:2px}
+.p-row .cbwrap{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10.5px;color:var(--g6)}
+.p-row:last-child{border-bottom:none}
+.p-row input,.p-row select{font-size:12px;padding:6px 8px}
+.svc-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--g1);font-size:12px}
+.svc-row:last-child{border-bottom:none}
+.svc-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;font-weight:700}
+
+/* ── Historial Opción 2 ── */
+.h2-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.h2-title-block{display:flex;align-items:center;gap:10px}
+.h2-icon-badge{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--navy2));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.h2-chips{display:flex;gap:7px;flex-wrap:wrap}
+.h2-chip{background:#fff;border:1.5px solid var(--g2);border-radius:9px;padding:6px 12px;display:flex;align-items:center;gap:7px}
+.h2-chip .ico{font-size:13px}
+.h2-chip .v{font-family:var(--font-d);font-weight:800;font-size:13px;color:var(--navy)}
+.h2-chip .l{font-size:8.5px;color:var(--g4);font-weight:700;text-transform:uppercase}
+.h2-filt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding:9px 10px;background:var(--g1);border-radius:9px}
+.h2-filt input,.h2-filt select{width:auto;flex:0 0 auto}
+.h2-filt input#h-buscar{min-width:160px}
+.h2-filt input,.h2-filt select{font-size:11px;padding:6px 9px}
+.h2-table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:12px}
+.h2-table thead th{text-align:left;padding:0 10px 4px;color:var(--g4);font-size:9px;letter-spacing:.6px;text-transform:uppercase;font-weight:800}
+.h2-table tbody tr{background:#fff;box-shadow:0 1px 3px rgba(11,22,40,.06)}
+.h2-table tbody tr:hover{box-shadow:0 4px 12px rgba(11,22,40,.12)}
+.h2-table td{padding:9px 10px;font-size:11.5px}
+.h2-table td:first-child{border-radius:9px 0 0 9px;border-left:3px solid var(--teal)}
+.h2-table td:last-child{border-radius:0 9px 9px 0}
+
+/* ── Modal trazabilidad (PRM/CRM) ── */
+.modal-overlay2{position:fixed;inset:0;background:rgba(11,22,40,.55);display:none;align-items:center;justify-content:center;z-index:500;padding:20px}
+#confirm-modal-overlay,#prompt-modal-overlay{z-index:900}
+.modal-overlay2.show{display:flex}
+.modal2{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:22px;max-height:88vh;overflow-y:auto;box-shadow:0 30px 70px -15px rgba(0,0,0,.4)}
+.modal2 h3{font-family:var(--font-d);font-size:15px;font-weight:800;margin-bottom:12px}
+.traza-resumen2{background:var(--g1);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--g6)}
+.traza-lista2{max-height:170px;overflow-y:auto;margin-bottom:6px}
+.traza-visita2{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--g1);font-size:11.5px}
+.crm-section-title2{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--navy2);margin:16px 0 8px}
+.crm-gestiones2{max-height:130px;overflow-y:auto;margin-bottom:10px}
+.crm-item2{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--g1);font-size:11.5px}
+.modal-footer2{display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--g2)}
+.modal-icon-circle{width:44px;height:44px;border-radius:50%;background:var(--teal-soft);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px}
+.modal-icon-circle.danger{background:#FEF0EF}
+.cp-input-wrap{position:relative}
+.cp-toggle-ojo{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--g4);font-size:14px}
+
+/* ── Footer / disclaimer legal (idéntico patrón CANOPY: logo blanco flotante, sin caja) ── */
+.app-footer{background:var(--g1);border-top:1px solid var(--g2);padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;text-align:center;flex-shrink:0}
+.app-footer img{display:none}
+.app-footer-text{font-size:10.5px;color:var(--g4)}
+.app-footer-link{color:#0B6E6E;text-decoration:underline;cursor:pointer;font-weight:600}
+.kpi-tile{border-radius:11px;padding:13px 14px;background:#fff;border:1.5px solid var(--g2)}
+.kpi-tile .ico{font-size:16px;margin-bottom:5px}
+.kpi-tile .lbl3{font-size:9px;font-weight:700;letter-spacing:.4px;color:var(--g6);text-transform:uppercase;margin-bottom:2px}
+.kpi-tile .val{font-size:18px;font-weight:800;color:var(--navy);font-family:var(--font-d)}
+.cierre-card2{background:#fff;border:1px solid var(--g2);border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:4px solid var(--teal)}
+.cierre-card2 .top{display:flex;justify-content:space-between;align-items:center}
+.cierre-card2 .name{font-size:12.5px;font-weight:700;color:var(--navy)}
+.cierre-card2 .total{font-size:14px;font-weight:800;color:var(--teal);font-family:var(--font-d)}
+.cierre-card2 .meta{font-size:10.5px;color:var(--g4)}
+.doc-pill{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;margin:6px 6px 0 0}
+.doc-pill.efectivo{background:#EAF7EE;border:1px solid #A8D8B4;color:#2E7D4F}
+.doc-pill.tarjeta{background:#EEF5FC;border:1px solid #BDD5F0;color:#1B5C9E}
+.doc-pill.transferencia{background:#FDF6EC;border:1px solid #EDD49A;color:#9A6010}
+.doc-pill.cortesia{background:#F5F0FC;border:1px solid #D2B4DE;color:#7D3C98}
+.prm-item2{background:#fff;border:1px solid var(--g2);border-radius:9px;padding:11px 13px;margin-bottom:8px}
+.prm-top2{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.prm-badge2{background:rgba(239,159,39,.14);color:#8a5a0d;font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+
+.wrap{width:100%;max-width:400px;position:relative}
+.glow{position:absolute;inset:-40px;background:radial-gradient(circle,rgba(42,191,191,.15),transparent 70%);filter:blur(10px);pointer-events:none}
+.wrap .card{background:#fff;border-radius:18px;box-shadow:0 30px 70px -15px rgba(0,0,0,.5);padding:34px 32px 28px;position:relative;overflow:hidden}
+.wrap .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),var(--navy2))}
+
+.brand{text-align:center;margin-bottom:26px}
+.brand-cuivan{height:52px;margin:0 auto;display:block;transform:translateX(-8px)}
+
+.screen{display:none}
+.screen.act{display:block}
+
+.lbl{font-size:10.5px;color:var(--g6);letter-spacing:.7px;text-transform:uppercase;font-weight:700;margin-bottom:5px;display:block}
+.fi{margin-bottom:14px}
+.input-wrap{position:relative}
+input{width:100%;background:var(--g1);border:1.5px solid var(--g2);border-radius:9px;padding:11px 12px 11px 38px;font-size:13.5px;color:var(--navy);font-family:var(--font-b);outline:none;transition:.18s}
+input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(42,191,191,.14)}
+.input-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.55}
+.toggle-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;opacity:.5;padding:2px}
+.toggle-eye:hover{opacity:.9}
+
+.row-between{display:flex;justify-content:space-between;align-items:center;margin:2px 0 18px}
+.remember{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--g6)}
+.remember input{width:14px;height:14px;padding:0;accent-color:var(--teal)}
+.link{font-size:12px;color:#0B6E6E;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer;background:none;border:none}
+.link:hover{color:var(--teal)}
+
+.btn{width:100%;padding:12px;border-radius:9px;border:none;cursor:pointer;font-weight:700;font-size:13.5px;font-family:var(--font-b);transition:.18s}
+.btn-p{background:linear-gradient(135deg,var(--teal),#22a8a8);color:var(--navy);box-shadow:0 8px 18px -6px rgba(42,191,191,.55)}
+.btn-p:hover{filter:brightness(1.04)}
+.btn-ghost{background:none;color:var(--navy2);border:1.5px solid var(--g2);margin-top:9px}
+.btn-ghost:hover{border-color:var(--navy2)}
+
+.err{background:#FDEDED;border:1px solid #F5C6C6;color:#9B2C2C;font-size:12px;padding:9px 12px;border-radius:8px;margin-bottom:14px;display:none;align-items:center;gap:7px}
+.err.show{display:flex}
+
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--g4);font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--g2)}
+
+.foot-note{text-align:center;font-size:11px;color:var(--g4);margin-top:16px;line-height:1.5}
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--g6);font-weight:600;cursor:pointer;background:none;border:none;margin-bottom:16px}
+.back-link:hover{color:var(--navy)}
+
+.mfa-boxes{display:flex;gap:8px;justify-content:center;margin-bottom:18px}
+.mfa-boxes input{width:42px;height:50px;text-align:center;font-size:19px;font-weight:700;padding:0}
+.recovered-icon{width:56px;height:56px;border-radius:50%;background:var(--teal-soft);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px}
+
+/* ── panel de carga (idéntico patrón CANOPY) ── */
+#loading-panel{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#183660 0%,#0B1628 55%,#080f1c 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:999;transition:opacity .25s ease}
+#loading-panel.hide{opacity:0;pointer-events:none}
+@keyframes girar-spinner{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+.spinner-grande{width:38px;height:38px;border:3.5px solid rgba(255,255,255,0.2);border-top-color:var(--teal);border-radius:50%;animation:girar-spinner 0.8s linear infinite;margin-bottom:20px}
+.loading-text{color:#fff;font-weight:700;font-size:14px}
+</style>
+</head>
+<body>
+
+<div id="app-view">
+  <div class="s3-strip">
+    <div class="s3-brand-left"><img src="data:image/png;base64,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" alt="Mediconsulting"/></div>
+    <div class="s3-brand-center">
+      <div class="s3-brand-title"><span class="w">PRODUCTIVIDAD</span> <span class="c">CUIVAN</span></div>
+      <div class="s3-brand-sub">Sistema de gestión de consultas</div>
+    </div>
+    <div class="s3-right">
+      <span class="s3-role-chip" id="app-role-chip">—</span>
+      <span id="app-user-name"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>—</span>
+      <button class="s3-logout" id="btn-personal-header" style="display:none">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configuración
+      </button>
+      <button class="s3-logout" id="btn-logout">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
+  <div class="s3-navrow">
+    <div class="s3-segment" id="app-nav">
+      <button class="navact" data-screen2="registro"><span>📝</span>Registro</button>
+      <button data-screen2="historial"><span>🗂️</span>Historial</button>
+      <button data-screen2="cierre"><span>🧾</span>Cierre</button>
+      <button class="locked" data-screen2="dash"><span>📊</span>Dashboard</button>
+      <button data-screen2="prm"><span>💬</span>PRM / CRM</button>
+    </div>
+  </div>
+
+  <main class="appmain">
+    <!-- ══ REGISTRO ══ -->
+    <div class="card screen2 act" id="app-screen-registro">
+      <div class="tab-title">📝 Registrar Consulta / Servicio</div>
+      <div class="b1-grid">
+        <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" type="text" id="r-fecha"/></div>
+        <div class="fi2"><label class="lbl2">Atendido por</label>
+          <select class="app-input" id="r-doctor"><option value="">Cargando...</option></select>
+        </div>
+        <div class="fi2"><label class="lbl2">Motivo</label>
+          <select class="app-input" id="r-motivo">
+            <option>Consulta</option><option>Procedimientos</option>
+            <option>Vacunas</option><option>Producto Farmacia</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="fi2"><label class="lbl2">Paciente</label><input class="app-input" type="text" id="r-paciente" placeholder="Nombre completo"/></div>
+        <div class="fi2"><label class="lbl2">Teléfono <span style="color:#e53e3e">*</span></label><input class="app-input" type="tel" id="r-telefono" placeholder="10 dígitos"/></div>
+        <div class="fi2" id="r-tipoconsulta-wrap"><label class="lbl2" id="r-tipoconsulta-label">Tipo de Consulta</label>
+          <select class="app-input" id="r-tipoconsulta-select"><option value="">Selecciona un motivo primero</option></select>
+          <input class="app-input" type="text" id="r-tipoconsulta-libre" placeholder="Descripción" style="display:none"/>
+        </div>
+        <div class="fi2"><label class="lbl2">Tipo de Paciente</label>
+          <select class="app-input" id="r-tipopaciente">
+            <option>Particular</option><option>Broker</option><option>VRIM</option>
+            <option>Integra Salud</option><option>Vitalife</option>
+          </select>
+        </div>
+        <div class="fi2"><label class="lbl2">Monto ($)</label><div class="mon2"><span>$</span><input class="app-input" type="number" id="r-monto" value="0"/></div></div>
+        <div class="b1-summary">
+          <div class="se">Resumen en vivo</div>
+          <div class="sv" id="r-rs-paciente">Sin nombre aún</div>
+          <div class="sm" id="r-rs-linea">—</div>
+          <div class="sm" id="r-rs-monto" style="font-weight:700;color:var(--teal);font-size:13px">$0.00</div>
+        </div>
+      </div>
+      <div class="row4">
+        <div class="fi2">
+          <label class="lbl2">💳 Medio de pago</label>
+          <select class="app-input" id="r-mediopago"><option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option></select>
+          <button type="button" id="btn-add2pago" style="background:none;border:none;color:#0B6E6E;cursor:pointer;font-size:10px;font-weight:700;padding:0;margin-top:10px;text-decoration:underline;text-underline-offset:2px">＋ agregar 2do pago</button>
+          <div id="r-pago2-wrap" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--g2)">
+            <div class="mon2"><span>$</span><input class="app-input" type="number" id="r-monto2" placeholder="Monto 2"/></div>
+            <select class="app-input" id="r-mediopago2"><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option><option>Cortesía</option></select>
+            <button type="button" id="btn-quitar2pago" style="grid-column:1/-1;background:none;border:none;color:var(--g4);cursor:pointer;font-size:10px;font-weight:700;text-align:right;text-decoration:underline;text-underline-offset:2px">quitar ✕</button>
+          </div>
+        </div>
+        <div class="fi2"><label class="lbl2">Notas / Observaciones</label><textarea class="app-input" id="r-notas" style="min-height:38px;resize:vertical" placeholder="Opcional..."></textarea></div>
+        <div class="fac2">
+          <label class="cbrow2"><input type="checkbox" id="r-factura"/><span style="font-size:.82rem;font-weight:600">¿Requiere factura?</span></label>
+          <div id="r-nfact-wrap" style="display:none;margin-top:7px">
+            <label class="lbl2">No. de factura</label>
+            <input class="app-input" type="text" id="r-numfactura" placeholder="Ej. F-0042"/>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:24px;display:flex;gap:8px">
+        <button class="appbtn appbtn-p" id="btn-guardar-registro">Guardar registro</button>
+        <button class="appbtn appbtn-s" id="btn-limpiar-registro">Limpiar</button>
+      </div>
+    </div>
+
+    <!-- ══ HISTORIAL ══ -->
+    <div class="card screen2" id="app-screen-historial">
+      <div class="h2-topbar">
+        <div class="h2-title-block">
+          <div class="h2-icon-badge">🗂️</div>
+          <div><div style="font-family:var(--font-d);font-weight:800;font-size:15px">Historial de consultas</div><div style="font-size:10.5px;color:var(--g4)" id="h2-subt">—</div></div>
+        </div>
+        <div class="h2-chips" id="h-kpis"></div>
+      </div>
+      <div class="h2-filt">
+        <input class="app-input" type="text" id="h-buscar" placeholder="Buscar paciente..." style="min-width:170px;background:#fff"/>
+        <select class="app-input" id="h-periodo" style="background:#fff">
+          <option value="7">Últimos 7 días</option>
+          <option value="30" selected>Últimos 30 días</option>
+          <option value="90">Últimos 90 días</option>
+          <option value="365">Último año</option>
+          <option value="0">Todo</option>
+        </select>
+        <select class="app-input" id="h-motivo" style="background:#fff">
+          <option value="">Todos los motivos</option>
+          <option>Consulta</option><option>Procedimientos</option><option>Vacunas</option>
+          <option>Producto Farmacia</option><option>Otro</option>
+        </select>
+        <select class="app-input" id="h-pago" style="background:#fff">
+          <option value="">Todos los medios de pago</option>
+          <option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option>
+        </select>
+        <button class="appbtn appbtn-s" id="btn-refrescar-historial" style="font-size:11px;padding:6px 12px">↻</button>
+        <button class="appbtn appbtn-s" id="btn-papelera-toggle" style="font-size:11px;padding:6px 12px;display:none">🗑 Papelera</button>
+        <button class="appbtn appbtn-p" id="btn-export-historial" style="font-size:11px;padding:6px 12px;margin-left:auto">⬇ Exportar Excel</button>
+      </div>
+      <div id="h-papelera-panel" style="display:none;margin-bottom:14px"></div>
+      <div style="overflow-x:auto">
+        <table class="h2-table">
+          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th><th></th></tr></thead>
+          <tbody id="h-tbody"><tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ CIERRE ══ -->
+    <div class="card screen2" id="app-screen-cierre">
+      <div class="tab-title"><span>🧾 Resultados Operativos</span></div>
+      <div class="filt2">
+        <button class="appbtn appbtn-s cierre-periodo" data-dias="1" style="font-size:11px;padding:6px 12px">Día</button>
+        <button class="appbtn appbtn-s cierre-periodo" data-dias="7" style="font-size:11px;padding:6px 12px">Semana</button>
+        <button class="appbtn appbtn-p cierre-periodo" data-dias="15" style="font-size:11px;padding:6px 12px">Quincena</button>
+        <button class="appbtn appbtn-s cierre-periodo" data-dias="30" style="font-size:11px;padding:6px 12px">Mes</button>
+      </div>
+      <div class="dash-kpi-row" id="cierre-kpis" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+      <div id="cierre-lista"></div>
+    </div>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="card screen2" id="app-screen-dash">
+      <div class="tab-title">📊 Dashboard de Indicadores</div>
+      <div class="dash-kpi-row" id="dash-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px"></div>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="fac2"><div class="lbl2" style="margin-bottom:8px">📈 Tendencia 14 días</div><div style="height:130px"><canvas id="ch-dash-trend"></canvas></div></div>
+        <div class="fac2"><div class="lbl2" style="margin-bottom:8px">🩺 Ingreso por doctor</div><div style="height:130px"><canvas id="ch-dash-doc"></canvas></div></div>
+      </div>
+      <div class="fac2"><div class="lbl2" style="margin-bottom:8px">💳 Medios de pago</div><div style="height:140px;max-width:320px;margin:0 auto"><canvas id="ch-dash-pago"></canvas></div></div>
+    </div>
+
+    <!-- ══ PRM/CRM ══ -->
+    <div class="card screen2" id="app-screen-prm">
+      <div class="tab-title">💬 PRM — Pacientes inactivos</div>
+      <div id="prm-kpis" class="dash-kpi-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
+      <div class="filt2">
+        <label class="lbl2" style="align-self:center">Días sin visita:</label>
+        <input class="app-input" type="number" id="prm-dias" value="60" style="width:70px"/>
+        <button class="appbtn appbtn-p" id="btn-prm-aplicar" style="font-size:11px;padding:6px 12px">Aplicar</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="htable2">
+          <thead><tr><th>Paciente</th><th>Teléfono</th><th>Última visita</th><th>Inactividad</th><th>Último servicio</th><th>Doctor</th><th></th></tr></thead>
+          <tbody id="prm-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ PERSONAL ══ -->
+    <div class="card screen2" id="app-screen-personal">
+      <div class="tab-title">⚙️ Configuración</div>
+      <div class="lbl2" style="margin-bottom:8px">✏️ Editar usuarios</div>
+      <div class="p-header"><span>Nombre</span><span>Rol</span><span style="text-align:center">Activo</span><span></span><span></span></div>
+      <div id="personal-lista" style="margin-bottom:20px"></div>
+      <p style="font-size:11px;color:var(--g4);margin-bottom:14px;line-height:1.5">Edita nombre/rol/activo directo en la lista. Para dar acceso real (correo + contraseña) a alguien que aún no lo tiene, usa "Dar acceso" en su fila.</p>
+
+      <div class="tab-title" style="margin-top:6px">➕ Crear usuario</div>
+      <div class="row4" style="border-top:none;padding-top:0;margin-top:0;grid-template-columns:1fr 1fr 1fr">
+        <div class="fi2"><label class="lbl2">Nombre</label><input class="app-input" id="np-nombre" placeholder="Ej. Dra. Nueva Doctora"/></div>
+        <div class="fi2"><label class="lbl2">Rol</label>
+          <select class="app-input" id="np-rol"><option value="recepcion">Recepción</option><option value="doctor">Doctor/a</option><option value="admin">Admin</option></select>
+        </div>
+        <div class="fi2"><label class="lbl2">&nbsp;</label><label class="cbrow2" style="margin-top:6px"><input type="checkbox" id="np-con-acceso"/><span style="font-size:.8rem">Con acceso al sistema</span></label></div>
+      </div>
+      <div class="row4" id="np-acceso-wrap" style="border-top:none;padding-top:0;margin-top:0;grid-template-columns:1fr 1fr auto;display:none">
+        <div class="fi2"><label class="lbl2">Correo</label><input class="app-input" id="np-email" type="email" placeholder="correo@cuivan.com"/></div>
+        <div class="fi2"><label class="lbl2">Contraseña temporal</label><input class="app-input" id="np-password" type="text" placeholder="Mínimo 8 caracteres"/></div>
+        <div class="fi2"><label class="lbl2">&nbsp;</label><button class="appbtn appbtn-p" id="btn-crear-personal">Crear</button></div>
+      </div>
+      <div class="fi2" id="np-sin-acceso-wrap" style="align-items:flex-start"><button class="appbtn appbtn-p" id="btn-crear-personal-sin-acceso" style="margin-top:6px;align-self:flex-start;width:auto">Agregar (sin acceso)</button></div>
+
+      <div class="tab-title" style="margin-top:6px">🧾 Catálogo de servicios</div>
+      <div class="row4" style="border-top:none;padding-top:0;margin-top:0;grid-template-columns:1fr 1fr auto">
+        <div class="fi2"><label class="lbl2">Motivo</label><input class="app-input" id="cs-motivo" placeholder="Ej. Consulta"/></div>
+        <div class="fi2"><label class="lbl2">Tipo de consulta</label><input class="app-input" id="cs-tipo" placeholder="Ej. Subsecuente"/></div>
+        <div class="fi2"><label class="lbl2">&nbsp;</label><button class="appbtn appbtn-p" id="btn-add-servicio">+ Agregar</button></div>
+      </div>
+      <div class="filt2" style="margin-top:14px">
+        <label class="lbl2" style="align-self:center">Filtrar por motivo:</label>
+        <select class="app-input" id="svc-filtro-motivo">
+          <option value="">Todos</option>
+          <option>Consulta</option><option>Procedimientos</option><option>Vacunas</option>
+        </select>
+      </div>
+      <div id="servicios-lista" style="margin-top:10px"></div>
+
+      <div class="tab-title" style="margin-top:6px">📜 Actividad reciente</div>
+      <div id="audit-lista"></div>
+    </div>
+  </main>
+  <div class="app-footer">
+    <span class="app-footer-text">© 2026 Mediconsulting. Uso exclusivo para CUIVAN Salud Integral. <span class="app-footer-link" id="link-aviso-legal-2">Aviso legal completo</span></span>
+  </div>
+</div>
+
+<div class="toast2" id="toast2"></div>
+
+<!-- Modal genérico de confirmación (reemplaza confirm() nativo) -->
+<div class="modal-overlay2" id="confirm-modal-overlay">
+  <div class="modal2" style="max-width:380px;text-align:center">
+    <div class="modal-icon-circle" id="confirm-modal-icono" style="margin-left:auto;margin-right:auto">❓</div>
+    <h3 id="confirm-modal-titulo" style="margin-bottom:8px">¿Confirmar?</h3>
+    <div id="confirm-modal-mensaje" style="font-size:13px;color:var(--g6);line-height:1.5;margin-bottom:18px;text-align:left"></div>
+    <div class="modal-footer2" style="justify-content:center;border-top:none;padding-top:0;margin-top:0">
+      <button class="appbtn appbtn-s" id="confirm-modal-btn-cancelar">Cancelar</button>
+      <button class="appbtn appbtn-p" id="confirm-modal-btn-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal genérico de texto/contraseña (reemplaza prompt() nativo) -->
+<div class="modal-overlay2" id="prompt-modal-overlay">
+  <div class="modal2" style="max-width:380px;text-align:center">
+    <div class="modal-icon-circle" id="prompt-modal-icono" style="margin-left:auto;margin-right:auto">✏️</div>
+    <h3 id="prompt-modal-titulo" style="margin-bottom:8px"></h3>
+    <div id="prompt-modal-mensaje" style="font-size:13px;color:var(--g6);line-height:1.5;margin-bottom:14px;text-align:left"></div>
+    <div class="cp-input-wrap">
+      <input class="app-input" type="text" id="prompt-modal-input" style="text-align:left"/>
+      <button type="button" class="cp-toggle-ojo" id="prompt-modal-toggle-ojo">👁️</button>
+    </div>
+    <div class="modal-footer2" style="justify-content:center;border-top:none;padding-top:0;margin-top:16px">
+      <button class="appbtn appbtn-s" id="prompt-modal-btn-cancelar">Cancelar</button>
+      <button class="appbtn appbtn-p" id="prompt-modal-btn-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar consulta (Historial) -->
+<div class="modal-overlay2" id="modal-editar-consulta">
+  <div class="modal2" style="max-width:480px">
+    <h3>✏️ Editar consulta</h3>
+    <div class="fi2" style="margin-bottom:10px"><label class="lbl2">Paciente</label><input class="app-input" id="ec-paciente"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" id="ec-fecha" placeholder="dd/mm/aaaa"/></div>
+      <div class="fi2"><label class="lbl2">Atendido por</label><select class="app-input" id="ec-doctor"></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="fi2"><label class="lbl2">Motivo</label>
+        <select class="app-input" id="ec-motivo"><option>Consulta</option><option>Procedimientos</option><option>Vacunas</option><option>Producto Farmacia</option><option>Otro</option></select>
+      </div>
+      <div class="fi2" id="ec-tipoconsulta-wrap"><label class="lbl2" id="ec-tipoconsulta-label">Tipo de consulta</label>
+        <select class="app-input" id="ec-tipo-select"></select>
+        <input class="app-input" id="ec-tipo-libre" style="display:none"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="fi2"><label class="lbl2">Monto</label><div class="mon2"><span>$</span><input class="app-input" id="ec-monto" type="number"/></div></div>
+      <div class="fi2"><label class="lbl2">Medio de pago</label><select class="app-input" id="ec-pago"><option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option></select></div>
+    </div>
+    <div class="modal-footer2" style="justify-content:space-between">
+      <button class="appbtn appbtn-danger-soft" id="btn-eliminar-consulta">🗑️ Eliminar registro</button>
+      <div style="display:flex;gap:8px">
+        <button class="appbtn appbtn-s" id="btn-ec-cerrar">Cancelar</button>
+        <button class="appbtn appbtn-p" id="btn-ec-guardar">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal aviso legal -->
+<div class="modal-overlay2" id="modal-aviso-legal">
+  <div class="modal2" style="max-width:420px">
+    <h3>Aviso legal</h3>
+    <div style="font-size:12.5px;color:var(--g6);line-height:1.7;max-height:340px;overflow-y:auto">
+      Esta plataforma fue desarrollada por <strong>Mediconsulting</strong> exclusivamente para uso interno de <strong>CUIVAN Salud Integral</strong>. Contiene información confidencial y datos personales de pacientes protegidos conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).
+      <br><br>
+      Queda prohibida su reproducción, distribución, copia o uso por terceros no autorizados. El acceso está restringido al personal designado por CUIVAN Salud Integral y Mediconsulting.
+      <br><br>
+      © 2026 Mediconsulting. Todos los derechos reservados.
+    </div>
+    <div class="modal-footer2">
+      <button class="appbtn appbtn-p" id="btn-aviso-legal-cerrar">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal trazabilidad del paciente (historial de visitas + bitácora CRM) -->
+<div class="modal-overlay2" id="modal-traza">
+  <div class="modal2">
+    <h3 id="traza-titulo">📖 Paciente</h3>
+    <div class="traza-resumen2" id="traza-resumen">—</div>
+    <div class="crm-section-title2" style="margin-top:0">🕒 Historial de visitas</div>
+    <div class="traza-lista2" id="traza-lista"></div>
+    <div class="crm-section-title2">📞 Bitácora de seguimiento (CRM)</div>
+    <div class="crm-gestiones2" id="traza-gestiones"></div>
+    <div style="display:grid;grid-template-columns:110px 1fr auto;gap:6px;align-items:end">
+      <div><label class="lbl2">Canal</label><select class="app-input" id="traza-canal"><option>Llamada</option><option>WhatsApp</option><option>Correo</option></select></div>
+      <div><label class="lbl2">Resultado</label><input class="app-input" id="traza-resultado" placeholder="Ej: No contestó, se reagenda"/></div>
+      <button class="appbtn appbtn-p" id="btn-traza-registrar">+ Registrar</button>
+    </div>
+    <div class="modal-footer2">
+      <button class="appbtn appbtn-s" id="btn-traza-cerrar">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="loading-panel">
+  <img src="data:image/png;base64,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" alt="Mediconsulting" style="height:48px;margin-bottom:36px;opacity:0.95;">
+  <div class="spinner-grande"></div>
+  <div class="loading-text">Cargando...</div>
+</div>
+
+<div id="auth-view">
+<div class="auth-center">
+<div class="wrap">
+  <div class="glow"></div>
+  <div class="card">
+    <div class="brand">
+      <img class="brand-cuivan" src="data:image/png;base64,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" alt="CUIVAN Salud Integral"/>
+    </div>
+
+    <!-- ══ 1. LOGIN ══ -->
+    <div class="screen act" id="s-login">
+      <div class="err" id="login-err">⚠️ Correo o contraseña incorrectos.</div>
+      <div class="fi">
+        <label class="lbl">Correo</label>
+        <div class="input-wrap">
+          <span class="input-ico">✉️</span>
+          <input type="email" id="email" placeholder="tu-correo@cuivan.com"/>
+        </div>
+      </div>
+      <div class="fi">
+        <label class="lbl">Contraseña</label>
+        <div class="input-wrap">
+          <span class="input-ico">🔒</span>
+          <input type="password" id="pw"/>
+          <button class="toggle-eye" id="toggle-pw">👁️</button>
+        </div>
+      </div>
+      <div class="row-between">
+        <label class="remember"><input type="checkbox" id="remember" checked/>Recordarme</label>
+        <button class="link" data-goto="forgot">¿Olvidaste tu contraseña?</button>
+      </div>
+      <button class="btn btn-p" id="btn-login">Iniciar sesión</button>
+      <div class="foot-note">¿Problemas para entrar? Contacta a un administrador para restablecer tu acceso.</div>
+    </div>
+
+    <!-- ══ 2. OLVIDÉ MI CONTRASEÑA ══ -->
+    <div class="screen" id="s-forgot">
+      <button class="back-link" data-goto="login">← Volver</button>
+      <p style="font-size:12.5px;color:var(--g6);margin-bottom:16px;line-height:1.5">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+      <div class="err" id="forgot-err">⚠️ No se pudo enviar el enlace. Intenta de nuevo.</div>
+      <div class="fi">
+        <label class="lbl">Correo</label>
+        <div class="input-wrap">
+          <span class="input-ico">✉️</span>
+          <input type="email" id="forgot-email" placeholder="tu-correo@cuivan.com"/>
+        </div>
+      </div>
+      <button class="btn btn-p" id="btn-forgot">Enviar enlace</button>
+      <div class="divider">o</div>
+      <div class="foot-note">Si no tienes acceso a tu correo, pide a un administrador que te restablezca la contraseña desde el módulo de Personal.</div>
+    </div>
+
+    <!-- ══ 3. CORREO ENVIADO ══ -->
+    <div class="screen" id="s-sent" style="text-align:center">
+      <div class="recovered-icon">📩</div>
+      <div style="font-family:var(--font-d);font-weight:800;font-size:15.5px;margin-bottom:6px">Revisa tu correo</div>
+      <p style="font-size:12.5px;color:var(--g6);line-height:1.5;margin-bottom:20px">Te enviamos un enlace a <b id="sent-email">tu correo</b> para restablecer tu contraseña. El enlace expira en 30 minutos.</p>
+      <button class="btn btn-ghost" data-goto="login">Volver al login</button>
+    </div>
+
+  </div>
+</div>
+</div>
+<div class="app-footer">
+  <span class="app-footer-text">© 2026 Mediconsulting. Uso exclusivo para CUIVAN Salud Integral. <span class="app-footer-link" id="link-aviso-legal-1">Aviso legal completo</span></span>
+</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ekuaqcmlkjywagrgjooe.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrdWFxY21sa2p5d2Fncmdqb29lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjUzNTgsImV4cCI6MjEwMTY0MTM1OH0.1xnf1NbyhP2JqC9UKhjX6rppyWs4POy2YnqdLnnlGmI';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function hideLoadingPanel(){
+  document.getElementById('loading-panel').classList.add('hide');
+}
+function showLoadingPanel(text){
+  const p = document.getElementById('loading-panel');
+  p.querySelector('.loading-text').textContent = text || 'Cargando...';
+  p.classList.remove('hide');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('act'));
+  document.getElementById('s-'+id).classList.add('act');
+}
+document.querySelectorAll('[data-goto]').forEach(el=>{
+  el.addEventListener('click',()=> showScreen(el.dataset.goto));
+});
+document.getElementById('toggle-pw').addEventListener('click',()=>{
+  const pw = document.getElementById('pw');
+  pw.type = pw.type === 'password' ? 'text' : 'password';
+});
+
+function setErr(id, msg){
+  const el = document.getElementById(id);
+  if(msg){ el.textContent = '⚠️ ' + msg; el.classList.add('show'); }
+  else{ el.classList.remove('show'); }
+}
+
+async function doLogin(){
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('pw').value;
+  setErr('login-err', null);
+  if(!email || !password){
+    setErr('login-err', 'Ingresa tu correo y contraseña.');
+    return;
+  }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  showLoadingPanel('Cargando...');
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){
+    console.error('[CUIVAN] Error en signInWithPassword:', error);
+    btn.disabled = false; btn.textContent = 'Iniciar sesión';
+    hideLoadingPanel();
+    setErr('login-err', 'Correo o contraseña incorrectos.');
+    return;
+  }
+  console.log('[CUIVAN] Login OK, user.id =', data.user.id);
+  // Trae el registro de personal vinculado a esta cuenta (rol, nombre)
+  const { data: perfil, error: perfilErr } = await sb
+    .from('personal')
+    .select('nombre, rol, activo')
+    .eq('auth_user_id', data.user.id)
+    .single();
+
+  btn.disabled = false; btn.textContent = 'Iniciar sesión';
+  hideLoadingPanel();
+
+  if(perfilErr){
+    console.error('[CUIVAN] Error consultando personal:', perfilErr);
+  }
+  if(perfilErr || !perfil || !perfil.activo){
+    setErr('login-err', 'Tu cuenta no tiene un perfil activo en el sistema. Contacta a un administrador.');
+    await sb.auth.signOut();
+    return;
+  }
+  entrarAlShell(perfil);
+}
+
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+async function doForgot(){
+  const email = document.getElementById('forgot-email').value.trim();
+  setErr('forgot-err', null);
+  if(!email){
+    setErr('forgot-err', 'Ingresa tu correo.');
+    return;
+  }
+  const btn = document.getElementById('btn-forgot');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname
+  });
+  btn.disabled = false; btn.textContent = 'Enviar enlace';
+  if(error){
+    setErr('forgot-err', 'No se pudo enviar el enlace. Verifica el correo.');
+    return;
+  }
+  document.getElementById('sent-email').textContent = email;
+  showScreen('sent');
+}
+document.getElementById('btn-forgot').addEventListener('click', doForgot);
+
+// Si el usuario ya tiene sesión activa (ej. volvió a abrir la página), lo saltamos directo
+sb.auth.getSession().then(({data:{session}})=>{
+  if(session){
+    doLogin_bySession(session);
+  } else {
+    hideLoadingPanel();
+  }
+});
+async function doLogin_bySession(session){
+  const { data: perfil, error } = await sb.from('personal').select('nombre, rol, activo').eq('auth_user_id', session.user.id).single();
+  hideLoadingPanel();
+  if(error){
+    console.error('[CUIVAN] Error consultando personal (sesión existente):', error);
+  }
+  if(perfil && perfil.activo){
+    entrarAlShell(perfil);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SHELL DE LA APP (post-login)
+// ═══════════════════════════════════════════════════════════
+let MI_PERFIL = null;
+
+function toast(msg){
+  const t = document.getElementById('toast2');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 3200);
+}
+
+// ── Modales genéricos: reemplazan confirm()/prompt() nativos del navegador ──
+let confirmModalCallback = null;
+function mostrarConfirm(opciones, callback){
+  const { titulo='¿Confirmar?', mensaje='', textoConfirmar='Confirmar', icono='❓', danger=false } = opciones;
+  document.getElementById('confirm-modal-icono').textContent = icono;
+  document.getElementById('confirm-modal-icono').classList.toggle('danger', danger);
+  document.getElementById('confirm-modal-titulo').textContent = titulo;
+  document.getElementById('confirm-modal-mensaje').innerHTML = mensaje;
+  const btnOk = document.getElementById('confirm-modal-btn-ok');
+  btnOk.textContent = textoConfirmar;
+  btnOk.className = danger ? 'appbtn appbtn-danger-soft' : 'appbtn appbtn-p';
+  confirmModalCallback = callback;
+  document.getElementById('confirm-modal-overlay').classList.add('show');
+}
+document.getElementById('confirm-modal-btn-ok').addEventListener('click', ()=>{
+  const cb = confirmModalCallback;
+  document.getElementById('confirm-modal-overlay').classList.remove('show');
+  confirmModalCallback = null;
+  if(cb) cb();
+});
+document.getElementById('confirm-modal-btn-cancelar').addEventListener('click', ()=>{
+  document.getElementById('confirm-modal-overlay').classList.remove('show');
+  confirmModalCallback = null;
+});
+
+let promptModalCallback = null;
+function mostrarPrompt(opciones, callback){
+  const { titulo='', mensaje='', tipo='text', placeholder='', icono='✏️', valorInicial='' } = opciones;
+  document.getElementById('prompt-modal-icono').textContent = icono;
+  document.getElementById('prompt-modal-titulo').textContent = titulo;
+  document.getElementById('prompt-modal-mensaje').innerHTML = mensaje;
+  const input = document.getElementById('prompt-modal-input');
+  input.value = valorInicial || '';
+  input.type = tipo;
+  input.placeholder = placeholder;
+  const ojoBtn = document.getElementById('prompt-modal-toggle-ojo');
+  ojoBtn.style.display = tipo === 'password' ? 'block' : 'none';
+  ojoBtn.textContent = '👁️';
+  promptModalCallback = callback;
+  document.getElementById('prompt-modal-overlay').classList.add('show');
+  setTimeout(()=>{ input.focus(); input.select(); }, 60);
+}
+document.getElementById('prompt-modal-toggle-ojo').addEventListener('click', ()=>{
+  const input = document.getElementById('prompt-modal-input');
+  const btn = document.getElementById('prompt-modal-toggle-ojo');
+  const verla = input.type === 'password';
+  input.type = verla ? 'text' : 'password';
+  btn.textContent = verla ? '🙈' : '👁️';
+});
+document.getElementById('prompt-modal-input').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') document.getElementById('prompt-modal-btn-ok').click();
+});
+document.getElementById('prompt-modal-btn-ok').addEventListener('click', ()=>{
+  const valor = document.getElementById('prompt-modal-input').value;
+  const cb = promptModalCallback;
+  document.getElementById('prompt-modal-overlay').classList.remove('show');
+  promptModalCallback = null;
+  if(cb) cb(valor);
+});
+document.getElementById('prompt-modal-btn-cancelar').addEventListener('click', ()=>{
+  document.getElementById('prompt-modal-overlay').classList.remove('show');
+  promptModalCallback = null;
+});
+
+function entrarAlShell(perfil){
+  MI_PERFIL = perfil;
+  document.getElementById('auth-view').classList.add('hide');
+  document.getElementById('app-view').classList.add('act');
+  const roleIcons = {
+    admin: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.6-6.3 4.6 2.3-7.2-6-4.6h7.6z"/></svg>',
+    doctor: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M6 2v6a4 4 0 0 0 8 0V2"/><path d="M10 15v3a4 4 0 0 0 8 0v-2a7 7 0 0 0-7-7"/><circle cx="20" cy="10" r="2"/></svg>',
+    recepcion: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+  };
+  document.getElementById('app-role-chip').innerHTML = (roleIcons[perfil.rol] || '') + perfil.rol.toUpperCase();
+  document.getElementById('app-user-name').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + esc2(perfil.nombre);
+
+  const showDash = perfil.rol !== 'recepcion';
+  const showPersonal = perfil.rol === 'admin';
+  const showPapelera = perfil.rol !== 'recepcion';
+  document.querySelector('[data-screen2="dash"]').classList.toggle('locked', !showDash);
+  document.getElementById('btn-personal-header').style.display = showPersonal ? 'inline-flex' : 'none';
+  document.getElementById('btn-papelera-toggle').style.display = showPapelera ? 'inline-flex' : 'none';
+  window.MI_ROL_ADMIN = perfil.rol === 'admin';
+
+  cargarDoctores();
+  cargarCatalogoServiciosCache();
+  document.getElementById('r-fecha').value = todayLocal();
+  activarRealtime();
+}
+
+// ── Realtime: refresca en vivo la pantalla activa cuando alguien más registra algo ──
+let REALTIME_CHANNEL = null;
+function pantallaActivaId(){
+  const el = document.querySelector('.screen2.act');
+  return el ? el.id.replace('app-screen-', '') : null;
+}
+function refrescarPantallaActiva(){
+  const activa = pantallaActivaId();
+  if(activa === 'historial') cargarHistorial();
+  if(activa === 'cierre') cargarCierre(cierreDiasActual);
+  if(activa === 'dash') cargarDashboard();
+  if(activa === 'prm') cargarPRM();
+}
+function activarRealtime(){
+  if(REALTIME_CHANNEL) return; // ya está activo, no duplicar
+  REALTIME_CHANNEL = sb
+    .channel('cuivan-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'consultas' }, () => {
+      refrescarPantallaActiva();
+      toast('🔄 Datos actualizados en vivo');
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'gestiones' }, () => {
+      if(document.getElementById('modal-traza').classList.contains('show') && TRAZA_PACIENTE_ID){
+        abrirTrazabilidad(TRAZA_PACIENTE_ID);
+      }
+    })
+    .subscribe();
+}
+
+function todayLocal(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
+}
+
+document.getElementById('app-nav').addEventListener('click',(e)=>{
+  const b = e.target.closest('button');
+  if(!b || b.classList.contains('locked') || !b.dataset.screen2) return;
+  document.querySelectorAll('#app-nav button').forEach(x=>x.classList.remove('navact'));
+  b.classList.add('navact');
+  document.querySelectorAll('.screen2').forEach(x=>x.classList.remove('act'));
+  document.getElementById('app-screen-'+b.dataset.screen2).classList.add('act');
+  if(b.dataset.screen2 === 'historial') cargarHistorial();
+});
+
+document.getElementById('btn-logout').addEventListener('click', async ()=>{
+  if(REALTIME_CHANNEL){ sb.removeChannel(REALTIME_CHANNEL); REALTIME_CHANNEL = null; }
+  await sb.auth.signOut();
+  window.location.reload();
+});
+
+// ── Doctores para "Atendido por" (orden alfabético) ──
+async function cargarDoctores(){
+  const sel = document.getElementById('r-doctor');
+  const { data, error } = await sb.from('personal').select('id, nombre').eq('rol','doctor').eq('activo', true).order('nombre');
+  if(error){ console.error('[CUIVAN] Error cargando doctores:', error); sel.innerHTML = '<option value="">Error al cargar</option>'; return; }
+  if(!data || data.length === 0){ sel.innerHTML = '<option value="">Sin doctores registrados</option>'; return; }
+  sel.innerHTML = data.map(d => `<option value="${d.id}">${esc2(d.nombre)}</option>`).join('');
+  refrescarResumen();
+  actualizarTipoConsulta();
+}
+function esc2(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ── Catálogo de servicios (Motivo → Tipo de Consulta), + caso especial Dra. Guadalupe Jimenez ──
+let CATALOGO_CACHE = {};
+const TIPOS_LIBRES = ['Producto Farmacia','Otro'];
+const DESC_LABEL = { 'Producto Farmacia':'Nombre del producto', 'Otro':'Descripción del servicio' };
+const CATALOGO_JIMENEZ = {
+  'Consulta': ['Consulta con Electro','Consulta Pediátrica','Consulta sin Electro','Consulta Síndrome de Down'],
+  'Procedimientos': ['Ecocardiograma','Mapa','Electrocardiograma','Holter','Rastreo','Eco Fetal','Tamiz Cardiaco','Holter 48 hrs'],
+};
+
+async function cargarCatalogoServiciosCache(){
+  const { data, error } = await sb.from('catalogo_servicios').select('motivo, tipo_consulta').eq('activo', true).order('tipo_consulta');
+  if(error){ console.error('[CUIVAN] Error cargando catálogo:', error); return; }
+  CATALOGO_CACHE = {};
+  (data||[]).forEach(row=>{
+    if(!CATALOGO_CACHE[row.motivo]) CATALOGO_CACHE[row.motivo] = [];
+    CATALOGO_CACHE[row.motivo].push(row.tipo_consulta);
+  });
+  actualizarTipoConsulta();
+}
+
+function actualizarTipoConsulta(){
+  const motivo = document.getElementById('r-motivo').value;
+  const wrapSel = document.getElementById('r-tipoconsulta-select');
+  const wrapTxt = document.getElementById('r-tipoconsulta-libre');
+  const label = document.getElementById('r-tipoconsulta-label');
+
+  if(TIPOS_LIBRES.includes(motivo)){
+    wrapSel.style.display = 'none';
+    wrapTxt.style.display = 'block';
+    label.textContent = DESC_LABEL[motivo] || 'Descripción';
+    return;
+  }
+  wrapSel.style.display = 'block';
+  wrapTxt.style.display = 'none';
+  label.textContent = 'Tipo de Consulta';
+
+  const doctorSel = document.getElementById('r-doctor');
+  const doctorTxt = doctorSel.options[doctorSel.selectedIndex] ? doctorSel.options[doctorSel.selectedIndex].text : '';
+  let opciones;
+  if(/jimenez/i.test(doctorTxt) && CATALOGO_JIMENEZ[motivo]){
+    opciones = CATALOGO_JIMENEZ[motivo];
+  } else {
+    opciones = CATALOGO_CACHE[motivo] || [];
+  }
+  wrapSel.innerHTML = opciones.length
+    ? opciones.map(o => `<option>${esc2(o)}</option>`).join('')
+    : '<option value="">Sin opciones para este motivo</option>';
+}
+document.getElementById('r-motivo').addEventListener('change', actualizarTipoConsulta);
+document.getElementById('r-doctor').addEventListener('change', actualizarTipoConsulta);
+
+function valorTipoConsulta(){
+  const motivo = document.getElementById('r-motivo').value;
+  if(TIPOS_LIBRES.includes(motivo)) return document.getElementById('r-tipoconsulta-libre').value.trim();
+  return document.getElementById('r-tipoconsulta-select').value;
+}
+
+// ── Resumen en vivo del formulario de Registro ──
+function refrescarResumen(){
+  const paciente = document.getElementById('r-paciente').value.trim() || 'Sin nombre aún';
+  const doctorSel = document.getElementById('r-doctor');
+  const doctorTxt = doctorSel.options[doctorSel.selectedIndex] ? doctorSel.options[doctorSel.selectedIndex].text : '—';
+  const motivo = document.getElementById('r-motivo').value;
+  const tipoConsulta = valorTipoConsulta() || '—';
+  const monto = parseFloat(document.getElementById('r-monto').value) || 0;
+  document.getElementById('r-rs-paciente').textContent = paciente;
+  document.getElementById('r-rs-linea').textContent = `${doctorTxt} · ${motivo} · ${tipoConsulta}`;
+  document.getElementById('r-rs-monto').textContent = '$' + monto.toLocaleString('es-MX',{minimumFractionDigits:2});
+}
+['r-paciente','r-doctor','r-motivo','r-tipoconsulta-select','r-tipoconsulta-libre','r-monto'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', refrescarResumen);
+  document.getElementById(id).addEventListener('change', refrescarResumen);
+});
+document.getElementById('r-factura').addEventListener('change', (e)=>{
+  document.getElementById('r-nfact-wrap').style.display = e.target.checked ? 'block' : 'none';
+});
+document.getElementById('btn-add2pago').addEventListener('click', ()=>{
+  document.getElementById('r-pago2-wrap').style.display = 'grid';
+});
+document.getElementById('btn-quitar2pago').addEventListener('click', ()=>{
+  document.getElementById('r-pago2-wrap').style.display = 'none';
+  document.getElementById('r-monto2').value = '';
+});
+
+// ── Guardar registro (upsert paciente por teléfono + insert consulta) ──
+function dmyToISO(dmy){
+  const [d,m,y] = dmy.split('/');
+  return `${y}-${m}-${d}`;
+}
+
+async function guardarRegistro(){
+  const btn = document.getElementById('btn-guardar-registro');
+  const paciente = document.getElementById('r-paciente').value.trim();
+  const telefono = document.getElementById('r-telefono').value.trim();
+  const doctorId = document.getElementById('r-doctor').value;
+  const fecha = document.getElementById('r-fecha').value.trim();
+
+  if(!paciente){ toast('⚠️ Falta el nombre del paciente'); return; }
+  if(!telefono){ toast('⚠️ Falta el teléfono (identificador del paciente)'); return; }
+  if(!doctorId){ toast('⚠️ Selecciona quién atendió'); return; }
+
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    // 1) upsert paciente por teléfono
+    let { data: pacienteRow, error: pacErr } = await sb.from('pacientes').select('id').eq('telefono', telefono).maybeSingle();
+    if(pacErr) throw pacErr;
+    if(!pacienteRow){
+      const { data: nuevoPac, error: insPacErr } = await sb.from('pacientes').insert({
+        nombre: paciente, telefono, tipo_paciente: document.getElementById('r-tipopaciente').value
+      }).select('id').single();
+      if(insPacErr) throw insPacErr;
+      pacienteRow = nuevoPac;
+    } else {
+      await sb.from('pacientes').update({ nombre: paciente, tipo_paciente: document.getElementById('r-tipopaciente').value }).eq('id', pacienteRow.id);
+    }
+
+    // 2) insert consulta
+    const { error: consErr } = await sb.from('consultas').insert({
+      fecha: dmyToISO(fecha),
+      paciente_id: pacienteRow.id,
+      doctor_id: doctorId,
+      motivo: document.getElementById('r-motivo').value,
+      tipo_consulta: valorTipoConsulta() || null,
+      monto: parseFloat(document.getElementById('r-monto').value) || 0,
+      medio_pago: document.getElementById('r-mediopago').value,
+      monto_2: document.getElementById('r-pago2-wrap').style.display === 'grid' && document.getElementById('r-monto2').value ? parseFloat(document.getElementById('r-monto2').value) : null,
+      medio_pago_2: document.getElementById('r-pago2-wrap').style.display === 'grid' && document.getElementById('r-monto2').value ? document.getElementById('r-mediopago2').value : null,
+      factura: document.getElementById('r-factura').checked,
+      num_factura: document.getElementById('r-numfactura').value.trim() || null,
+      notas: document.getElementById('r-notas').value.trim() || null,
+      created_by: MI_PERFIL ? await miPersonalId() : null
+    });
+    if(consErr) throw consErr;
+
+    toast('✅ Registro guardado');
+    limpiarRegistro();
+  } catch(err){
+    console.error('[CUIVAN] Error guardando registro:', err);
+    toast('⚠️ No se pudo guardar: ' + (err.message || 'error desconocido'));
+  }
+  btn.disabled = false; btn.textContent = 'Guardar registro';
+}
+
+async function miPersonalId(){
+  const { data } = await sb.auth.getSession();
+  const uid = data.session.user.id;
+  const { data: row } = await sb.from('personal').select('id').eq('auth_user_id', uid).single();
+  return row ? row.id : null;
+}
+
+function limpiarRegistro(){
+  document.getElementById('r-paciente').value = '';
+  document.getElementById('r-telefono').value = '';
+  document.getElementById('r-tipoconsulta-libre').value = '';
+  document.getElementById('r-monto').value = '0';
+  document.getElementById('r-notas').value = '';
+  document.getElementById('r-numfactura').value = '';
+  document.getElementById('r-monto2').value = '';
+  document.getElementById('r-pago2-wrap').style.display = 'none';
+  document.getElementById('r-factura').checked = false;
+  document.getElementById('r-nfact-wrap').style.display = 'none';
+  document.getElementById('r-fecha').value = todayLocal();
+  refrescarResumen();
+}
+document.getElementById('btn-guardar-registro').addEventListener('click', guardarRegistro);
+document.getElementById('btn-limpiar-registro').addEventListener('click', limpiarRegistro);
+
+// ── Historial (lectura real) ──
+async function cargarHistorial(){
+  const tbody = document.getElementById('h-tbody');
+  const kpisEl = document.getElementById('h-kpis');
+  tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
+  const periodo = parseInt(document.getElementById('h-periodo').value) || 0;
+  let query = sb
+    .from('consultas')
+    .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, pacientes(id, nombre), personal!consultas_doctor_id_fkey(nombre)')
+    .eq('deleted', false)
+    .order('fecha', { ascending: false })
+    .limit(300);
+  if(periodo > 0) query = query.gte('fecha', isoDesdeHace(periodo));
+  const { data, error } = await query;
+  if(error){
+    console.error('[CUIVAN] Error cargando historial:', error);
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
+    kpisEl.innerHTML = '';
+    return;
+  }
+  window._historialData = data || [];
+  aplicarFiltrosHistorial();
+}
+function aplicarFiltrosHistorial(){
+  const q = document.getElementById('h-buscar').value.trim().toLowerCase();
+  const motivo = document.getElementById('h-motivo').value;
+  const pago = document.getElementById('h-pago').value;
+  let rows = window._historialData || [];
+  if(q) rows = rows.filter(r => (r.pacientes?.nombre || '').toLowerCase().includes(q));
+  if(motivo) rows = rows.filter(r => r.motivo === motivo);
+  if(pago) rows = rows.filter(r => r.medio_pago === pago);
+
+  const kpisEl = document.getElementById('h-kpis');
+  const periodoTxt = document.getElementById('h-periodo').selectedOptions[0].text;
+  if(rows.length === 0){
+    document.getElementById('h-tbody').innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
+    kpisEl.innerHTML = '';
+    document.getElementById('h2-subt').textContent = periodoTxt + ' · 0 registros';
+    return;
+  }
+  const totalIngreso = rows.reduce((a,r)=>a+Number(r.monto||0),0);
+  const pacientesUnicos = new Set(rows.map(r=>r.pacientes?.id)).size;
+  const ticketProm = rows.length ? totalIngreso/rows.length : 0;
+  document.getElementById('h2-subt').textContent = periodoTxt + ' · ' + rows.length + ' registros';
+  kpisEl.innerHTML = `
+    <div class="h2-chip"><span class="ico">💰</span><div><div class="v">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:0})}</div><div class="l">Total</div></div></div>
+    <div class="h2-chip"><span class="ico">👥</span><div><div class="v">${pacientesUnicos}</div><div class="l">Pacientes</div></div></div>
+    <div class="h2-chip"><span class="ico">🎟️</span><div><div class="v">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:0})}</div><div class="l">Ticket prom.</div></div></div>
+  `;
+  window._historialFiltrado = rows;
+  renderHistorial(rows);
+}
+const PAGO_ICON = { Tarjeta:'💳', Efectivo:'💵', Transferencia:'🏦', Cortesía:'🎁' };
+function renderHistorial(rows){
+  const tbody = document.getElementById('h-tbody');
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${fmtFechaISO(r.fecha)}</td>
+      <td><b>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</b></td>
+      <td>${esc2(r.personal ? r.personal.nombre : '—')}</td>
+      <td><span class="pill2 pt2">${esc2(r.motivo)}</span></td>
+      <td>${esc2(r.tipo_consulta || '—')}</td>
+      <td><b style="color:var(--teal)">$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</b></td>
+      <td>${PAGO_ICON[r.medio_pago]||''} ${esc2(r.medio_pago)}</td>
+      <td><button class="h-editar-btn" data-id="${r.id}" style="background:none;border:none;color:#0B6E6E;cursor:pointer;font-size:13px" title="Editar">✏️</button></td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('.h-editar-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> abrirEditarConsulta(btn.dataset.id));
+  });
+}
+function fmtFechaISO(iso){
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}`;
+}
+document.getElementById('btn-refrescar-historial').addEventListener('click', cargarHistorial);
+document.getElementById('h-periodo').addEventListener('change', cargarHistorial);
+document.getElementById('h-buscar').addEventListener('input', aplicarFiltrosHistorial);
+document.getElementById('h-motivo').addEventListener('change', aplicarFiltrosHistorial);
+document.getElementById('h-pago').addEventListener('change', aplicarFiltrosHistorial);
+
+// ── Exportar a Excel (datos crudos, sin emojis/HTML) ──
+document.getElementById('btn-export-historial').addEventListener('click', ()=>{
+  const rows = window._historialFiltrado || [];
+  if(rows.length === 0){ toast('⚠️ No hay datos para exportar'); return; }
+  const header = ['Fecha','Paciente','Doctor','Motivo','Tipo de Consulta','Monto','Medio de Pago'];
+  const body = rows.map(r => [
+    r.fecha,
+    r.pacientes ? r.pacientes.nombre : '',
+    r.personal ? r.personal.nombre : '',
+    r.motivo,
+    r.tipo_consulta || '',
+    Number(r.monto || 0),
+    r.medio_pago
+  ]);
+  const ws = XLSX.utils.aoa_to_sheet([header, ...body]);
+  ws['!cols'] = [{wch:11},{wch:26},{wch:22},{wch:16},{wch:22},{wch:12},{wch:16}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Historial');
+  XLSX.writeFile(wb, `CUIVAN_Historial_${todayLocal().replace(/\//g,'-')}.xlsx`);
+});
+
+// ── Papelera: consultas eliminadas (soft-delete), restaurar o borrar definitivo ──
+let PAPELERA_ABIERTA = false;
+document.getElementById('btn-papelera-toggle').addEventListener('click', ()=>{
+  PAPELERA_ABIERTA = !PAPELERA_ABIERTA;
+  document.getElementById('h-papelera-panel').style.display = PAPELERA_ABIERTA ? 'block' : 'none';
+  if(PAPELERA_ABIERTA) cargarPapelera();
+});
+async function cargarPapelera(){
+  const panel = document.getElementById('h-papelera-panel');
+  panel.innerHTML = '<div class="papelera-box"><div class="papelera-title">🗑 Papelera</div><div style="color:var(--g4);font-size:12px">Cargando...</div></div>';
+  const { data, error } = await sb
+    .from('consultas')
+    .select('id, fecha, motivo, monto, deleted_at, pacientes(nombre), personal!consultas_doctor_id_fkey(nombre), eliminador:deleted_by(nombre)')
+    .eq('deleted', true)
+    .order('deleted_at', { ascending: false })
+    .limit(100);
+  if(error){
+    console.error('[CUIVAN] Error cargando papelera:', error);
+    panel.innerHTML = '<div class="papelera-box"><div class="papelera-title">🗑 Papelera</div><div style="color:var(--red);font-size:12px">Error al cargar</div></div>';
+    return;
+  }
+  if(!data || data.length === 0){
+    panel.innerHTML = '<div class="papelera-box"><div class="papelera-title">🗑 Papelera</div><div style="color:var(--g4);font-size:12px">La papelera está vacía</div></div>';
+    return;
+  }
+  panel.innerHTML = `
+    <div class="papelera-box">
+      <div class="papelera-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>🗑 Papelera — ${data.length} registro(s) eliminado(s)</span>
+        ${window.MI_ROL_ADMIN ? `<button class="appbtn appbtn-danger-soft" id="btn-vaciar-papelera" style="font-size:10.5px;padding:5px 10px;text-transform:none;letter-spacing:0;font-weight:700">Vaciar papelera</button>` : ''}
+      </div>
+      <div style="overflow-x:auto">
+        <table class="htable2">
+          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Monto</th><th>Eliminado</th><th>Por</th><th></th></tr></thead>
+          <tbody>
+            ${data.map(c => `
+              <tr>
+                <td>${fmtFechaISO(c.fecha)}</td>
+                <td>${esc2(c.pacientes ? c.pacientes.nombre : '—')}</td>
+                <td>${esc2(c.personal ? c.personal.nombre : '—')}</td>
+                <td>${esc2(c.motivo)}</td>
+                <td>$${Number(c.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
+                <td style="font-size:10.5px;color:var(--g4)">${c.deleted_at ? new Date(c.deleted_at).toLocaleString('es-MX') : '—'}</td>
+                <td style="font-size:10.5px;color:var(--g4)">${esc2(c.eliminador ? c.eliminador.nombre : '—')}</td>
+                <td style="white-space:nowrap">
+                  <button class="appbtn appbtn-s pap-restaurar" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">↺ Restaurar</button>
+                  ${window.MI_ROL_ADMIN ? `<button class="appbtn appbtn-danger-soft pap-eliminar-def" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">✕ Eliminar</button>` : ''}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  const btnVaciar = document.getElementById('btn-vaciar-papelera');
+  if(btnVaciar){
+    btnVaciar.addEventListener('click', ()=>{
+      mostrarConfirm({
+        titulo: '¿Vaciar toda la papelera?',
+        mensaje: `Se eliminarán DEFINITIVAMENTE los ${data.length} registro(s) de la papelera. Esta acción no se puede deshacer bajo ninguna circunstancia.`,
+        textoConfirmar: 'Sí, vaciar todo',
+        icono: '🗑️',
+        danger: true
+      }, ()=>{
+        llamarPersonalAdmin({ action:'empty_trash' })
+          .then((res)=>{ toast(`✅ Papelera vaciada (${res.count} registro(s))`); cargarPapelera(); })
+          .catch(err=>{ console.error('[CUIVAN] Error vaciando papelera:', err); toast('⚠️ ' + err.message); });
+      });
+    });
+  }
+  panel.querySelectorAll('.pap-restaurar').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const { error } = await sb.from('consultas').update({ deleted: false, deleted_at: null, deleted_by: null }).eq('id', btn.dataset.id);
+      if(error){ console.error('[CUIVAN] Error restaurando:', error); toast('⚠️ No se pudo restaurar'); return; }
+      toast('✅ Registro restaurado');
+      cargarPapelera();
+      cargarHistorial();
+    });
+  });
+  panel.querySelectorAll('.pap-eliminar-def').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      mostrarConfirm({
+        titulo: '¿Eliminar definitivamente?',
+        mensaje: 'Esta acción no se puede deshacer bajo ninguna circunstancia.',
+        textoConfirmar: 'Sí, eliminar',
+        icono: '🗑️',
+        danger: true
+      }, ()=>{
+        llamarPersonalAdmin({ action:'hard_delete_consulta', consulta_id: btn.dataset.id })
+          .then(()=>{ toast('✅ Eliminado definitivamente'); cargarPapelera(); })
+          .catch(err=>{ console.error('[CUIVAN] Error en borrado definitivo:', err); toast('⚠️ ' + err.message); });
+      });
+    });
+  });
+}
+
+// ── Personal: lista + edición (nombre/rol/activo) ──
+async function cargarPersonal(){
+  const cont = document.getElementById('personal-lista');
+  cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
+  const { data, error } = await sb.from('personal').select('id, nombre, rol, activo, auth_user_id, email').order('rol').order('nombre');
+  if(error){ console.error('[CUIVAN] Error cargando personal:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+  cont.innerHTML = data.map(p => `
+    <div class="p-row" data-id="${p.id}" data-auth="${p.auth_user_id || ''}">
+      <div>
+        <input class="app-input p-nombre" value="${esc2(p.nombre)}"/>
+        <div class="p-email">✉️ ${p.email ? esc2(p.email) : 'Sin correo (sin acceso)'}</div>
+      </div>
+      <select class="app-input p-rol">
+        <option value="recepcion" ${p.rol==='recepcion'?'selected':''}>Recepción</option>
+        <option value="doctor" ${p.rol==='doctor'?'selected':''}>Doctor/a</option>
+        <option value="admin" ${p.rol==='admin'?'selected':''}>Admin</option>
+      </select>
+      <label class="cbwrap"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/></label>
+      <button class="appbtn appbtn-s p-guardar" style="font-size:11px;padding:6px 10px;white-space:nowrap">Guardar</button>
+      <div class="p-actions2">
+        ${p.auth_user_id
+          ? `<button class="appbtn appbtn-s p-reset" style="font-size:11px;padding:6px 10px;white-space:nowrap">🔑 Reset</button>
+             <button class="appbtn appbtn-s p-cambiar-correo" style="font-size:11px;padding:6px 10px;white-space:nowrap">✉️ Correo</button>`
+          : `<button class="appbtn appbtn-p p-dar-acceso" style="font-size:11px;padding:6px 10px;white-space:nowrap">Dar acceso</button>`}
+        <button class="appbtn appbtn-danger-soft p-eliminar" style="font-size:11px;padding:6px 10px;white-space:nowrap">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+  cont.querySelectorAll('.p-guardar').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      const row = e.target.closest('.p-row');
+      const id = row.dataset.id;
+      const nombre = row.querySelector('.p-nombre').value.trim();
+      const rol = row.querySelector('.p-rol').value;
+      const activo = row.querySelector('.p-activo').checked;
+      const { error } = await sb.from('personal').update({ nombre, rol, activo }).eq('id', id);
+      if(error){ console.error('[CUIVAN] Error actualizando personal:', error); toast('⚠️ No se pudo guardar'); return; }
+      toast('✅ Actualizado');
+      cargarDoctores();
+    });
+  });
+
+  cont.querySelectorAll('.p-dar-acceso').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const row = e.target.closest('.p-row');
+      abrirDarAcceso(row.dataset.id, row.querySelector('.p-nombre').value);
+    });
+  });
+  cont.querySelectorAll('.p-reset').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const row = e.target.closest('.p-row');
+      abrirReset(row.dataset.auth, row.querySelector('.p-nombre').value);
+    });
+  });
+  cont.querySelectorAll('.p-cambiar-correo').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const row = e.target.closest('.p-row');
+      abrirCambiarCorreo(row.dataset.id, row.dataset.auth, row.querySelector('.p-nombre').value);
+    });
+  });
+  cont.querySelectorAll('.p-eliminar').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const row = e.target.closest('.p-row');
+      abrirEliminarPersonal(row.dataset.id, row.dataset.auth, row.querySelector('.p-nombre').value);
+    });
+  });
+}
+
+// ── Llamada a la Edge Function personal-admin ──
+const EDGE_URL = SUPABASE_URL + '/functions/v1/personal-admin';
+async function llamarPersonalAdmin(payload){
+  const { data: { session } } = await sb.auth.getSession();
+  const resp = await fetch(EDGE_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + session.access_token,
+      'apikey': SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify(payload)
+  });
+  const body = await resp.json();
+  if(!resp.ok) throw new Error(body.error || 'Error desconocido');
+  return body;
+}
+
+function abrirDarAcceso(personalId, nombre){
+  mostrarPrompt({ titulo:'Correo de acceso', mensaje:`Correo para <b>${esc2(nombre)}</b>:`, tipo:'email', placeholder:'correo@cuivan.com', icono:'✉️' }, (email)=>{
+    if(!email) return;
+    mostrarPrompt({ titulo:'Contraseña temporal', mensaje:`Contraseña para <b>${esc2(nombre)}</b> (mínimo 8 caracteres):`, tipo:'password', placeholder:'••••••••', icono:'🔑' }, (password)=>{
+      if(!password) return;
+      llamarPersonalAdmin({ action:'create_user', personal_id: personalId, email, password })
+        .then(()=>{ toast('✅ Acceso creado'); cargarPersonal(); })
+        .catch(err=>{ console.error('[CUIVAN] Error dando acceso:', err); toast('⚠️ ' + err.message); });
+    });
+  });
+}
+function abrirReset(authUserId, nombre){
+  mostrarPrompt({ titulo:'Restablecer contraseña', mensaje:`Nueva contraseña para <b>${esc2(nombre)}</b> (mínimo 8 caracteres):`, tipo:'password', placeholder:'••••••••', icono:'🔑' }, (password)=>{
+    if(!password) return;
+    llamarPersonalAdmin({ action:'reset_password', auth_user_id: authUserId, new_password: password })
+      .then(()=>{ toast('✅ Contraseña restablecida'); })
+      .catch(err=>{ console.error('[CUIVAN] Error reseteando:', err); toast('⚠️ ' + err.message); });
+  });
+}
+function abrirCambiarCorreo(personalId, authUserId, nombre){
+  mostrarPrompt({ titulo:'Cambiar correo', mensaje:`Nuevo correo para <b>${esc2(nombre)}</b>:`, tipo:'email', placeholder:'correo@cuivan.com', icono:'✉️' }, (nuevoCorreo)=>{
+    if(!nuevoCorreo) return;
+    llamarPersonalAdmin({ action:'change_email', personal_id: personalId, auth_user_id: authUserId, new_email: nuevoCorreo })
+      .then(()=>{ toast('✅ Correo actualizado'); cargarPersonal(); })
+      .catch(err=>{ console.error('[CUIVAN] Error cambiando correo:', err); toast('⚠️ ' + err.message); });
+  });
+}
+function abrirEliminarPersonal(personalId, authUserId, nombre){
+  mostrarConfirm({
+    titulo: '¿Eliminar definitivamente?',
+    mensaje: `Vas a eliminar a <b>${esc2(nombre)}</b>. Esta acción no se puede deshacer.<br><br>Si tiene consultas registradas, no se podrá eliminar (para no romper el historial) — en ese caso, desactívalo en su lugar.`,
+    textoConfirmar: 'Sí, eliminar',
+    icono: '🗑️',
+    danger: true
+  }, ()=>{
+    llamarPersonalAdmin({ action:'delete_user', personal_id: personalId, auth_user_id: authUserId || null, nombre_snapshot: nombre })
+      .then((res)=>{
+        toast(res.warning ? '⚠️ ' + res.warning : '✅ Eliminado');
+        cargarPersonal();
+        cargarDoctores();
+      })
+      .catch(err=>{ console.error('[CUIVAN] Error eliminando:', err); toast('⚠️ ' + err.message); });
+  });
+}
+
+document.getElementById('np-con-acceso').addEventListener('change', (e)=>{
+  document.getElementById('np-acceso-wrap').style.display = e.target.checked ? 'grid' : 'none';
+  document.getElementById('np-sin-acceso-wrap').style.display = e.target.checked ? 'none' : 'block';
+});
+
+document.getElementById('btn-crear-personal-sin-acceso').addEventListener('click', async ()=>{
+  const nombre = document.getElementById('np-nombre').value.trim();
+  const rol = document.getElementById('np-rol').value;
+  if(!nombre){ toast('⚠️ Falta el nombre'); return; }
+  const { error } = await sb.from('personal').insert({ nombre, rol, email: null, activo: true, auth_user_id: null });
+  if(error){ console.error('[CUIVAN] Error agregando personal:', error); toast('⚠️ No se pudo agregar'); return; }
+  toast('✅ Agregado (sin acceso)');
+  document.getElementById('np-nombre').value = '';
+  cargarPersonal();
+  cargarDoctores();
+});
+
+document.getElementById('btn-crear-personal').addEventListener('click', async ()=>{
+  const nombre = document.getElementById('np-nombre').value.trim();
+  const rol = document.getElementById('np-rol').value;
+  const email = document.getElementById('np-email').value.trim();
+  const password = document.getElementById('np-password').value;
+  if(!nombre || !email || !password){ toast('⚠️ Completa nombre, correo y contraseña'); return; }
+  const btn = document.getElementById('btn-crear-personal');
+  btn.disabled = true; btn.textContent = 'Creando...';
+  try {
+    await llamarPersonalAdmin({ action:'create_user', nombre, rol, email, password });
+    toast('✅ Cuenta creada con acceso');
+    document.getElementById('np-nombre').value = '';
+    document.getElementById('np-email').value = '';
+    document.getElementById('np-password').value = '';
+    cargarPersonal();
+    cargarDoctores();
+  } catch(err){
+    console.error('[CUIVAN] Error creando cuenta:', err);
+    toast('⚠️ ' + err.message);
+  }
+  btn.disabled = false; btn.textContent = 'Crear';
+});
+
+
+// ── Catálogo de servicios: alta y lista (admin) ──
+let SERVICIOS_CACHE = [];
+async function cargarServicios(){
+  const cont = document.getElementById('servicios-lista');
+  cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
+  const { data, error } = await sb.from('catalogo_servicios').select('id, motivo, tipo_consulta, activo').order('motivo').order('tipo_consulta');
+  if(error){ console.error('[CUIVAN] Error cargando catálogo:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+  SERVICIOS_CACHE = data || [];
+  renderServicios();
+}
+function renderServicios(){
+  const cont = document.getElementById('servicios-lista');
+  const filtro = document.getElementById('svc-filtro-motivo').value;
+  const data = filtro ? SERVICIOS_CACHE.filter(s => s.motivo === filtro) : SERVICIOS_CACHE;
+  if(!data || data.length === 0){ cont.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Sin servicios para este filtro.</div>'; return; }
+  // agrupado por motivo, como en CANOPY
+  const porMotivo = {};
+  data.forEach(s=>{ if(!porMotivo[s.motivo]) porMotivo[s.motivo] = []; porMotivo[s.motivo].push(s); });
+  cont.innerHTML = Object.entries(porMotivo).map(([motivo, items]) => `
+    <div style="margin-bottom:10px">
+      <div style="font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--teal);margin-bottom:4px">${esc2(motivo)} (${items.length})</div>
+      ${items.map(s => `
+        <div class="svc-row" data-id="${s.id}">
+          <span></span>
+          <span>${esc2(s.tipo_consulta)}</span>
+          <button class="svc-del">Eliminar</button>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+  cont.querySelectorAll('.svc-del').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      const id = e.target.closest('.svc-row').dataset.id;
+      const { error } = await sb.from('catalogo_servicios').delete().eq('id', id);
+      if(error){ toast('⚠️ No se pudo eliminar'); return; }
+      cargarServicios();
+    });
+  });
+}
+document.getElementById('svc-filtro-motivo').addEventListener('change', renderServicios);
+document.getElementById('btn-add-servicio').addEventListener('click', async ()=>{
+  const motivo = document.getElementById('cs-motivo').value.trim();
+  const tipo = document.getElementById('cs-tipo').value.trim();
+  if(!motivo || !tipo){ toast('⚠️ Completa motivo y tipo de consulta'); return; }
+  const { error } = await sb.from('catalogo_servicios').insert({ motivo, tipo_consulta: tipo });
+  if(error){ console.error('[CUIVAN] Error agregando servicio:', error); toast('⚠️ No se pudo agregar'); return; }
+  document.getElementById('cs-motivo').value = '';
+  document.getElementById('cs-tipo').value = '';
+  cargarServicios();
+  cargarCatalogoServiciosCache();
+});
+
+document.getElementById('btn-personal-header').addEventListener('click', ()=>{
+  document.querySelectorAll('#app-nav button').forEach(x=>x.classList.remove('navact'));
+  document.querySelectorAll('.screen2').forEach(x=>x.classList.remove('act'));
+  document.getElementById('app-screen-personal').classList.add('act');
+  cargarPersonal();
+  cargarServicios();
+  cargarAuditLog();
+});
+
+// ── Actividad reciente (audit_log), solo admin ──
+const AUDIT_LABEL = {
+  crear_personal: '➕ Dio de alta a',
+  reset_password: '🔑 Restableció contraseña de',
+  cambiar_correo: '✉️ Cambió el correo de',
+  eliminar_personal: '🗑️ Eliminó a',
+  eliminar_personal_auth_fallo: '⚠️ Eliminó de personal (falló borrar acceso) a'
+};
+async function cargarAuditLog(){
+  const cont = document.getElementById('audit-lista');
+  cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
+  const { data, error } = await sb
+    .from('audit_log')
+    .select('accion, detalle, created_at, personal:actor_id(nombre)')
+    .order('created_at', { ascending: false })
+    .limit(60);
+  if(error){ console.error('[CUIVAN] Error cargando audit_log:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+  if(!data || data.length === 0){ cont.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Sin actividad registrada todavía.</div>'; return; }
+  cont.innerHTML = data.map(a => {
+    const quien = a.personal ? a.personal.nombre : 'Sistema';
+    const label = AUDIT_LABEL[a.accion] || a.accion;
+    const detalleTxt = a.detalle ? Object.entries(a.detalle).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join(' · ') : '';
+    const fecha = new Date(a.created_at);
+    const fechaTxt = fecha.toLocaleString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    return `
+      <div style="padding:8px 0;border-bottom:1px solid var(--g1);font-size:11.5px">
+        <b style="color:var(--navy)">${esc2(quien)}</b> <span style="color:var(--g6)">${label}</span>
+        <div style="color:var(--g4);font-size:10.5px;margin-top:2px">${esc2(detalleTxt)} · ${fechaTxt}</div>
+      </div>
+    `;
+  }).join('');
+}
+// ═══════════════════════════════════════════════════════════
+// CIERRE
+// ═══════════════════════════════════════════════════════════
+let cierreDiasActual = 15;
+function isoDesdeHace(dias){
+  const d = new Date();
+  d.setDate(d.getDate() - dias + 1);
+  return d.toISOString().slice(0,10);
+}
+async function cargarCierre(dias){
+  cierreDiasActual = dias;
+  document.querySelectorAll('.cierre-periodo').forEach(b=>{
+    b.classList.toggle('appbtn-p', Number(b.dataset.dias) === dias);
+    b.classList.toggle('appbtn-s', Number(b.dataset.dias) !== dias);
+  });
+  const desde = isoDesdeHace(dias);
+  const { data, error } = await sb
+    .from('consultas')
+    .select('monto, medio_pago, monto_2, medio_pago_2, tipo_consulta, motivo, pacientes(nombre), personal!consultas_doctor_id_fkey(id, nombre)')
+    .eq('deleted', false)
+    .gte('fecha', desde);
+  const kpisEl = document.getElementById('cierre-kpis');
+  const listaEl = document.getElementById('cierre-lista');
+  if(error){
+    console.error('[CUIVAN] Error cargando cierre:', error);
+    listaEl.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>';
+    return;
+  }
+  const totalIngreso = data.reduce((a,r)=>a+Number(r.monto||0),0);
+  const totalConsultas = data.length;
+  const ticketProm = totalConsultas ? totalIngreso/totalConsultas : 0;
+  kpisEl.innerHTML = `
+    <div class="kpi-tile"><div class="ico">💰</div><div class="lbl3">Ingreso total</div><div class="val">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+    <div class="kpi-tile"><div class="ico">🧾</div><div class="lbl3">Consultas</div><div class="val">${totalConsultas}</div></div>
+    <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket promedio</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+  `;
+  // agrupar por doctor (con detalle de pacientes y medios de pago)
+  const porDoctor = {};
+  data.forEach(r=>{
+    const doc = r.personal ? r.personal.nombre : 'Sin doctor';
+    if(!porDoctor[doc]) porDoctor[doc] = { total:0, n:0, pacientes:[], pagos:{ Efectivo:0, Tarjeta:0, Transferencia:0, Cortesía:0 } };
+    porDoctor[doc].total += Number(r.monto||0);
+    porDoctor[doc].n += 1;
+    porDoctor[doc].pacientes.push({
+      nombre: r.pacientes ? r.pacientes.nombre : '—',
+      detalle: [r.motivo, r.tipo_consulta].filter(Boolean).join(' · '),
+      monto: Number(r.monto||0)
+    });
+    if(porDoctor[doc].pagos[r.medio_pago] !== undefined) porDoctor[doc].pagos[r.medio_pago] += Number(r.monto||0);
+    if(r.medio_pago_2 && porDoctor[doc].pagos[r.medio_pago_2] !== undefined) porDoctor[doc].pagos[r.medio_pago_2] += Number(r.monto_2||0);
+  });
+  const MEDIOS_INFO = {
+    Efectivo:{cls:'efectivo', icon:'💵'},
+    Tarjeta:{cls:'tarjeta', icon:'💳'},
+    Transferencia:{cls:'transferencia', icon:'🏦'},
+    Cortesía:{cls:'cortesia', icon:'🎁'}
+  };
+  const doctores = Object.entries(porDoctor).sort((a,b)=>b[1].total-a[1].total);
+  if(doctores.length === 0){
+    listaEl.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Sin consultas en este período.</div>';
+    return;
+  }
+  listaEl.innerHTML = doctores.map(([nombre, d], i) => `
+    <div class="cierre-card2">
+      <div class="top"><span class="name">${esc2(nombre)}</span><span class="total">$${d.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>
+      <div class="meta">${d.n} paciente(s)</div>
+      <div>
+        ${Object.entries(d.pagos).filter(([,v])=>v>0).map(([medio,val])=>
+          `<span class="doc-pill ${MEDIOS_INFO[medio].cls}">${MEDIOS_INFO[medio].icon} ${esc2(medio)} $${val.toLocaleString('es-MX',{minimumFractionDigits:2})}</span>`
+        ).join('')}
+      </div>
+      <button class="cierre-toggle-pac" data-idx="${i}" style="background:none;border:none;color:#0B6E6E;font-size:10.5px;cursor:pointer;padding:0;margin-top:7px;font-weight:700;text-decoration:underline;text-underline-offset:2px">Ver pacientes (${d.n}) ▾</button>
+      <div class="cierre-pac-list" id="cierre-pac-${i}" style="display:none;margin-top:8px;border-top:1px dashed var(--g2);padding-top:7px">
+        ${d.pacientes.map(p => `
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--g1);font-size:11px">
+            <span style="color:var(--navy);font-weight:600">${esc2(p.nombre)}</span>
+            <span style="color:var(--g4);flex:1;text-align:center">${esc2(p.detalle || '—')}</span>
+            <span style="color:var(--teal);font-weight:700">$${p.monto.toLocaleString('es-MX',{minimumFractionDigits:2})}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+  listaEl.querySelectorAll('.cierre-toggle-pac').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const panel = document.getElementById('cierre-pac-'+btn.dataset.idx);
+      const abierto = panel.style.display === 'block';
+      panel.style.display = abierto ? 'none' : 'block';
+      btn.textContent = btn.textContent.replace(abierto ? '▴' : '▾', abierto ? '▾' : '▴');
+    });
+  });
+}
+document.querySelectorAll('.cierre-periodo').forEach(b=>{
+  b.addEventListener('click', ()=> cargarCierre(Number(b.dataset.dias)));
+});
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+let dashCharts = {};
+async function cargarDashboard(){
+  const desde = isoDesdeHace(14);
+  const { data, error } = await sb
+    .from('consultas')
+    .select('fecha, monto, medio_pago, pacientes(id), personal!consultas_doctor_id_fkey(nombre)')
+    .eq('deleted', false)
+    .gte('fecha', desde);
+  const kpisEl = document.getElementById('dash-kpis');
+  if(error){ console.error('[CUIVAN] Error cargando dashboard:', error); kpisEl.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+
+  const totalIngreso = data.reduce((a,r)=>a+Number(r.monto||0),0);
+  const pacientesUnicos = new Set(data.map(r=>r.pacientes?.id)).size;
+  const ticketProm = data.length ? totalIngreso/data.length : 0;
+  const porDoc = {};
+  data.forEach(r=>{ const n = r.personal?.nombre || '—'; porDoc[n] = (porDoc[n]||0) + Number(r.monto||0); });
+  const docTop = Object.entries(porDoc).sort((a,b)=>b[1]-a[1])[0];
+
+  kpisEl.innerHTML = `
+    <div class="kpi-tile"><div class="ico">💰</div><div class="lbl3">Ingreso 14d</div><div class="val">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:0})}</div></div>
+    <div class="kpi-tile"><div class="ico">👥</div><div class="lbl3">Pacientes</div><div class="val">${pacientesUnicos}</div></div>
+    <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket prom.</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:0})}</div></div>
+    <div class="kpi-tile"><div class="ico">🏆</div><div class="lbl3">Doctor top</div><div class="val" style="font-size:13px">${docTop ? esc2(docTop[0]) : '—'}</div></div>
+  `;
+
+  // tendencia por día
+  const porDia = {};
+  for(let i=0;i<14;i++){ const d=new Date(); d.setDate(d.getDate()-i); porDia[d.toISOString().slice(0,10)] = 0; }
+  data.forEach(r=>{ if(porDia[r.fecha] !== undefined) porDia[r.fecha] += Number(r.monto||0); });
+  const diasOrdenados = Object.keys(porDia).sort();
+
+  const TEAL='#2ABFBF', NAVY2='#1B3A6B', NAVY3='#22488a', TEAL_L='#9FE1CB', SLATE='#94a3b8', NAVY='#0B1628';
+  Object.values(dashCharts).forEach(c=>c.destroy());
+  dashCharts.trend = new Chart(document.getElementById('ch-dash-trend'), {
+    type:'line',
+    data:{ labels: diasOrdenados.map(d=>d.slice(5)), datasets:[{ data: diasOrdenados.map(d=>porDia[d]), borderColor:TEAL, backgroundColor:'rgba(42,191,191,.12)', fill:true, tension:.4, pointRadius:0, borderWidth:2.5 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ ticks:{ font:{size:9} } }, x:{ ticks:{ maxTicksLimit:7, font:{size:9} }, grid:{display:false} } } }
+  });
+  const docLabels = Object.keys(porDoc);
+  dashCharts.doc = new Chart(document.getElementById('ch-dash-doc'), {
+    type:'bar',
+    data:{ labels: docLabels, datasets:[{ data: docLabels.map(l=>porDoc[l]), backgroundColor:[TEAL,NAVY2,NAVY3,SLATE,'#5DCAA5'], borderRadius:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ ticks:{ font:{size:9} } }, x:{ ticks:{font:{size:9}}, grid:{display:false} } } }
+  });
+  const porPago = {};
+  data.forEach(r=>{ porPago[r.medio_pago] = (porPago[r.medio_pago]||0) + Number(r.monto||0); });
+  dashCharts.pago = new Chart(document.getElementById('ch-dash-pago'), {
+    type:'doughnut',
+    data:{ labels: Object.keys(porPago), datasets:[{ data: Object.values(porPago), backgroundColor:[TEAL,NAVY2,TEAL_L,SLATE], borderWidth:3, borderColor:'#fff' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:10} } } }, cutout:'55%' }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRM — Pacientes inactivos
+// ═══════════════════════════════════════════════════════════
+async function cargarPRM(){
+  const dias = parseInt(document.getElementById('prm-dias').value) || 60;
+  const tbody = document.getElementById('prm-tbody');
+  const kpisEl = document.getElementById('prm-kpis');
+  tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
+  const { data, error } = await sb
+    .from('consultas')
+    .select('fecha, paciente_id, motivo, tipo_consulta, pacientes(id, nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
+    .eq('deleted', false)
+    .order('fecha', { ascending:false });
+  if(error){ console.error('[CUIVAN] Error cargando PRM:', error); tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--red)">Error al cargar</td></tr>'; return; }
+
+  // última visita por paciente
+  const ultima = {};
+  data.forEach(r=>{
+    if(!r.pacientes) return;
+    const id = r.pacientes.id;
+    if(!ultima[id] || r.fecha > ultima[id].fecha) ultima[id] = {
+      fecha: r.fecha, nombre: r.pacientes.nombre, telefono: r.pacientes.telefono,
+      servicio: [r.motivo, r.tipo_consulta].filter(Boolean).join(' · '),
+      doctor: r.personal ? r.personal.nombre : '—'
+    };
+  });
+  const hoy = new Date();
+  const todos = Object.entries(ultima).map(([id, info])=>{
+    const diasSin = Math.floor((hoy - new Date(info.fecha)) / 86400000);
+    return { id, ...info, diasSin };
+  });
+  const inactivos = todos.filter(p => p.diasSin >= dias).sort((a,b)=>b.diasSin - a.diasSin);
+
+  kpisEl.innerHTML = `
+    <div class="kpi-tile"><div class="ico">🎯</div><div class="lbl3">Pacientes inactivos</div><div class="val">${inactivos.length}</div></div>
+    <div class="kpi-tile"><div class="ico">👥</div><div class="lbl3">Total pacientes</div><div class="val">${todos.length}</div></div>
+    <div class="kpi-tile"><div class="ico">📊</div><div class="lbl3">% inactivos</div><div class="val">${todos.length ? Math.round(inactivos.length/todos.length*100) : 0}%</div></div>
+  `;
+
+  if(inactivos.length === 0){
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">🎉 Nadie supera ese umbral — todos tus pacientes están activos</td></tr>';
+    return;
+  }
+  window._prmData = inactivos;
+  tbody.innerHTML = inactivos.map(p => `
+    <tr>
+      <td><b>${esc2(p.nombre)}</b></td>
+      <td>${esc2(p.telefono || '—')}</td>
+      <td>${fmtFechaISO(p.fecha)}</td>
+      <td><span class="pill2" style="background:${p.diasSin>=dias*2?'#FDECEA':'#FDF6EC'};color:${p.diasSin>=dias*2?'#C0392B':'#9A6010'}">${p.diasSin} días</span></td>
+      <td>${esc2(p.servicio || '—')}</td>
+      <td>${esc2(p.doctor)}</td>
+      <td><button class="appbtn appbtn-p prm-ver-btn" data-id="${p.id}" style="font-size:10.5px;padding:6px 11px">📖 Ver / gestionar</button></td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('.prm-ver-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> abrirTrazabilidad(btn.dataset.id));
+  });
+}
+document.getElementById('btn-prm-aplicar').addEventListener('click', cargarPRM);
+
+// ── Modal de trazabilidad: historial de visitas + bitácora CRM (gestiones) ──
+let TRAZA_PACIENTE_ID = null;
+// ── Editar / eliminar una consulta desde Historial ──
+let EDITANDO_CONSULTA = null;
+function actualizarTipoConsultaEC(){
+  const motivo = document.getElementById('ec-motivo').value;
+  const wrapSel = document.getElementById('ec-tipo-select');
+  const wrapTxt = document.getElementById('ec-tipo-libre');
+  const label = document.getElementById('ec-tipoconsulta-label');
+  if(TIPOS_LIBRES.includes(motivo)){
+    wrapSel.style.display = 'none';
+    wrapTxt.style.display = 'block';
+    label.textContent = DESC_LABEL[motivo] || 'Descripción';
+    return;
+  }
+  wrapSel.style.display = 'block';
+  wrapTxt.style.display = 'none';
+  label.textContent = 'Tipo de Consulta';
+  const doctorSel = document.getElementById('ec-doctor');
+  const doctorTxt = doctorSel.options[doctorSel.selectedIndex] ? doctorSel.options[doctorSel.selectedIndex].text : '';
+  let opciones;
+  if(/jimenez/i.test(doctorTxt) && CATALOGO_JIMENEZ[motivo]){
+    opciones = CATALOGO_JIMENEZ[motivo];
+  } else {
+    opciones = CATALOGO_CACHE[motivo] || [];
+  }
+  wrapSel.innerHTML = opciones.length
+    ? opciones.map(o => `<option>${esc2(o)}</option>`).join('')
+    : '<option value="">Sin opciones para este motivo</option>';
+}
+function valorTipoConsultaEC(){
+  const motivo = document.getElementById('ec-motivo').value;
+  if(TIPOS_LIBRES.includes(motivo)) return document.getElementById('ec-tipo-libre').value.trim();
+  return document.getElementById('ec-tipo-select').value;
+}
+document.getElementById('ec-motivo').addEventListener('change', actualizarTipoConsultaEC);
+document.getElementById('ec-doctor').addEventListener('change', actualizarTipoConsultaEC);
+
+function abrirEditarConsulta(consultaId){
+  const row = (window._historialFiltrado || window._historialData || []).find(r => r.id === consultaId);
+  if(!row){ toast('⚠️ No se encontró el registro'); return; }
+  EDITANDO_CONSULTA = row;
+
+  document.getElementById('ec-paciente').value = row.pacientes ? row.pacientes.nombre : '';
+  document.getElementById('ec-fecha').value = fmtFechaCompletaISO(row.fecha);
+  document.getElementById('ec-doctor').innerHTML = document.getElementById('r-doctor').innerHTML;
+  document.getElementById('ec-doctor').value = row.doctor_id || '';
+  document.getElementById('ec-motivo').value = row.motivo;
+  actualizarTipoConsultaEC();
+  if(TIPOS_LIBRES.includes(row.motivo)){
+    document.getElementById('ec-tipo-libre').value = row.tipo_consulta || '';
+  } else {
+    document.getElementById('ec-tipo-select').value = row.tipo_consulta || '';
+  }
+  document.getElementById('ec-monto').value = row.monto;
+  document.getElementById('ec-pago').value = row.medio_pago;
+
+  document.getElementById('modal-editar-consulta').classList.add('show');
+}
+function fmtFechaCompletaISO(iso){
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+document.getElementById('btn-ec-cerrar').addEventListener('click', ()=>{
+  document.getElementById('modal-editar-consulta').classList.remove('show');
+});
+document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
+  if(!EDITANDO_CONSULTA) return;
+  const nuevoNombre = document.getElementById('ec-paciente').value.trim();
+  const fechaVal = document.getElementById('ec-fecha').value.trim();
+  const doctorId = document.getElementById('ec-doctor').value;
+  const btn = document.getElementById('btn-ec-guardar');
+  if(!nuevoNombre || !fechaVal || !doctorId){ toast('⚠️ Completa paciente, fecha y doctor'); return; }
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    if(EDITANDO_CONSULTA.pacientes && nuevoNombre !== EDITANDO_CONSULTA.pacientes.nombre){
+      await sb.from('pacientes').update({ nombre: nuevoNombre }).eq('id', EDITANDO_CONSULTA.paciente_id);
+    }
+    const { error } = await sb.from('consultas').update({
+      fecha: dmyToISO(fechaVal),
+      doctor_id: doctorId,
+      motivo: document.getElementById('ec-motivo').value,
+      tipo_consulta: valorTipoConsultaEC() || null,
+      monto: parseFloat(document.getElementById('ec-monto').value) || 0,
+      medio_pago: document.getElementById('ec-pago').value,
+      edited_by: await miPersonalId(),
+      edited_at: new Date().toISOString()
+    }).eq('id', EDITANDO_CONSULTA.id);
+    if(error) throw error;
+    toast('✅ Consulta actualizada');
+    document.getElementById('modal-editar-consulta').classList.remove('show');
+    cargarHistorial();
+  } catch(err){
+    console.error('[CUIVAN] Error editando consulta:', err);
+    toast('⚠️ No se pudo guardar: ' + err.message);
+  }
+  btn.disabled = false; btn.textContent = 'Guardar cambios';
+});
+document.getElementById('btn-eliminar-consulta').addEventListener('click', ()=>{
+  if(!EDITANDO_CONSULTA) return;
+  mostrarConfirm({
+    titulo: '¿Eliminar este registro?',
+    mensaje: 'Se moverá a la Papelera — podrás restaurarlo desde ahí más adelante si hace falta.',
+    textoConfirmar: 'Sí, eliminar',
+    icono: '🗑️',
+    danger: true
+  }, async ()=>{
+    const { error } = await sb.from('consultas').update({
+      deleted: true, deleted_at: new Date().toISOString(), deleted_by: await miPersonalId()
+    }).eq('id', EDITANDO_CONSULTA.id);
+    if(error){ console.error('[CUIVAN] Error eliminando consulta:', error); toast('⚠️ No se pudo eliminar'); return; }
+    toast('✅ Registro movido a la Papelera');
+    document.getElementById('modal-editar-consulta').classList.remove('show');
+    cargarHistorial();
+  });
+});
+
+async function abrirTrazabilidad(pacienteId){
+  TRAZA_PACIENTE_ID = pacienteId;
+  const info = (window._prmData || []).find(p => p.id === pacienteId);
+  document.getElementById('traza-titulo').textContent = '📖 ' + (info ? info.nombre : 'Paciente');
+  document.getElementById('traza-resumen').textContent = info
+    ? `📞 ${info.telefono || '—'} · Última visita ${fmtFechaISO(info.fecha)} · ${info.doctor}`
+    : '—';
+  document.getElementById('traza-lista').innerHTML = '<div style="padding:10px;color:var(--g4);font-size:12px">Cargando...</div>';
+  document.getElementById('traza-gestiones').innerHTML = '<div style="padding:10px;color:var(--g4);font-size:12px">Cargando...</div>';
+  document.getElementById('modal-traza').classList.add('show');
+
+  const [visitas, gestiones] = await Promise.all([
+    sb.from('consultas').select('fecha, motivo, tipo_consulta, monto').eq('paciente_id', pacienteId).eq('deleted', false).order('fecha', { ascending:false }),
+    sb.from('gestiones').select('id, tipo, nota, fecha, personal:creado_por(nombre)').eq('paciente_id', pacienteId).order('fecha', { ascending:false })
+  ]);
+
+  if(visitas.error){ console.error('[CUIVAN] Error cargando visitas:', visitas.error); }
+  document.getElementById('traza-lista').innerHTML = (visitas.data && visitas.data.length)
+    ? visitas.data.map(v => `<div class="traza-visita2"><span>${fmtFechaISO(v.fecha)} — ${esc2(v.motivo)}${v.tipo_consulta ? ' · '+esc2(v.tipo_consulta) : ''}</span><span style="color:var(--g4)">$${Number(v.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>`).join('')
+    : '<div style="color:var(--g4);font-size:11.5px;padding:6px 0">Sin visitas registradas.</div>';
+
+  if(gestiones.error){ console.error('[CUIVAN] Error cargando gestiones:', gestiones.error); }
+  const GEST_ICON = { llamada:'📞', whatsapp:'💬', correo:'✉️' };
+  document.getElementById('traza-gestiones').innerHTML = (gestiones.data && gestiones.data.length)
+    ? gestiones.data.map(g => `<div class="crm-item2"><span>${GEST_ICON[g.tipo]||'📌'}</span><div><b style="text-transform:capitalize">${esc2(g.tipo)}</b> · ${fmtFechaISO(g.fecha)}${g.personal ? ' · '+esc2(g.personal.nombre) : ''}<br><span style="color:var(--g4)">${esc2(g.nota || '')}</span></div></div>`).join('')
+    : '<div style="color:var(--g4);font-size:11.5px;font-style:italic;padding:6px 0">Sin seguimientos registrados aún.</div>';
+}
+document.getElementById('btn-traza-cerrar').addEventListener('click', ()=>{
+  document.getElementById('modal-traza').classList.remove('show');
+});
+document.getElementById('btn-traza-registrar').addEventListener('click', async ()=>{
+  const tipoMap = { 'Llamada':'llamada', 'WhatsApp':'whatsapp', 'Correo':'correo' };
+  const tipo = tipoMap[document.getElementById('traza-canal').value];
+  const nota = document.getElementById('traza-resultado').value.trim();
+  if(!nota){ toast('⚠️ Describe el resultado de la gestión'); return; }
+  const { error } = await sb.from('gestiones').insert({
+    paciente_id: TRAZA_PACIENTE_ID, tipo, nota, fecha: new Date().toISOString().slice(0,10),
+    creado_por: await miPersonalId()
+  });
+  if(error){ console.error('[CUIVAN] Error registrando gestión:', error); toast('⚠️ No se pudo registrar'); return; }
+  document.getElementById('traza-resultado').value = '';
+  toast('✅ Gestión registrada');
+  abrirTrazabilidad(TRAZA_PACIENTE_ID);
+});
+
+// ── conectar carga por pestaña ──
+document.getElementById('app-nav').addEventListener('click',(e)=>{
+  const b = e.target.closest('button');
+  if(!b || b.classList.contains('locked') || !b.dataset.screen2) return;
+  if(b.dataset.screen2 === 'cierre') cargarCierre(cierreDiasActual);
+  if(b.dataset.screen2 === 'dash') cargarDashboard();
+  if(b.dataset.screen2 === 'prm') cargarPRM();
+});
+
+document.getElementById('link-aviso-legal-1').addEventListener('click', ()=>{
+  document.getElementById('modal-aviso-legal').classList.add('show');
+});
+document.getElementById('link-aviso-legal-2').addEventListener('click', ()=>{
+  document.getElementById('modal-aviso-legal').classList.add('show');
+});
+document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>{
+  document.getElementById('modal-aviso-legal').classList.remove('show');
+});
+</script>
+</body>
+</html>
