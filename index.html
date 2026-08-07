@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -493,14 +492,24 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
       <div class="fi2"><label class="lbl2">Monto</label><div class="mon2"><span>$</span><input class="app-input" id="ec-monto" type="number"/></div></div>
-      <div class="fi2"><label class="lbl2">Medio de pago</label><select class="app-input" id="ec-pago"><option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option></select></div>
-    </div>
-    <div class="modal-footer2" style="justify-content:space-between">
-      <button class="appbtn appbtn-danger-soft" id="btn-eliminar-consulta">🗑️ Eliminar registro</button>
-      <div style="display:flex;gap:8px">
-        <button class="appbtn appbtn-s" id="btn-ec-cerrar">Cancelar</button>
-        <button class="appbtn appbtn-p" id="btn-ec-guardar">Guardar cambios</button>
+      <div class="fi2">
+        <label class="lbl2">Medio de pago</label>
+        <select class="app-input" id="ec-pago"><option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option></select>
+        <button type="button" id="ec-btn-add2pago" style="background:none;border:none;color:#0B6E6E;cursor:pointer;font-size:10px;font-weight:700;padding:0;margin-top:5px;text-decoration:underline;text-underline-offset:2px">＋ agregar 2do pago</button>
       </div>
+    </div>
+    <div id="ec-pago2-wrap" style="display:none;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;padding-top:6px;border-top:1px dashed var(--g2)">
+      <div class="fi2"><label class="lbl2">Monto 2do pago</label><div class="mon2"><span>$</span><input class="app-input" id="ec-monto2" type="number"/></div></div>
+      <div class="fi2">
+        <label class="lbl2">Medio de pago 2</label>
+        <select class="app-input" id="ec-pago2"><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option><option>Cortesía</option></select>
+        <button type="button" id="ec-btn-quitar2pago" style="background:none;border:none;color:var(--g4);cursor:pointer;font-size:10px;font-weight:700;margin-top:5px;text-decoration:underline;text-underline-offset:2px">quitar ✕</button>
+      </div>
+    </div>
+    <div class="modal-footer2" style="justify-content:center;gap:8px;border-top:1px solid var(--g2);padding-top:14px">
+      <button class="appbtn appbtn-danger-soft" id="btn-eliminar-consulta" style="flex:1;text-align:center">🗑️ Eliminar</button>
+      <button class="appbtn appbtn-s" id="btn-ec-cerrar" style="flex:1;text-align:center">Cancelar</button>
+      <button class="appbtn appbtn-p" id="btn-ec-guardar" style="flex:1;text-align:center">Guardar cambios</button>
     </div>
   </div>
 </div>
@@ -671,7 +680,7 @@ async function doLogin(){
   // Trae el registro de personal vinculado a esta cuenta (rol, nombre)
   const { data: perfil, error: perfilErr } = await sb
     .from('personal')
-    .select('nombre, rol, activo')
+    .select('nombre, rol, activo, permisos')
     .eq('auth_user_id', data.user.id)
     .single();
 
@@ -723,7 +732,7 @@ sb.auth.getSession().then(({data:{session}})=>{
   }
 });
 async function doLogin_bySession(session){
-  const { data: perfil, error } = await sb.from('personal').select('nombre, rol, activo').eq('auth_user_id', session.user.id).single();
+  const { data: perfil, error } = await sb.from('personal').select('nombre, rol, activo, permisos').eq('auth_user_id', session.user.id).single();
   hideLoadingPanel();
   if(error){
     console.error('[CUIVAN] Error consultando personal (sesión existente):', error);
@@ -828,6 +837,7 @@ function entrarAlShell(perfil){
   document.getElementById('btn-personal-header').style.display = showPersonal ? 'inline-flex' : 'none';
   document.getElementById('btn-papelera-toggle').style.display = showPapelera ? 'inline-flex' : 'none';
   window.MI_ROL_ADMIN = perfil.rol === 'admin';
+  window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
 
   cargarDoctores();
   cargarCatalogoServiciosCache();
@@ -1042,11 +1052,14 @@ async function guardarRegistro(){
   btn.disabled = false; btn.textContent = 'Guardar registro';
 }
 
+let _miPersonalIdCache = null;
 async function miPersonalId(){
+  if(_miPersonalIdCache) return _miPersonalIdCache;
   const { data } = await sb.auth.getSession();
   const uid = data.session.user.id;
   const { data: row } = await sb.from('personal').select('id').eq('auth_user_id', uid).single();
-  return row ? row.id : null;
+  _miPersonalIdCache = row ? row.id : null;
+  return _miPersonalIdCache;
 }
 
 function limpiarRegistro(){
@@ -1148,24 +1161,43 @@ document.getElementById('h-motivo').addEventListener('change', aplicarFiltrosHis
 document.getElementById('h-pago').addEventListener('change', aplicarFiltrosHistorial);
 
 // ── Exportar a Excel (datos crudos, sin emojis/HTML) ──
-document.getElementById('btn-export-historial').addEventListener('click', ()=>{
+function cargarXLSX(){
+  return new Promise((resolve, reject)=>{
+    if(window.XLSX) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+document.getElementById('btn-export-historial').addEventListener('click', async ()=>{
   const rows = window._historialFiltrado || [];
   if(rows.length === 0){ toast('⚠️ No hay datos para exportar'); return; }
-  const header = ['Fecha','Paciente','Doctor','Motivo','Tipo de Consulta','Monto','Medio de Pago'];
-  const body = rows.map(r => [
-    r.fecha,
-    r.pacientes ? r.pacientes.nombre : '',
-    r.personal ? r.personal.nombre : '',
-    r.motivo,
-    r.tipo_consulta || '',
-    Number(r.monto || 0),
-    r.medio_pago
-  ]);
-  const ws = XLSX.utils.aoa_to_sheet([header, ...body]);
-  ws['!cols'] = [{wch:11},{wch:26},{wch:22},{wch:16},{wch:22},{wch:12},{wch:16}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Historial');
-  XLSX.writeFile(wb, `CUIVAN_Historial_${todayLocal().replace(/\//g,'-')}.xlsx`);
+  const btn = document.getElementById('btn-export-historial');
+  btn.disabled = true; btn.textContent = 'Preparando...';
+  try {
+    await cargarXLSX();
+    const header = ['Fecha','Paciente','Doctor','Motivo','Tipo de Consulta','Monto','Medio de Pago'];
+    const body = rows.map(r => [
+      r.fecha,
+      r.pacientes ? r.pacientes.nombre : '',
+      r.personal ? r.personal.nombre : '',
+      r.motivo,
+      r.tipo_consulta || '',
+      Number(r.monto || 0),
+      r.medio_pago
+    ]);
+    const ws = XLSX.utils.aoa_to_sheet([header, ...body]);
+    ws['!cols'] = [{wch:11},{wch:26},{wch:22},{wch:16},{wch:22},{wch:12},{wch:16}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Historial');
+    XLSX.writeFile(wb, `CUIVAN_Historial_${todayLocal().replace(/\//g,'-')}.xlsx`);
+  } catch(err){
+    console.error('[CUIVAN] Error exportando:', err);
+    toast('⚠️ No se pudo generar el Excel');
+  }
+  btn.disabled = false; btn.textContent = '⬇ Exportar Excel';
 });
 
 // ── Papelera: consultas eliminadas (soft-delete), restaurar o borrar definitivo ──
@@ -1197,7 +1229,7 @@ async function cargarPapelera(){
     <div class="papelera-box">
       <div class="papelera-title" style="display:flex;align-items:center;justify-content:space-between">
         <span>🗑 Papelera — ${data.length} registro(s) eliminado(s)</span>
-        ${window.MI_ROL_ADMIN ? `<button class="appbtn appbtn-danger-soft" id="btn-vaciar-papelera" style="font-size:10.5px;padding:5px 10px;text-transform:none;letter-spacing:0;font-weight:700">Vaciar papelera</button>` : ''}
+        ${window.MI_PUEDE_ELIMINAR_PAPELERA ? `<button class="appbtn appbtn-danger-soft" id="btn-vaciar-papelera" style="font-size:10.5px;padding:5px 10px;text-transform:none;letter-spacing:0;font-weight:700">Vaciar papelera</button>` : ''}
       </div>
       <div style="overflow-x:auto">
         <table class="htable2">
@@ -1214,7 +1246,7 @@ async function cargarPapelera(){
                 <td style="font-size:10.5px;color:var(--g4)">${esc2(c.eliminador ? c.eliminador.nombre : '—')}</td>
                 <td style="white-space:nowrap">
                   <button class="appbtn appbtn-s pap-restaurar" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">↺ Restaurar</button>
-                  ${window.MI_ROL_ADMIN ? `<button class="appbtn appbtn-danger-soft pap-eliminar-def" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">✕ Eliminar</button>` : ''}
+                  ${window.MI_PUEDE_ELIMINAR_PAPELERA ? `<button class="appbtn appbtn-danger-soft pap-eliminar-def" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">✕ Eliminar</button>` : ''}
                 </td>
               </tr>
             `).join('')}
@@ -1269,7 +1301,7 @@ async function cargarPapelera(){
 async function cargarPersonal(){
   const cont = document.getElementById('personal-lista');
   cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
-  const { data, error } = await sb.from('personal').select('id, nombre, rol, activo, auth_user_id, email').order('rol').order('nombre');
+  const { data, error } = await sb.from('personal').select('id, nombre, rol, activo, auth_user_id, email, permisos').order('rol').order('nombre');
   if(error){ console.error('[CUIVAN] Error cargando personal:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
   cont.innerHTML = data.map(p => `
     <div class="p-row" data-id="${p.id}" data-auth="${p.auth_user_id || ''}">
@@ -1292,6 +1324,10 @@ async function cargarPersonal(){
         <button class="appbtn appbtn-danger-soft p-eliminar" style="font-size:11px;padding:6px 10px;white-space:nowrap">🗑️</button>
       </div>
     </div>
+    ${p.rol === 'admin' ? `
+    <div class="p-permiso-row" data-permiso-id="${p.id}" style="padding:4px 0 10px;margin-top:-4px;border-bottom:1px solid var(--g1)">
+      <label class="cbrow2" style="font-size:11px"><input type="checkbox" class="p-permiso-papelera" ${p.permisos?.puede_eliminar_papelera !== false ? 'checked':''}/><span style="font-weight:600;color:var(--g6)">🗑️ Puede vaciar/eliminar registros de la Papelera</span></label>
+    </div>` : ''}
   `).join('');
   cont.querySelectorAll('.p-guardar').forEach(btn=>{
     btn.addEventListener('click', async (e)=>{
@@ -1304,6 +1340,15 @@ async function cargarPersonal(){
       if(error){ console.error('[CUIVAN] Error actualizando personal:', error); toast('⚠️ No se pudo guardar'); return; }
       toast('✅ Actualizado');
       cargarDoctores();
+    });
+  });
+
+  cont.querySelectorAll('.p-permiso-papelera').forEach(cb=>{
+    cb.addEventListener('change', async (e)=>{
+      const id = e.target.closest('.p-permiso-row').dataset.permisoId;
+      const { error } = await sb.from('personal').update({ permisos: { puede_eliminar_papelera: e.target.checked } }).eq('id', id);
+      if(error){ console.error('[CUIVAN] Error actualizando permiso:', error); toast('⚠️ No se pudo guardar el permiso'); e.target.checked = !e.target.checked; return; }
+      toast('✅ Permiso actualizado');
     });
   });
 
@@ -1799,9 +1844,24 @@ function abrirEditarConsulta(consultaId){
   }
   document.getElementById('ec-monto').value = row.monto;
   document.getElementById('ec-pago').value = row.medio_pago;
+  if(row.monto_2 && row.medio_pago_2){
+    document.getElementById('ec-pago2-wrap').style.display = 'grid';
+    document.getElementById('ec-monto2').value = row.monto_2;
+    document.getElementById('ec-pago2').value = row.medio_pago_2;
+  } else {
+    document.getElementById('ec-pago2-wrap').style.display = 'none';
+    document.getElementById('ec-monto2').value = '';
+  }
 
   document.getElementById('modal-editar-consulta').classList.add('show');
 }
+document.getElementById('ec-btn-add2pago').addEventListener('click', ()=>{
+  document.getElementById('ec-pago2-wrap').style.display = 'grid';
+});
+document.getElementById('ec-btn-quitar2pago').addEventListener('click', ()=>{
+  document.getElementById('ec-pago2-wrap').style.display = 'none';
+  document.getElementById('ec-monto2').value = '';
+});
 function fmtFechaCompletaISO(iso){
   const [y,m,d] = iso.split('-');
   return `${d}/${m}/${y}`;
@@ -1828,6 +1888,8 @@ document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
       tipo_consulta: valorTipoConsultaEC() || null,
       monto: parseFloat(document.getElementById('ec-monto').value) || 0,
       medio_pago: document.getElementById('ec-pago').value,
+      monto_2: document.getElementById('ec-pago2-wrap').style.display === 'grid' && document.getElementById('ec-monto2').value ? parseFloat(document.getElementById('ec-monto2').value) : null,
+      medio_pago_2: document.getElementById('ec-pago2-wrap').style.display === 'grid' && document.getElementById('ec-monto2').value ? document.getElementById('ec-pago2').value : null,
       edited_by: await miPersonalId(),
       edited_at: new Date().toISOString()
     }).eq('id', EDITANDO_CONSULTA.id);
