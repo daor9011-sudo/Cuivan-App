@@ -74,6 +74,8 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 
 .appbtn{padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-weight:700;font-size:.82rem;transition:.18s;font-family:var(--font-b)}
 .appbtn-p{background:linear-gradient(135deg,var(--teal),#22a8a8);color:var(--navy);box-shadow:0 6px 14px -4px rgba(42,191,191,.55)}
+.appbtn-danger-soft{background:#FEF0EF;color:#C0392B;border:1px solid #FBBFBB;box-shadow:none}
+.appbtn-danger-soft:hover{background:#FCE0DF}
 .appbtn-s{background:var(--navy2);color:#fff;box-shadow:0 6px 14px -4px rgba(27,58,107,.45)}
 
 .filt2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
@@ -445,14 +447,17 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <div class="fi2"><label class="lbl2">Motivo</label>
         <select class="app-input" id="ec-motivo"><option>Consulta</option><option>Procedimientos</option><option>Vacunas</option><option>Producto Farmacia</option><option>Otro</option></select>
       </div>
-      <div class="fi2"><label class="lbl2">Tipo de consulta</label><input class="app-input" id="ec-tipo"/></div>
+      <div class="fi2" id="ec-tipoconsulta-wrap"><label class="lbl2" id="ec-tipoconsulta-label">Tipo de consulta</label>
+        <select class="app-input" id="ec-tipo-select"></select>
+        <input class="app-input" id="ec-tipo-libre" style="display:none"/>
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
       <div class="fi2"><label class="lbl2">Monto</label><div class="mon2"><span>$</span><input class="app-input" id="ec-monto" type="number"/></div></div>
       <div class="fi2"><label class="lbl2">Medio de pago</label><select class="app-input" id="ec-pago"><option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option></select></div>
     </div>
     <div class="modal-footer2" style="justify-content:space-between">
-      <button class="appbtn appbtn-s" id="btn-eliminar-consulta" style="background:#e53e3e">🗑️ Eliminar registro</button>
+      <button class="appbtn appbtn-danger-soft" id="btn-eliminar-consulta">🗑️ Eliminar registro</button>
       <div style="display:flex;gap:8px">
         <button class="appbtn appbtn-s" id="btn-ec-cerrar">Cancelar</button>
         <button class="appbtn appbtn-p" id="btn-ec-guardar">Guardar cambios</button>
@@ -1081,7 +1086,7 @@ async function cargarPersonal(){
           ? `<button class="appbtn appbtn-s p-reset" style="font-size:11px;padding:6px 10px;white-space:nowrap">🔑 Reset</button>
              <button class="appbtn appbtn-s p-cambiar-correo" style="font-size:11px;padding:6px 10px;white-space:nowrap">✉️ Correo</button>`
           : `<button class="appbtn appbtn-p p-dar-acceso" style="font-size:11px;padding:6px 10px;white-space:nowrap">Dar acceso</button>`}
-        <button class="appbtn appbtn-s p-eliminar" style="font-size:11px;padding:6px 10px;white-space:nowrap;background:#e53e3e">🗑️</button>
+        <button class="appbtn appbtn-danger-soft p-eliminar" style="font-size:11px;padding:6px 10px;white-space:nowrap">🗑️</button>
       </div>
     </div>
   `).join('');
@@ -1529,6 +1534,40 @@ document.getElementById('btn-prm-aplicar').addEventListener('click', cargarPRM);
 let TRAZA_PACIENTE_ID = null;
 // ── Editar / eliminar una consulta desde Historial ──
 let EDITANDO_CONSULTA = null;
+function actualizarTipoConsultaEC(){
+  const motivo = document.getElementById('ec-motivo').value;
+  const wrapSel = document.getElementById('ec-tipo-select');
+  const wrapTxt = document.getElementById('ec-tipo-libre');
+  const label = document.getElementById('ec-tipoconsulta-label');
+  if(TIPOS_LIBRES.includes(motivo)){
+    wrapSel.style.display = 'none';
+    wrapTxt.style.display = 'block';
+    label.textContent = DESC_LABEL[motivo] || 'Descripción';
+    return;
+  }
+  wrapSel.style.display = 'block';
+  wrapTxt.style.display = 'none';
+  label.textContent = 'Tipo de Consulta';
+  const doctorSel = document.getElementById('ec-doctor');
+  const doctorTxt = doctorSel.options[doctorSel.selectedIndex] ? doctorSel.options[doctorSel.selectedIndex].text : '';
+  let opciones;
+  if(/jimenez/i.test(doctorTxt) && CATALOGO_JIMENEZ[motivo]){
+    opciones = CATALOGO_JIMENEZ[motivo];
+  } else {
+    opciones = CATALOGO_CACHE[motivo] || [];
+  }
+  wrapSel.innerHTML = opciones.length
+    ? opciones.map(o => `<option>${esc2(o)}</option>`).join('')
+    : '<option value="">Sin opciones para este motivo</option>';
+}
+function valorTipoConsultaEC(){
+  const motivo = document.getElementById('ec-motivo').value;
+  if(TIPOS_LIBRES.includes(motivo)) return document.getElementById('ec-tipo-libre').value.trim();
+  return document.getElementById('ec-tipo-select').value;
+}
+document.getElementById('ec-motivo').addEventListener('change', actualizarTipoConsultaEC);
+document.getElementById('ec-doctor').addEventListener('change', actualizarTipoConsultaEC);
+
 function abrirEditarConsulta(consultaId){
   const row = (window._historialFiltrado || window._historialData || []).find(r => r.id === consultaId);
   if(!row){ toast('⚠️ No se encontró el registro'); return; }
@@ -1539,7 +1578,12 @@ function abrirEditarConsulta(consultaId){
   document.getElementById('ec-doctor').innerHTML = document.getElementById('r-doctor').innerHTML;
   document.getElementById('ec-doctor').value = row.doctor_id || '';
   document.getElementById('ec-motivo').value = row.motivo;
-  document.getElementById('ec-tipo').value = row.tipo_consulta || '';
+  actualizarTipoConsultaEC();
+  if(TIPOS_LIBRES.includes(row.motivo)){
+    document.getElementById('ec-tipo-libre').value = row.tipo_consulta || '';
+  } else {
+    document.getElementById('ec-tipo-select').value = row.tipo_consulta || '';
+  }
   document.getElementById('ec-monto').value = row.monto;
   document.getElementById('ec-pago').value = row.medio_pago;
 
@@ -1568,7 +1612,7 @@ document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
       fecha: dmyToISO(fechaVal),
       doctor_id: doctorId,
       motivo: document.getElementById('ec-motivo').value,
-      tipo_consulta: document.getElementById('ec-tipo').value.trim() || null,
+      tipo_consulta: valorTipoConsultaEC() || null,
       monto: parseFloat(document.getElementById('ec-monto').value) || 0,
       medio_pago: document.getElementById('ec-pago').value,
       edited_by: await miPersonalId(),
