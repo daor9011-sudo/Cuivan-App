@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -89,6 +90,38 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .svc-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--g1);font-size:12px}
 .svc-row:last-child{border-bottom:none}
 .svc-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;font-weight:700}
+
+/* ── Historial Opción 2 ── */
+.h2-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.h2-title-block{display:flex;align-items:center;gap:10px}
+.h2-icon-badge{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--navy2));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.h2-chips{display:flex;gap:7px;flex-wrap:wrap}
+.h2-chip{background:#fff;border:1.5px solid var(--g2);border-radius:9px;padding:6px 12px;display:flex;align-items:center;gap:7px}
+.h2-chip .ico{font-size:13px}
+.h2-chip .v{font-family:var(--font-d);font-weight:800;font-size:13px;color:var(--navy)}
+.h2-chip .l{font-size:8.5px;color:var(--g4);font-weight:700;text-transform:uppercase}
+.h2-filt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding:9px 10px;background:var(--g1);border-radius:9px}
+.h2-filt input,.h2-filt select{font-size:11px;padding:6px 9px}
+.h2-table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:12px}
+.h2-table thead th{text-align:left;padding:0 10px 4px;color:var(--g4);font-size:9px;letter-spacing:.6px;text-transform:uppercase;font-weight:800}
+.h2-table tbody tr{background:#fff;box-shadow:0 1px 3px rgba(11,22,40,.06)}
+.h2-table tbody tr:hover{box-shadow:0 4px 12px rgba(11,22,40,.12)}
+.h2-table td{padding:9px 10px;font-size:11.5px}
+.h2-table td:first-child{border-radius:9px 0 0 9px;border-left:3px solid var(--teal)}
+.h2-table td:last-child{border-radius:0 9px 9px 0}
+
+/* ── Modal trazabilidad (PRM/CRM) ── */
+.modal-overlay2{position:fixed;inset:0;background:rgba(11,22,40,.55);display:none;align-items:center;justify-content:center;z-index:500;padding:20px}
+.modal-overlay2.show{display:flex}
+.modal2{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:22px;max-height:88vh;overflow-y:auto;box-shadow:0 30px 70px -15px rgba(0,0,0,.4)}
+.modal2 h3{font-family:var(--font-d);font-size:15px;font-weight:800;margin-bottom:12px}
+.traza-resumen2{background:var(--g1);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--g6)}
+.traza-lista2{max-height:170px;overflow-y:auto;margin-bottom:6px}
+.traza-visita2{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--g1);font-size:11.5px}
+.crm-section-title2{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--navy2);margin:16px 0 8px}
+.crm-gestiones2{max-height:130px;overflow-y:auto;margin-bottom:10px}
+.crm-item2{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--g1);font-size:11.5px}
+.modal-footer2{display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--g2)}
 .kpi-tile{border-radius:11px;padding:13px 14px;background:#fff;border:1.5px solid var(--g2)}
 .kpi-tile .ico{font-size:16px;margin-bottom:5px}
 .kpi-tile .lbl3{font-size:9px;font-weight:700;letter-spacing:.4px;color:var(--g6);text-transform:uppercase;margin-bottom:2px}
@@ -252,29 +285,36 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 
     <!-- ══ HISTORIAL ══ -->
     <div class="card screen2" id="app-screen-historial">
-      <div class="tab-title"><span>🗂️ Historial de consultas</span><button class="appbtn appbtn-s" id="btn-refrescar-historial" style="font-size:11px;padding:6px 12px">↻ Refrescar</button></div>
-      <div id="h-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
-      <div class="filt2">
-        <input class="app-input" type="text" id="h-buscar" placeholder="Buscar paciente..." style="min-width:180px"/>
-        <select class="app-input" id="h-periodo">
+      <div class="h2-topbar">
+        <div class="h2-title-block">
+          <div class="h2-icon-badge">🗂️</div>
+          <div><div style="font-family:var(--font-d);font-weight:800;font-size:15px">Historial de consultas</div><div style="font-size:10.5px;color:var(--g4)" id="h2-subt">—</div></div>
+        </div>
+        <div class="h2-chips" id="h-kpis"></div>
+      </div>
+      <div class="h2-filt">
+        <input class="app-input" type="text" id="h-buscar" placeholder="Buscar paciente..." style="min-width:170px;background:#fff"/>
+        <select class="app-input" id="h-periodo" style="background:#fff">
           <option value="7">Últimos 7 días</option>
           <option value="30" selected>Últimos 30 días</option>
           <option value="90">Últimos 90 días</option>
           <option value="365">Último año</option>
           <option value="0">Todo</option>
         </select>
-        <select class="app-input" id="h-motivo">
+        <select class="app-input" id="h-motivo" style="background:#fff">
           <option value="">Todos los motivos</option>
           <option>Consulta</option><option>Procedimientos</option><option>Vacunas</option>
           <option>Producto Farmacia</option><option>Otro</option>
         </select>
-        <select class="app-input" id="h-pago">
+        <select class="app-input" id="h-pago" style="background:#fff">
           <option value="">Todos los medios de pago</option>
           <option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option>
         </select>
+        <button class="appbtn appbtn-s" id="btn-refrescar-historial" style="font-size:11px;padding:6px 12px">↻</button>
+        <button class="appbtn appbtn-p" id="btn-export-historial" style="font-size:11px;padding:6px 12px;margin-left:auto">⬇ Exportar Excel</button>
       </div>
       <div style="overflow-x:auto">
-        <table class="htable2">
+        <table class="h2-table">
           <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th></tr></thead>
           <tbody id="h-tbody"><tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
         </table>
@@ -308,12 +348,18 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     <!-- ══ PRM/CRM ══ -->
     <div class="card screen2" id="app-screen-prm">
       <div class="tab-title">💬 PRM — Pacientes inactivos</div>
+      <div id="prm-kpis" class="dash-kpi-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
       <div class="filt2">
         <label class="lbl2" style="align-self:center">Días sin visita:</label>
         <input class="app-input" type="number" id="prm-dias" value="60" style="width:70px"/>
         <button class="appbtn appbtn-p" id="btn-prm-aplicar" style="font-size:11px;padding:6px 12px">Aplicar</button>
       </div>
-      <div id="prm-lista"></div>
+      <div style="overflow-x:auto">
+        <table class="htable2">
+          <thead><tr><th>Paciente</th><th>Teléfono</th><th>Última visita</th><th>Inactividad</th><th>Último servicio</th><th>Doctor</th><th></th></tr></thead>
+          <tbody id="prm-tbody"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ══ PERSONAL ══ -->
@@ -358,6 +404,26 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 </div>
 
 <div class="toast2" id="toast2"></div>
+
+<!-- Modal trazabilidad del paciente (historial de visitas + bitácora CRM) -->
+<div class="modal-overlay2" id="modal-traza">
+  <div class="modal2">
+    <h3 id="traza-titulo">📖 Paciente</h3>
+    <div class="traza-resumen2" id="traza-resumen">—</div>
+    <div class="crm-section-title2" style="margin-top:0">🕒 Historial de visitas</div>
+    <div class="traza-lista2" id="traza-lista"></div>
+    <div class="crm-section-title2">📞 Bitácora de seguimiento (CRM)</div>
+    <div class="crm-gestiones2" id="traza-gestiones"></div>
+    <div style="display:grid;grid-template-columns:110px 1fr auto;gap:6px;align-items:end">
+      <div><label class="lbl2">Canal</label><select class="app-input" id="traza-canal"><option>Llamada</option><option>WhatsApp</option><option>Correo</option></select></div>
+      <div><label class="lbl2">Resultado</label><input class="app-input" id="traza-resultado" placeholder="Ej: No contestó, se reagenda"/></div>
+      <button class="appbtn appbtn-p" id="btn-traza-registrar">+ Registrar</button>
+    </div>
+    <div class="modal-footer2">
+      <button class="appbtn appbtn-s" id="btn-traza-cerrar">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <div id="loading-panel">
   <img src="data:image/png;base64,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" alt="Mediconsulting" style="height:48px;margin-bottom:36px;opacity:0.95;">
@@ -813,33 +879,37 @@ function aplicarFiltrosHistorial(){
   if(pago) rows = rows.filter(r => r.medio_pago === pago);
 
   const kpisEl = document.getElementById('h-kpis');
+  const periodoTxt = document.getElementById('h-periodo').selectedOptions[0].text;
   if(rows.length === 0){
     document.getElementById('h-tbody').innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
     kpisEl.innerHTML = '';
+    document.getElementById('h2-subt').textContent = periodoTxt + ' · 0 registros';
     return;
   }
   const totalIngreso = rows.reduce((a,r)=>a+Number(r.monto||0),0);
   const pacientesUnicos = new Set(rows.map(r=>r.pacientes?.id)).size;
   const ticketProm = rows.length ? totalIngreso/rows.length : 0;
+  document.getElementById('h2-subt').textContent = periodoTxt + ' · ' + rows.length + ' registros';
   kpisEl.innerHTML = `
-    <div class="kpi-tile"><div class="ico">💰</div><div class="lbl3">Total mostrado</div><div class="val">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
-    <div class="kpi-tile"><div class="ico">🧾</div><div class="lbl3">Consultas</div><div class="val">${rows.length}</div></div>
-    <div class="kpi-tile"><div class="ico">👥</div><div class="lbl3">Pacientes únicos</div><div class="val">${pacientesUnicos}</div></div>
-    <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket promedio</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+    <div class="h2-chip"><span class="ico">💰</span><div><div class="v">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:0})}</div><div class="l">Total</div></div></div>
+    <div class="h2-chip"><span class="ico">👥</span><div><div class="v">${pacientesUnicos}</div><div class="l">Pacientes</div></div></div>
+    <div class="h2-chip"><span class="ico">🎟️</span><div><div class="v">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:0})}</div><div class="l">Ticket prom.</div></div></div>
   `;
+  window._historialFiltrado = rows;
   renderHistorial(rows);
 }
+const PAGO_ICON = { Tarjeta:'💳', Efectivo:'💵', Transferencia:'🏦', Cortesía:'🎁' };
 function renderHistorial(rows){
   const tbody = document.getElementById('h-tbody');
   tbody.innerHTML = rows.map(r => `
     <tr>
       <td>${fmtFechaISO(r.fecha)}</td>
-      <td>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</td>
+      <td><b>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</b></td>
       <td>${esc2(r.personal ? r.personal.nombre : '—')}</td>
       <td><span class="pill2 pt2">${esc2(r.motivo)}</span></td>
       <td>${esc2(r.tipo_consulta || '—')}</td>
-      <td>$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</td>
-      <td><span class="pill2 pn2">${esc2(r.medio_pago)}</span></td>
+      <td><b style="color:var(--teal)">$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</b></td>
+      <td>${PAGO_ICON[r.medio_pago]||''} ${esc2(r.medio_pago)}</td>
     </tr>
   `).join('');
 }
@@ -852,6 +922,27 @@ document.getElementById('h-periodo').addEventListener('change', cargarHistorial)
 document.getElementById('h-buscar').addEventListener('input', aplicarFiltrosHistorial);
 document.getElementById('h-motivo').addEventListener('change', aplicarFiltrosHistorial);
 document.getElementById('h-pago').addEventListener('change', aplicarFiltrosHistorial);
+
+// ── Exportar a Excel (datos crudos, sin emojis/HTML) ──
+document.getElementById('btn-export-historial').addEventListener('click', ()=>{
+  const rows = window._historialFiltrado || [];
+  if(rows.length === 0){ toast('⚠️ No hay datos para exportar'); return; }
+  const header = ['Fecha','Paciente','Doctor','Motivo','Tipo de Consulta','Monto','Medio de Pago'];
+  const body = rows.map(r => [
+    r.fecha,
+    r.pacientes ? r.pacientes.nombre : '',
+    r.personal ? r.personal.nombre : '',
+    r.motivo,
+    r.tipo_consulta || '',
+    Number(r.monto || 0),
+    r.medio_pago
+  ]);
+  const ws = XLSX.utils.aoa_to_sheet([header, ...body]);
+  ws['!cols'] = [{wch:11},{wch:26},{wch:22},{wch:16},{wch:22},{wch:12},{wch:16}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Historial');
+  XLSX.writeFile(wb, `CUIVAN_Historial_${todayLocal().replace(/\//g,'-')}.xlsx`);
+});
 
 // ── Personal: lista + edición (nombre/rol/activo) ──
 async function cargarPersonal(){
@@ -1195,42 +1286,108 @@ async function cargarDashboard(){
 // ═══════════════════════════════════════════════════════════
 async function cargarPRM(){
   const dias = parseInt(document.getElementById('prm-dias').value) || 60;
-  const cont = document.getElementById('prm-lista');
-  cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
+  const tbody = document.getElementById('prm-tbody');
+  const kpisEl = document.getElementById('prm-kpis');
+  tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
   const { data, error } = await sb
     .from('consultas')
-    .select('fecha, paciente_id, pacientes(id, nombre, telefono)')
+    .select('fecha, paciente_id, motivo, tipo_consulta, pacientes(id, nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
     .eq('deleted', false)
     .order('fecha', { ascending:false });
-  if(error){ console.error('[CUIVAN] Error cargando PRM:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+  if(error){ console.error('[CUIVAN] Error cargando PRM:', error); tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--red)">Error al cargar</td></tr>'; return; }
 
   // última visita por paciente
   const ultima = {};
   data.forEach(r=>{
     if(!r.pacientes) return;
     const id = r.pacientes.id;
-    if(!ultima[id] || r.fecha > ultima[id].fecha) ultima[id] = { fecha: r.fecha, nombre: r.pacientes.nombre, telefono: r.pacientes.telefono };
+    if(!ultima[id] || r.fecha > ultima[id].fecha) ultima[id] = {
+      fecha: r.fecha, nombre: r.pacientes.nombre, telefono: r.pacientes.telefono,
+      servicio: [r.motivo, r.tipo_consulta].filter(Boolean).join(' · '),
+      doctor: r.personal ? r.personal.nombre : '—'
+    };
   });
   const hoy = new Date();
-  const inactivos = Object.entries(ultima).map(([id, info])=>{
+  const todos = Object.entries(ultima).map(([id, info])=>{
     const diasSin = Math.floor((hoy - new Date(info.fecha)) / 86400000);
     return { id, ...info, diasSin };
-  }).filter(p => p.diasSin >= dias).sort((a,b)=>b.diasSin - a.diasSin);
+  });
+  const inactivos = todos.filter(p => p.diasSin >= dias).sort((a,b)=>b.diasSin - a.diasSin);
+
+  kpisEl.innerHTML = `
+    <div class="kpi-tile"><div class="ico">🎯</div><div class="lbl3">Pacientes inactivos</div><div class="val">${inactivos.length}</div></div>
+    <div class="kpi-tile"><div class="ico">👥</div><div class="lbl3">Total pacientes</div><div class="val">${todos.length}</div></div>
+    <div class="kpi-tile"><div class="ico">📊</div><div class="lbl3">% inactivos</div><div class="val">${todos.length ? Math.round(inactivos.length/todos.length*100) : 0}%</div></div>
+  `;
 
   if(inactivos.length === 0){
-    cont.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Ningún paciente supera ese umbral de inactividad.</div>';
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">🎉 Nadie supera ese umbral — todos tus pacientes están activos</td></tr>';
     return;
   }
-  cont.innerHTML = inactivos.map(p => `
-    <div class="prm-item2">
-      <div class="prm-top2">
-        <div><b style="font-size:12.5px;color:var(--navy)">${esc2(p.nombre)}</b><div style="font-size:10.5px;color:var(--g6)">Última visita: ${fmtFechaISO(p.fecha)} · ${esc2(p.telefono||'—')}</div></div>
-        <span class="prm-badge2">${p.diasSin} días sin visita</span>
-      </div>
-    </div>
+  window._prmData = inactivos;
+  tbody.innerHTML = inactivos.map(p => `
+    <tr>
+      <td><b>${esc2(p.nombre)}</b></td>
+      <td>${esc2(p.telefono || '—')}</td>
+      <td>${fmtFechaISO(p.fecha)}</td>
+      <td><span class="pill2" style="background:${p.diasSin>=dias*2?'#FDECEA':'#FDF6EC'};color:${p.diasSin>=dias*2?'#C0392B':'#9A6010'}">${p.diasSin} días</span></td>
+      <td>${esc2(p.servicio || '—')}</td>
+      <td>${esc2(p.doctor)}</td>
+      <td><button class="appbtn appbtn-p prm-ver-btn" data-id="${p.id}" style="font-size:10.5px;padding:6px 11px">📖 Ver / gestionar</button></td>
+    </tr>
   `).join('');
+  tbody.querySelectorAll('.prm-ver-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> abrirTrazabilidad(btn.dataset.id));
+  });
 }
 document.getElementById('btn-prm-aplicar').addEventListener('click', cargarPRM);
+
+// ── Modal de trazabilidad: historial de visitas + bitácora CRM (gestiones) ──
+let TRAZA_PACIENTE_ID = null;
+async function abrirTrazabilidad(pacienteId){
+  TRAZA_PACIENTE_ID = pacienteId;
+  const info = (window._prmData || []).find(p => p.id === pacienteId);
+  document.getElementById('traza-titulo').textContent = '📖 ' + (info ? info.nombre : 'Paciente');
+  document.getElementById('traza-resumen').textContent = info
+    ? `📞 ${info.telefono || '—'} · Última visita ${fmtFechaISO(info.fecha)} · ${info.doctor}`
+    : '—';
+  document.getElementById('traza-lista').innerHTML = '<div style="padding:10px;color:var(--g4);font-size:12px">Cargando...</div>';
+  document.getElementById('traza-gestiones').innerHTML = '<div style="padding:10px;color:var(--g4);font-size:12px">Cargando...</div>';
+  document.getElementById('modal-traza').classList.add('show');
+
+  const [visitas, gestiones] = await Promise.all([
+    sb.from('consultas').select('fecha, motivo, tipo_consulta, monto').eq('paciente_id', pacienteId).eq('deleted', false).order('fecha', { ascending:false }),
+    sb.from('gestiones').select('id, tipo, nota, fecha, personal:creado_por(nombre)').eq('paciente_id', pacienteId).order('fecha', { ascending:false })
+  ]);
+
+  if(visitas.error){ console.error('[CUIVAN] Error cargando visitas:', visitas.error); }
+  document.getElementById('traza-lista').innerHTML = (visitas.data && visitas.data.length)
+    ? visitas.data.map(v => `<div class="traza-visita2"><span>${fmtFechaISO(v.fecha)} — ${esc2(v.motivo)}${v.tipo_consulta ? ' · '+esc2(v.tipo_consulta) : ''}</span><span style="color:var(--g4)">$${Number(v.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>`).join('')
+    : '<div style="color:var(--g4);font-size:11.5px;padding:6px 0">Sin visitas registradas.</div>';
+
+  if(gestiones.error){ console.error('[CUIVAN] Error cargando gestiones:', gestiones.error); }
+  const GEST_ICON = { llamada:'📞', whatsapp:'💬', correo:'✉️' };
+  document.getElementById('traza-gestiones').innerHTML = (gestiones.data && gestiones.data.length)
+    ? gestiones.data.map(g => `<div class="crm-item2"><span>${GEST_ICON[g.tipo]||'📌'}</span><div><b style="text-transform:capitalize">${esc2(g.tipo)}</b> · ${fmtFechaISO(g.fecha)}${g.personal ? ' · '+esc2(g.personal.nombre) : ''}<br><span style="color:var(--g4)">${esc2(g.nota || '')}</span></div></div>`).join('')
+    : '<div style="color:var(--g4);font-size:11.5px;font-style:italic;padding:6px 0">Sin seguimientos registrados aún.</div>';
+}
+document.getElementById('btn-traza-cerrar').addEventListener('click', ()=>{
+  document.getElementById('modal-traza').classList.remove('show');
+});
+document.getElementById('btn-traza-registrar').addEventListener('click', async ()=>{
+  const tipoMap = { 'Llamada':'llamada', 'WhatsApp':'whatsapp', 'Correo':'correo' };
+  const tipo = tipoMap[document.getElementById('traza-canal').value];
+  const nota = document.getElementById('traza-resultado').value.trim();
+  if(!nota){ toast('⚠️ Describe el resultado de la gestión'); return; }
+  const { error } = await sb.from('gestiones').insert({
+    paciente_id: TRAZA_PACIENTE_ID, tipo, nota, fecha: new Date().toISOString().slice(0,10),
+    creado_por: await miPersonalId()
+  });
+  if(error){ console.error('[CUIVAN] Error registrando gestión:', error); toast('⚠️ No se pudo registrar'); return; }
+  document.getElementById('traza-resultado').value = '';
+  toast('✅ Gestión registrada');
+  abrirTrazabilidad(TRAZA_PACIENTE_ID);
+});
 
 // ── conectar carga por pestaña ──
 document.getElementById('app-nav').addEventListener('click',(e)=>{
