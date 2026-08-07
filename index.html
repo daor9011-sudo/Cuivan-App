@@ -68,7 +68,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 /* ── panel de carga (igual patrón que CANOPY) ── */
 #loading-panel{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#183660 0%,#0B1628 55%,#080f1c 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;z-index:999;transition:opacity .25s ease}
 #loading-panel.hide{opacity:0;pointer-events:none}
-.loading-logo{height:34px;width:auto;filter:brightness(0) invert(1);opacity:.95}
+.loading-logo{height:56px;width:auto;background:#fff;border-radius:10px;padding:10px 16px;box-shadow:0 8px 24px -6px rgba(0,0,0,.35)}
 .loading-ring{width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.14);border-top-color:var(--teal);animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{color:#fff;font-family:var(--font-d);font-size:16px;font-weight:800;letter-spacing:.2px}
