@@ -441,13 +441,14 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 
       <div class="tab-title" style="margin-top:6px">🕐 Horario de acceso (Recepción)</div>
       <div class="fac2" style="margin-bottom:14px">
-        <label class="cbrow2" style="margin-bottom:10px"><input type="checkbox" id="horario-activo"/><span style="font-weight:600">Restringir el acceso de Recepción a un horario</span></label>
+        <label class="cbrow2" style="margin-bottom:10px"><input type="checkbox" id="horario-activo"/><span style="font-weight:600">Restringir el acceso de Recepción a un horario (lunes a sábado)</span></label>
         <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end">
           <div class="fi2"><label class="lbl2">Desde</label><input class="app-input" type="time" id="horario-inicio"/></div>
           <div class="fi2"><label class="lbl2">Hasta</label><input class="app-input" type="time" id="horario-fin"/></div>
           <button class="appbtn appbtn-p" id="btn-guardar-horario">Guardar</button>
         </div>
-        <p style="font-size:10.5px;color:var(--g4);margin-top:8px;line-height:1.5">Solo afecta a cuentas con rol Recepción — doctoras y admins siempre tienen acceso, sin importar la hora. Si el horario cruza medianoche (ej. 20:00 a 08:45), funciona igual.</p>
+        <label class="cbrow2" style="margin-top:12px"><input type="checkbox" id="horario-bloquear-domingo"/><span style="font-weight:600">Bloquear domingos por completo (todo el día, sin importar la hora)</span></label>
+        <p style="font-size:10.5px;color:var(--g4);margin-top:8px;line-height:1.5">Solo afecta a cuentas con rol Recepción — doctoras y admins siempre tienen acceso, sin importar la hora ni el día. Si el horario cruza medianoche (ej. 20:00 a 08:45), funciona igual.</p>
       </div>
 
       <div class="tab-title" style="margin-top:6px">📜 Actividad reciente</div>
@@ -861,14 +862,21 @@ function horaDentroDeRango(inicioStr, finStr){
 }
 async function intentarEntrar(perfil){
   if(perfil.rol === 'recepcion'){
-    const { data: horario, error: hErr } = await sb.from('horario_acceso').select('hora_inicio, hora_fin, activo').order('updated_at', { ascending:false }).limit(1).maybeSingle();
+    const { data: horario, error: hErr } = await sb.from('horario_acceso').select('hora_inicio, hora_fin, activo, bloquear_domingo').order('updated_at', { ascending:false }).limit(1).maybeSingle();
     if(hErr) console.error('[CUIVAN] Error consultando horario_acceso:', hErr);
     if(horario && horario.activo){
       const inicio = horario.hora_inicio.slice(0,5);
       const fin = horario.hora_fin.slice(0,5);
+      const hoyEsDomingo = new Date().getDay() === 0;
+      if(horario.bloquear_domingo && hoyEsDomingo){
+        await sb.auth.signOut();
+        document.getElementById('fh-horario').textContent = 'domingos cerrado — de lunes a sábado, ' + inicio + ' a ' + fin;
+        showScreen('fuera-horario');
+        return false;
+      }
       if(!horaDentroDeRango(horario.hora_inicio, horario.hora_fin)){
         await sb.auth.signOut();
-        document.getElementById('fh-horario').textContent = `${inicio} a ${fin}`;
+        document.getElementById('fh-horario').textContent = `${inicio} a ${fin}, de lunes a sábado`;
         showScreen('fuera-horario');
         return false;
       }
@@ -1651,20 +1659,22 @@ document.getElementById('btn-personal-header').addEventListener('click', ()=>{
 
 // ── Horario de acceso (solo Recepción se restringe) ──
 async function cargarHorarioAcceso(){
-  const { data, error } = await sb.from('horario_acceso').select('hora_inicio, hora_fin, activo').order('updated_at', { ascending:false }).limit(1).maybeSingle();
+  const { data, error } = await sb.from('horario_acceso').select('hora_inicio, hora_fin, activo, bloquear_domingo').order('updated_at', { ascending:false }).limit(1).maybeSingle();
   if(error){ console.error('[CUIVAN] Error cargando horario:', error); return; }
   if(!data) return;
   document.getElementById('horario-activo').checked = data.activo;
   document.getElementById('horario-inicio').value = data.hora_inicio?.slice(0,5) || '08:45';
   document.getElementById('horario-fin').value = data.hora_fin?.slice(0,5) || '20:00';
+  document.getElementById('horario-bloquear-domingo').checked = data.bloquear_domingo !== false;
 }
 document.getElementById('btn-guardar-horario').addEventListener('click', async ()=>{
   const activo = document.getElementById('horario-activo').checked;
   const inicio = document.getElementById('horario-inicio').value;
   const fin = document.getElementById('horario-fin').value;
+  const bloquearDomingo = document.getElementById('horario-bloquear-domingo').checked;
   if(activo && (!inicio || !fin)){ toast('⚠️ Completa las horas de inicio y fin'); return; }
   const { error } = await sb.from('horario_acceso').insert({
-    hora_inicio: inicio || '08:45', hora_fin: fin || '20:00', activo, updated_by: await miPersonalId()
+    hora_inicio: inicio || '08:45', hora_fin: fin || '20:00', activo, bloquear_domingo: bloquearDomingo, updated_by: await miPersonalId()
   });
   if(error){ console.error('[CUIVAN] Error guardando horario:', error); toast('⚠️ No se pudo guardar'); return; }
   toast('✅ Horario actualizado');
