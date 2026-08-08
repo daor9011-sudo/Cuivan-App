@@ -1009,24 +1009,34 @@ async function cargarDoctores(){
 }
 function esc2(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// ── Catálogo de servicios (Motivo → Tipo de Consulta), + caso especial Dra. Guadalupe Jimenez ──
-let CATALOGO_CACHE = {};
+// ── Catálogo de servicios (Motivo → Tipo de Consulta), general + por doctor específico ──
+let CATALOGO_CACHE = {};        // general: { motivo: [tipos...] } — doctor_id NULL
+let CATALOGO_POR_DOCTOR = {};   // específico: { doctor_id: { motivo: [tipos...] } }
 const TIPOS_LIBRES = ['Producto Farmacia','Otro'];
 const DESC_LABEL = { 'Producto Farmacia':'Nombre del producto', 'Otro':'Descripción del servicio' };
-const CATALOGO_JIMENEZ = {
-  'Consulta': ['Consulta con Electro','Consulta Pediátrica','Consulta sin Electro','Consulta Síndrome de Down'],
-  'Procedimientos': ['Ecocardiograma','Mapa','Electrocardiograma','Holter','Rastreo','Eco Fetal','Tamiz Cardiaco','Holter 48 hrs'],
-};
 
 async function cargarCatalogoServiciosCache(){
-  const { data, error } = await sb.from('catalogo_servicios').select('motivo, tipo_consulta').eq('activo', true).order('tipo_consulta');
+  const { data, error } = await sb.from('catalogo_servicios').select('motivo, tipo_consulta, doctor_id').eq('activo', true).order('tipo_consulta');
   if(error){ console.error('[CUIVAN] Error cargando catálogo:', error); return; }
   CATALOGO_CACHE = {};
+  CATALOGO_POR_DOCTOR = {};
   (data||[]).forEach(row=>{
-    if(!CATALOGO_CACHE[row.motivo]) CATALOGO_CACHE[row.motivo] = [];
-    CATALOGO_CACHE[row.motivo].push(row.tipo_consulta);
+    if(!row.doctor_id){
+      if(!CATALOGO_CACHE[row.motivo]) CATALOGO_CACHE[row.motivo] = [];
+      CATALOGO_CACHE[row.motivo].push(row.tipo_consulta);
+    } else {
+      if(!CATALOGO_POR_DOCTOR[row.doctor_id]) CATALOGO_POR_DOCTOR[row.doctor_id] = {};
+      if(!CATALOGO_POR_DOCTOR[row.doctor_id][row.motivo]) CATALOGO_POR_DOCTOR[row.doctor_id][row.motivo] = [];
+      CATALOGO_POR_DOCTOR[row.doctor_id][row.motivo].push(row.tipo_consulta);
+    }
   });
   actualizarTipoConsulta();
+}
+// Devuelve las opciones de tipo de consulta para un motivo + doctor (usa el catálogo
+// específico del doctor si existe para ese motivo; si no, cae al catálogo general).
+function opcionesTipoConsulta(motivo, doctorId){
+  const especifico = doctorId && CATALOGO_POR_DOCTOR[doctorId] ? CATALOGO_POR_DOCTOR[doctorId][motivo] : null;
+  return especifico && especifico.length ? especifico : (CATALOGO_CACHE[motivo] || []);
 }
 
 function actualizarTipoConsulta(){
@@ -1045,14 +1055,8 @@ function actualizarTipoConsulta(){
   wrapTxt.style.display = 'none';
   label.textContent = 'Tipo de Consulta';
 
-  const doctorSel = document.getElementById('r-doctor');
-  const doctorTxt = doctorSel.options[doctorSel.selectedIndex] ? doctorSel.options[doctorSel.selectedIndex].text : '';
-  let opciones;
-  if(/jimenez/i.test(doctorTxt) && CATALOGO_JIMENEZ[motivo]){
-    opciones = CATALOGO_JIMENEZ[motivo];
-  } else {
-    opciones = CATALOGO_CACHE[motivo] || [];
-  }
+  const doctorId = document.getElementById('r-doctor').value;
+  const opciones = opcionesTipoConsulta(motivo, doctorId);
   wrapSel.innerHTML = opciones.length
     ? opciones.map(o => `<option>${esc2(o)}</option>`).join('')
     : '<option value="">Sin opciones para este motivo</option>';
@@ -1646,7 +1650,7 @@ let SERVICIOS_CACHE = [];
 async function cargarServicios(){
   const cont = document.getElementById('servicios-lista');
   cont.innerHTML = '<div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div>';
-  const { data, error } = await sb.from('catalogo_servicios').select('id, motivo, tipo_consulta, activo').order('motivo').order('tipo_consulta');
+  const { data, error } = await sb.from('catalogo_servicios').select('id, motivo, tipo_consulta, activo, doctor_id, personal:doctor_id(nombre)').order('motivo').order('tipo_consulta');
   if(error){ console.error('[CUIVAN] Error cargando catálogo:', error); cont.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
   SERVICIOS_CACHE = data || [];
   renderServicios();
@@ -1664,7 +1668,7 @@ function renderServicios(){
       <div style="font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--teal);margin-bottom:4px">${esc2(motivo)} (${items.length})</div>
       ${items.map(s => `
         <div class="svc-row" data-id="${s.id}">
-          <span></span>
+          <span>${s.doctor_id ? `<span class="pill2 pn2" style="font-size:9px">👤 ${esc2(s.personal?.nombre || 'Doctor específico')}</span>` : ''}</span>
           <span>${esc2(s.tipo_consulta)}</span>
           <button class="svc-del">Eliminar</button>
         </div>
@@ -1677,6 +1681,7 @@ function renderServicios(){
       const { error } = await sb.from('catalogo_servicios').delete().eq('id', id);
       if(error){ toast('⚠️ No se pudo eliminar'); return; }
       cargarServicios();
+      cargarCatalogoServiciosCache();
     });
   });
 }
@@ -2053,14 +2058,8 @@ function actualizarTipoConsultaEC(){
   wrapSel.style.display = 'block';
   wrapTxt.style.display = 'none';
   label.textContent = 'Tipo de Consulta';
-  const doctorSel = document.getElementById('ec-doctor');
-  const doctorTxt = doctorSel.options[doctorSel.selectedIndex] ? doctorSel.options[doctorSel.selectedIndex].text : '';
-  let opciones;
-  if(/jimenez/i.test(doctorTxt) && CATALOGO_JIMENEZ[motivo]){
-    opciones = CATALOGO_JIMENEZ[motivo];
-  } else {
-    opciones = CATALOGO_CACHE[motivo] || [];
-  }
+  const doctorId = document.getElementById('ec-doctor').value;
+  const opciones = opcionesTipoConsulta(motivo, doctorId);
   wrapSel.innerHTML = opciones.length
     ? opciones.map(o => `<option>${esc2(o)}</option>`).join('')
     : '<option value="">Sin opciones para este motivo</option>';
