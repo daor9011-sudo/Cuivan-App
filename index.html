@@ -82,6 +82,8 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .badge-fact{background:#EEF8F1;color:#2E7D4F;border:1px solid #A8D8B4;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .badge-nofact{background:#FEF6E7;color:#9A6010;border:1px solid #EDD49A;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .recibo-input{font-size:10.5px !important;padding:5px 7px !important;min-width:80px}
+.pendiente-factura{border-color:#EDD49A !important;background:#FEF6E7}
+.pendiente-factura::placeholder{color:#9A6010;font-weight:700;opacity:1}
 .fields-dim-novino{opacity:.35;pointer-events:none;transition:.2s}
 .hist-filtros-exclusivos{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--g1);border-radius:9px}
 .hist-filtro-link{display:flex;align-items:center;gap:6px;color:var(--g6);cursor:pointer;font-size:11.5px;font-weight:600}
@@ -1361,7 +1363,7 @@ function renderHistorial(rows){
       <td>${esc2(r.tipo_consulta || '—')}</td>
       <td>${r.no_vino ? '—' : `<b style="color:var(--teal)">$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</b>`}</td>
       <td>${r.no_vino ? '—' : (PAGO_ICON[r.medio_pago]||'') + ' ' + esc2(r.medio_pago||'')}</td>
-      <td>${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-factura" data-id="${r.id}" value="${esc2(r.num_factura||'')}" placeholder="—"/>`}</td>
+      <td>${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-factura${r.factura && !r.num_factura ? ' pendiente-factura' : ''}" data-id="${r.id}" value="${esc2(r.num_factura||'')}" placeholder="${r.factura && !r.num_factura ? 'Pendiente' : '—'}"/>`}</td>
       <td>${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-recibo" data-id="${r.id}" value="${esc2(r.numero_recibo||'')}" placeholder="—"/>`}</td>
       <td><button class="h-editar-btn" data-id="${r.id}" style="background:none;border:none;color:#0B6E6E;cursor:pointer;font-size:13px" title="Editar">✏️</button></td>
     </tr>
