@@ -77,6 +77,20 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .appbtn-danger-soft{background:#FEF0EF;color:#C0392B;border:1px solid #FBBFBB;box-shadow:none}
 .appbtn-danger-soft:hover{background:#FCE0DF}
 .papelera-box{background:#FDF8F7;border:1px solid #F5C2BC;border-radius:10px;padding:12px 14px}
+.novino-box{margin-top:16px;padding:13px 15px;background:#F5EEF8;border:1.5px solid #D9B3D9;border-radius:10px}
+.badge-novino{background:#F5EEF8;color:#7D3C98;border:1px solid #D9B3D9;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.badge-fact{background:#EEF8F1;color:#2E7D4F;border:1px solid #A8D8B4;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.badge-nofact{background:#FEF6E7;color:#9A6010;border:1px solid #EDD49A;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.recibo-input{font-size:10.5px !important;padding:5px 7px !important;min-width:80px}
+.fields-dim-novino{opacity:.35;pointer-events:none;transition:.2s}
+.hist-filtros-exclusivos{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--g1);border-radius:9px}
+.hist-filtro-link{display:flex;align-items:center;gap:6px;color:var(--g6);cursor:pointer;font-size:11.5px;font-weight:600}
+.hist-filtro-link input{width:14px;height:14px;accent-color:var(--navy2)}
+.prm-tabs{display:flex;gap:6px;margin-bottom:14px}
+.prm-tab-btn{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--g2);background:#fff;color:var(--g6);font-family:var(--font-b)}
+.prm-tab-btn.act{background:var(--navy);border-color:var(--navy);color:#fff}
+.prm-tab-btn.act[data-tab="novino"]{background:#7D3C98;border-color:#7D3C98}
+.prm-row-novino{border-left:4px solid #7D3C98}
 .papelera-title{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#C0392B;margin-bottom:8px}
 .appbtn-s{background:var(--navy2);color:#fff;box-shadow:0 6px 14px -4px rgba(27,58,107,.45)}
 
@@ -285,7 +299,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
             <option>Integra Salud</option><option>Vitalife</option>
           </select>
         </div>
-        <div class="fi2"><label class="lbl2">Monto ($)</label><div class="mon2"><span>$</span><input class="app-input" type="number" id="r-monto" value="0"/></div></div>
+        <div class="fi2" id="r-monto-wrap"><label class="lbl2">Monto ($)</label><div class="mon2"><span>$</span><input class="app-input" type="number" id="r-monto" value="0"/></div></div>
         <div class="b1-summary">
           <div class="se">Resumen en vivo</div>
           <div class="sv" id="r-rs-paciente">Sin nombre aún</div>
@@ -294,7 +308,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         </div>
       </div>
       <div class="row4">
-        <div class="fi2">
+        <div class="fi2" id="r-mediopago-wrap">
           <label class="lbl2">💳 Medio de pago</label>
           <select class="app-input" id="r-mediopago"><option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option></select>
           <button type="button" id="btn-add2pago" style="background:none;border:none;color:#0B6E6E;cursor:pointer;font-size:10px;font-weight:700;padding:0;margin-top:10px;text-decoration:underline;text-underline-offset:2px">＋ agregar 2do pago</button>
@@ -305,13 +319,17 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
           </div>
         </div>
         <div class="fi2"><label class="lbl2">Notas / Observaciones</label><textarea class="app-input" id="r-notas" style="min-height:38px;resize:vertical" placeholder="Opcional..."></textarea></div>
-        <div class="fac2">
+        <div class="fac2" id="r-factura-wrap">
           <label class="cbrow2"><input type="checkbox" id="r-factura"/><span style="font-size:.82rem;font-weight:600">¿Requiere factura?</span></label>
           <div id="r-nfact-wrap" style="display:none;margin-top:7px">
             <label class="lbl2">No. de factura</label>
             <input class="app-input" type="text" id="r-numfactura" placeholder="Ej. F-0042"/>
           </div>
         </div>
+      </div>
+      <div class="novino-box" id="r-novino-box">
+        <label class="cbrow2" style="cursor:pointer"><input type="checkbox" id="r-novino"/><span style="font-weight:700;color:#7D3C98;font-size:13px">👻 El paciente no vino / no se presentó</span></label>
+        <p style="font-size:10.5px;color:var(--g6);margin-top:6px;margin-left:24px;line-height:1.5">Se guarda para que aparezca en PRM/CRM y le des seguimiento — no cuenta como ingreso ni aparece en Historial normal. Si el paciente viene después, la marca desaparece sola.</p>
       </div>
       <div style="margin-top:24px;display:flex;gap:8px">
         <button class="appbtn appbtn-p" id="btn-guardar-registro">Guardar registro</button>
@@ -351,11 +369,16 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         <button class="appbtn appbtn-s" id="btn-papelera-toggle" style="font-size:11px;padding:6px 12px;display:none">🗑 Papelera</button>
         <button class="appbtn appbtn-p" id="btn-export-historial" style="font-size:11px;padding:6px 12px;margin-left:auto">⬇ Exportar Excel</button>
       </div>
+      <div class="hist-filtros-exclusivos">
+        <label class="hist-filtro-link"><input type="checkbox" id="h-solo-facturado"/> 🧾 Solo facturado</label>
+        <label class="hist-filtro-link"><input type="checkbox" id="h-solo-nofacturado"/> ❌ Solo no facturado</label>
+        <label class="hist-filtro-link"><input type="checkbox" id="h-solo-novino"/> 👻 Solo "No vino"</label>
+      </div>
       <div id="h-papelera-panel" style="display:none;margin-bottom:14px"></div>
       <div style="overflow-x:auto">
         <table class="h2-table">
-          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th><th></th></tr></thead>
-          <tbody id="h-tbody"><tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
+          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th><th>N° Factura</th><th>N° Recibo</th><th></th></tr></thead>
+          <tbody id="h-tbody"><tr><td colspan="10" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -424,16 +447,20 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 
     <!-- ══ PRM/CRM ══ -->
     <div class="card screen2" id="app-screen-prm">
-      <div class="tab-title">💬 PRM — Pacientes inactivos</div>
+      <div class="tab-title">💬 PRM — Pacientes</div>
+      <div class="prm-tabs">
+        <button type="button" class="prm-tab-btn act" id="prm-tab-inactivos" data-tab="inactivos">🎯 Inactivos</button>
+        <button type="button" class="prm-tab-btn" id="prm-tab-novino" data-tab="novino">👻 No vinieron</button>
+      </div>
       <div id="prm-kpis" class="dash-kpi-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
-      <div class="filt2">
+      <div class="filt2" id="prm-filt-inactivos">
         <label class="lbl2" style="align-self:center">Días sin visita:</label>
         <input class="app-input" type="number" id="prm-dias" value="60" style="width:70px"/>
         <button class="appbtn appbtn-p" id="btn-prm-aplicar" style="font-size:11px;padding:6px 12px">Aplicar</button>
       </div>
       <div style="overflow-x:auto">
         <table class="htable2">
-          <thead><tr><th>Paciente</th><th>Teléfono</th><th>Última visita</th><th>Inactividad</th><th>Último servicio</th><th>Doctor</th><th></th></tr></thead>
+          <thead id="prm-thead"><tr><th>Paciente</th><th>Teléfono</th><th>Última visita</th><th>Inactividad</th><th>Último servicio</th><th>Doctor</th><th></th></tr></thead>
           <tbody id="prm-tbody"></tbody>
         </table>
       </div>
@@ -568,6 +595,10 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         <select class="app-input" id="ec-pago2"><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option><option>Cortesía</option></select>
         <button type="button" id="ec-btn-quitar2pago" style="background:none;border:none;color:var(--g4);cursor:pointer;font-size:10px;font-weight:700;margin-top:5px;text-decoration:underline;text-underline-offset:2px">quitar ✕</button>
       </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;padding-top:10px;border-top:1px dashed var(--g2)">
+      <div class="fi2"><label class="lbl2">N° Factura</label><input class="app-input" id="ec-numfactura" placeholder="Ej. F-0042"/></div>
+      <div class="fi2"><label class="lbl2">N° Recibo</label><input class="app-input" id="ec-numrecibo" placeholder="Ej. REC-0042"/></div>
     </div>
     <div class="modal-footer2" style="justify-content:center;gap:8px;border-top:1px solid var(--g2);padding-top:14px;flex-wrap:nowrap">
       <button class="appbtn appbtn-danger-soft" id="btn-eliminar-consulta" style="white-space:nowrap">🗑️ Eliminar registro</button>
@@ -1145,6 +1176,7 @@ async function guardarRegistro(){
   const telefono = document.getElementById('r-telefono').value.trim();
   const doctorId = document.getElementById('r-doctor').value;
   const fecha = document.getElementById('r-fecha').value.trim();
+  const noVino = document.getElementById('r-novino').checked;
 
   if(!paciente){ toast('⚠️ Falta el nombre del paciente'); return; }
   if(!telefono){ toast('⚠️ Falta el teléfono (identificador del paciente)'); return; }
@@ -1163,25 +1195,37 @@ async function guardarRegistro(){
       .single();
     if(pacErr) throw pacErr;
 
-    // 2) insert consulta
-    const { error: consErr } = await sb.from('consultas').insert({
+    // 2) insert consulta — si es "no vino", no lleva monto/pago/factura
+    const payload = {
       fecha: fecha,
       paciente_id: pacienteRow.id,
       doctor_id: doctorId,
       motivo: document.getElementById('r-motivo').value,
-      tipo_consulta: valorTipoConsulta() || null,
-      monto: parseFloat(document.getElementById('r-monto').value) || 0,
-      medio_pago: document.getElementById('r-mediopago').value,
-      monto_2: document.getElementById('r-pago2-wrap').style.display === 'grid' && document.getElementById('r-monto2').value ? parseFloat(document.getElementById('r-monto2').value) : null,
-      medio_pago_2: document.getElementById('r-pago2-wrap').style.display === 'grid' && document.getElementById('r-monto2').value ? document.getElementById('r-mediopago2').value : null,
-      factura: document.getElementById('r-factura').checked,
-      num_factura: document.getElementById('r-numfactura').value.trim() || null,
+      no_vino: noVino,
       notas: document.getElementById('r-notas').value.trim() || null,
       created_by: MI_PERFIL ? await miPersonalId() : null
-    });
+    };
+    if(noVino){
+      payload.tipo_consulta = null;
+      payload.monto = 0;
+      payload.medio_pago = null;
+      payload.monto_2 = null;
+      payload.medio_pago_2 = null;
+      payload.factura = false;
+      payload.num_factura = null;
+    } else {
+      payload.tipo_consulta = valorTipoConsulta() || null;
+      payload.monto = parseFloat(document.getElementById('r-monto').value) || 0;
+      payload.medio_pago = document.getElementById('r-mediopago').value;
+      payload.monto_2 = document.getElementById('r-pago2-wrap').style.display === 'grid' && document.getElementById('r-monto2').value ? parseFloat(document.getElementById('r-monto2').value) : null;
+      payload.medio_pago_2 = document.getElementById('r-pago2-wrap').style.display === 'grid' && document.getElementById('r-monto2').value ? document.getElementById('r-mediopago2').value : null;
+      payload.factura = document.getElementById('r-factura').checked;
+      payload.num_factura = document.getElementById('r-numfactura').value.trim() || null;
+    }
+    const { error: consErr } = await sb.from('consultas').insert(payload);
     if(consErr) throw consErr;
 
-    toast('✅ Registro guardado');
+    toast(noVino ? '✅ Registrado como "No vino"' : '✅ Registro guardado');
     limpiarRegistro();
   } catch(err){
     console.error('[CUIVAN] Error guardando registro:', err);
@@ -1189,6 +1233,12 @@ async function guardarRegistro(){
   }
   btn.disabled = false; btn.textContent = 'Guardar registro';
 }
+document.getElementById('r-novino').addEventListener('change', (e)=>{
+  const dim = e.target.checked;
+  ['r-tipoconsulta-wrap','r-monto-wrap','r-mediopago-wrap','r-factura-wrap'].forEach(id=>{
+    document.getElementById(id).classList.toggle('fields-dim-novino', dim);
+  });
+});
 
 let _miPersonalIdCache = null;
 async function miPersonalId(){
@@ -1212,6 +1262,10 @@ function limpiarRegistro(){
   document.getElementById('r-factura').checked = false;
   document.getElementById('r-nfact-wrap').style.display = 'none';
   document.getElementById('r-fecha').value = isoLocal(new Date());
+  document.getElementById('r-novino').checked = false;
+  ['r-tipoconsulta-wrap','r-monto-wrap','r-mediopago-wrap','r-factura-wrap'].forEach(id=>{
+    document.getElementById(id).classList.remove('fields-dim-novino');
+  });
   refrescarResumen();
 }
 document.getElementById('btn-guardar-registro').addEventListener('click', guardarRegistro);
@@ -1221,14 +1275,18 @@ document.getElementById('btn-limpiar-registro').addEventListener('click', limpia
 async function cargarHistorial(){
   const tbody = document.getElementById('h-tbody');
   const kpisEl = document.getElementById('h-kpis');
-  tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
   const periodoRaw = document.getElementById('h-periodo').value;
+  const soloNoVino = document.getElementById('h-solo-novino').checked;
   let query = sb
     .from('consultas')
-    .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, pacientes(id, nombre), personal!consultas_doctor_id_fkey(nombre)')
+    .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, factura, num_factura, numero_recibo, no_vino, pacientes(id, nombre), personal!consultas_doctor_id_fkey(nombre)')
     .eq('deleted', false)
     .order('fecha', { ascending: false })
     .limit(300);
+  // por defecto el historial NUNCA muestra "no vino" (no son visitas reales);
+  // solo se muestran cuando ese filtro específico está activo — mismo patrón que CANOPY
+  query = soloNoVino ? query.eq('no_vino', true) : query.eq('no_vino', false);
   if(periodoRaw === 'hoy'){
     const hoyIso = isoLocal(new Date());
     query = query.gte('fecha', hoyIso).lte('fecha', hoyIso);
@@ -1239,7 +1297,7 @@ async function cargarHistorial(){
   const { data, error } = await query;
   if(error){
     console.error('[CUIVAN] Error cargando historial:', error);
-    tbody.innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
     kpisEl.innerHTML = '';
     return;
   }
@@ -1250,15 +1308,19 @@ function aplicarFiltrosHistorial(){
   const q = document.getElementById('h-buscar').value.trim().toLowerCase();
   const motivo = document.getElementById('h-motivo').value;
   const pago = document.getElementById('h-pago').value;
+  const soloFacturado = document.getElementById('h-solo-facturado').checked;
+  const soloNoFacturado = document.getElementById('h-solo-nofacturado').checked;
   let rows = window._historialData || [];
   if(q) rows = rows.filter(r => (r.pacientes?.nombre || '').toLowerCase().includes(q));
   if(motivo) rows = rows.filter(r => r.motivo === motivo);
   if(pago) rows = rows.filter(r => r.medio_pago === pago);
+  if(soloFacturado) rows = rows.filter(r => r.factura);
+  if(soloNoFacturado) rows = rows.filter(r => !r.factura);
 
   const kpisEl = document.getElementById('h-kpis');
   const periodoTxt = document.getElementById('h-periodo').selectedOptions[0].text;
   if(rows.length === 0){
-    document.getElementById('h-tbody').innerHTML = '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
+    document.getElementById('h-tbody').innerHTML = '<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
     kpisEl.innerHTML = '';
     document.getElementById('h2-subt').textContent = periodoTxt + ' · 0 registros';
     return;
@@ -1275,23 +1337,51 @@ function aplicarFiltrosHistorial(){
   window._historialFiltrado = rows;
   renderHistorial(rows);
 }
+// Los 3 filtros especiales se excluyen entre sí — igual patrón que CANOPY (FILTROS_EXCLUSIVOS_HIST)
+['h-solo-facturado','h-solo-nofacturado','h-solo-novino'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', (e)=>{
+    if(e.target.checked){
+      ['h-solo-facturado','h-solo-nofacturado','h-solo-novino'].forEach(otroId=>{
+        if(otroId !== id) document.getElementById(otroId).checked = false;
+      });
+    }
+    // "no vino" cambia la fuente de datos (va a la base), los otros dos solo filtran en memoria
+    if(id === 'h-solo-novino') cargarHistorial(); else aplicarFiltrosHistorial();
+  });
+});
 const PAGO_ICON = { Tarjeta:'💳', Efectivo:'💵', Transferencia:'🏦', Cortesía:'🎁' };
 function renderHistorial(rows){
   const tbody = document.getElementById('h-tbody');
   tbody.innerHTML = rows.map(r => `
-    <tr>
+    <tr data-id="${r.id}">
       <td>${fmtFechaISO(r.fecha)}</td>
-      <td><b>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</b></td>
+      <td><b>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</b>${r.no_vino ? '<div><span class="badge-novino">👻 No vino</span></div>' : ''}</td>
       <td>${esc2(r.personal ? r.personal.nombre : '—')}</td>
       <td><span class="pill2 pt2">${esc2(r.motivo)}</span></td>
       <td>${esc2(r.tipo_consulta || '—')}</td>
-      <td><b style="color:var(--teal)">$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</b></td>
-      <td>${PAGO_ICON[r.medio_pago]||''} ${esc2(r.medio_pago)}</td>
+      <td>${r.no_vino ? '—' : `<b style="color:var(--teal)">$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</b>`}</td>
+      <td>${r.no_vino ? '—' : (PAGO_ICON[r.medio_pago]||'') + ' ' + esc2(r.medio_pago||'')}</td>
+      <td>${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-factura" data-id="${r.id}" value="${esc2(r.num_factura||'')}" placeholder="—"/>`}</td>
+      <td>${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-recibo" data-id="${r.id}" value="${esc2(r.numero_recibo||'')}" placeholder="—"/>`}</td>
       <td><button class="h-editar-btn" data-id="${r.id}" style="background:none;border:none;color:#0B6E6E;cursor:pointer;font-size:13px" title="Editar">✏️</button></td>
     </tr>
   `).join('');
   tbody.querySelectorAll('.h-editar-btn').forEach(btn=>{
     btn.addEventListener('click', ()=> abrirEditarConsulta(btn.dataset.id));
+  });
+  tbody.querySelectorAll('.h-inline-factura').forEach(inp=>{
+    inp.addEventListener('change', async (e)=>{
+      const { error } = await sb.from('consultas').update({ num_factura: e.target.value.trim() || null, factura: !!e.target.value.trim() }).eq('id', e.target.dataset.id);
+      if(error){ console.error('[CUIVAN] Error guardando N° factura:', error); toast('⚠️ No se pudo guardar'); return; }
+      toast('✅ N° de factura guardado');
+    });
+  });
+  tbody.querySelectorAll('.h-inline-recibo').forEach(inp=>{
+    inp.addEventListener('change', async (e)=>{
+      const { error } = await sb.from('consultas').update({ numero_recibo: e.target.value.trim() || null }).eq('id', e.target.dataset.id);
+      if(error){ console.error('[CUIVAN] Error guardando N° recibo:', error); toast('⚠️ No se pudo guardar'); return; }
+      toast('✅ N° de recibo guardado');
+    });
   });
 }
 function fmtFechaISO(iso){
@@ -1322,18 +1412,21 @@ document.getElementById('btn-export-historial').addEventListener('click', async 
   btn.disabled = true; btn.textContent = 'Preparando...';
   try {
     await cargarXLSX();
-    const header = ['Fecha','Paciente','Doctor','Motivo','Tipo de Consulta','Monto','Medio de Pago'];
+    const header = ['Fecha','Paciente','Estado','Doctor','Motivo','Tipo de Consulta','Monto','Medio de Pago','N° Factura','N° Recibo'];
     const body = rows.map(r => [
       r.fecha,
       r.pacientes ? r.pacientes.nombre : '',
+      r.no_vino ? 'No vino' : 'Normal',
       r.personal ? r.personal.nombre : '',
       r.motivo,
       r.tipo_consulta || '',
       Number(r.monto || 0),
-      r.medio_pago
+      r.medio_pago || '',
+      r.num_factura || '',
+      r.numero_recibo || ''
     ]);
     const ws = XLSX.utils.aoa_to_sheet([header, ...body]);
-    ws['!cols'] = [{wch:11},{wch:26},{wch:22},{wch:16},{wch:22},{wch:12},{wch:16}];
+    ws['!cols'] = [{wch:11},{wch:26},{wch:10},{wch:22},{wch:16},{wch:22},{wch:12},{wch:16},{wch:14},{wch:14}];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Historial');
     XLSX.writeFile(wb, `CUIVAN_Historial_${todayLocal().replace(/\//g,'-')}.xlsx`);
@@ -1839,6 +1932,7 @@ async function cargarCierre(){
     .from('consultas')
     .select('monto, medio_pago, monto_2, medio_pago_2, tipo_consulta, motivo, pacientes(nombre), personal!consultas_doctor_id_fkey(id, nombre)')
     .eq('deleted', false)
+    .eq('no_vino', false)
     .gte('fecha', desde)
     .lte('fecha', hasta);
   if(doctorFiltro) query = query.eq('doctor_id', doctorFiltro);
@@ -1975,7 +2069,8 @@ async function cargarDashboard(){
   let query = sb
     .from('consultas')
     .select('fecha, monto, medio_pago, motivo, tipo_consulta, paciente_id, pacientes(id), personal!consultas_doctor_id_fkey(id, nombre)')
-    .eq('deleted', false);
+    .eq('deleted', false)
+    .eq('no_vino', false);
   if(periodo > 0) query = query.gte('fecha', isoDesdeHace(periodo));
   if(doctorFiltro) query = query.eq('doctor_id', doctorFiltro);
   if(motivoFiltro) query = query.eq('motivo', motivoFiltro);
@@ -2095,21 +2190,29 @@ document.getElementById('dash-tipo-filtro').addEventListener('change', cargarDas
 // ═══════════════════════════════════════════════════════════
 // PRM — Pacientes inactivos
 // ═══════════════════════════════════════════════════════════
+let PRM_TAB_ACTUAL = 'inactivos';
 async function cargarPRM(){
-  const dias = parseInt(document.getElementById('prm-dias').value) || 60;
   const tbody = document.getElementById('prm-tbody');
-  const kpisEl = document.getElementById('prm-kpis');
   tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
   const { data, error } = await sb
     .from('consultas')
-    .select('fecha, paciente_id, motivo, tipo_consulta, pacientes(id, nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
+    .select('fecha, paciente_id, motivo, tipo_consulta, no_vino, pacientes(id, nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
     .eq('deleted', false)
     .order('fecha', { ascending:false });
   if(error){ console.error('[CUIVAN] Error cargando PRM:', error); tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--red)">Error al cargar</td></tr>'; return; }
 
-  // última visita por paciente
+  if(PRM_TAB_ACTUAL === 'inactivos') renderPRMInactivos(data);
+  else renderPRMNoVino(data);
+}
+
+function renderPRMInactivos(data){
+  const dias = parseInt(document.getElementById('prm-dias').value) || 60;
+  const tbody = document.getElementById('prm-tbody');
+  const kpisEl = document.getElementById('prm-kpis');
+
+  // última visita REAL (no_vino=false) por paciente — un "no vino" no cuenta como visita
   const ultima = {};
-  data.forEach(r=>{
+  data.filter(r=>!r.no_vino).forEach(r=>{
     if(!r.pacientes) return;
     const id = r.pacientes.id;
     if(!ultima[id] || r.fecha > ultima[id].fecha) ultima[id] = {
@@ -2151,6 +2254,71 @@ async function cargarPRM(){
     btn.addEventListener('click', ()=> abrirTrazabilidad(btn.dataset.id));
   });
 }
+
+function renderPRMNoVino(data){
+  const tbody = document.getElementById('prm-tbody');
+  const kpisEl = document.getElementById('prm-kpis');
+
+  // último registro (cualquiera) por paciente — si el más reciente es "no vino", sigue pendiente;
+  // en cuanto haya una visita real más nueva, sale solo de la lista.
+  const ultimoGeneral = {};
+  data.forEach(r=>{
+    if(!r.pacientes) return;
+    const id = r.pacientes.id;
+    if(!ultimoGeneral[id] || r.fecha > ultimoGeneral[id].fecha) ultimoGeneral[id] = {
+      fecha: r.fecha, nombre: r.pacientes.nombre, telefono: r.pacientes.telefono,
+      motivo: r.motivo, tipoConsulta: r.tipo_consulta, doctor: r.personal ? r.personal.nombre : '—',
+      noVino: r.no_vino
+    };
+  });
+  const pendientes = Object.entries(ultimoGeneral)
+    .map(([id, info]) => ({ id, ...info }))
+    .filter(p => p.noVino)
+    .sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  kpisEl.innerHTML = `
+    <div class="kpi-tile"><div class="ico">👻</div><div class="lbl3">No vinieron</div><div class="val">${pendientes.length}</div></div>
+    <div class="kpi-tile"><div class="ico">👥</div><div class="lbl3">Total pacientes</div><div class="val">${Object.keys(ultimoGeneral).length}</div></div>
+    <div class="kpi-tile"><div class="ico">📊</div><div class="lbl3">% pendientes</div><div class="val">${Object.keys(ultimoGeneral).length ? Math.round(pendientes.length/Object.keys(ultimoGeneral).length*100) : 0}%</div></div>
+  `;
+
+  if(pendientes.length === 0){
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">🎉 Nadie con "No vino" pendiente</td></tr>';
+    return;
+  }
+  window._prmData = pendientes;
+  tbody.innerHTML = pendientes.map(p => `
+    <tr class="prm-row-novino">
+      <td><b>${esc2(p.nombre)}</b></td>
+      <td>${esc2(p.telefono || '—')}</td>
+      <td>${fmtFechaISO(p.fecha)}</td>
+      <td><span class="badge-novino">👻 No vino</span></td>
+      <td>${esc2([p.motivo, p.tipoConsulta].filter(Boolean).join(' · ') || '—')}</td>
+      <td>${esc2(p.doctor)}</td>
+      <td><button class="appbtn appbtn-p prm-ver-btn" data-id="${p.id}" style="font-size:10.5px;padding:6px 11px">📖 Ver / gestionar</button></td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('.prm-ver-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> abrirTrazabilidad(btn.dataset.id));
+  });
+}
+
+document.getElementById('prm-tab-inactivos').addEventListener('click', ()=>{
+  PRM_TAB_ACTUAL = 'inactivos';
+  document.getElementById('prm-tab-inactivos').classList.add('act');
+  document.getElementById('prm-tab-novino').classList.remove('act');
+  document.getElementById('prm-filt-inactivos').style.display = 'flex';
+  document.getElementById('prm-thead').innerHTML = '<tr><th>Paciente</th><th>Teléfono</th><th>Última visita</th><th>Inactividad</th><th>Último servicio</th><th>Doctor</th><th></th></tr>';
+  cargarPRM();
+});
+document.getElementById('prm-tab-novino').addEventListener('click', ()=>{
+  PRM_TAB_ACTUAL = 'novino';
+  document.getElementById('prm-tab-novino').classList.add('act');
+  document.getElementById('prm-tab-inactivos').classList.remove('act');
+  document.getElementById('prm-filt-inactivos').style.display = 'none';
+  document.getElementById('prm-thead').innerHTML = '<tr><th>Paciente</th><th>Teléfono</th><th>No vino el</th><th>Estado</th><th>Motivo</th><th>Doctor</th><th></th></tr>';
+  cargarPRM();
+});
 document.getElementById('btn-prm-aplicar').addEventListener('click', cargarPRM);
 
 // ── Modal de trazabilidad: historial de visitas + bitácora CRM (gestiones) ──
@@ -2203,6 +2371,8 @@ function abrirEditarConsulta(consultaId){
   }
   document.getElementById('ec-monto').value = row.monto;
   document.getElementById('ec-pago').value = row.medio_pago;
+  document.getElementById('ec-numfactura').value = row.num_factura || '';
+  document.getElementById('ec-numrecibo').value = row.numero_recibo || '';
   if(row.monto_2 && row.medio_pago_2){
     document.getElementById('ec-pago2-wrap').style.display = 'grid';
     document.getElementById('ec-monto2').value = row.monto_2;
@@ -2249,6 +2419,9 @@ document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
       medio_pago: document.getElementById('ec-pago').value,
       monto_2: document.getElementById('ec-pago2-wrap').style.display === 'grid' && document.getElementById('ec-monto2').value ? parseFloat(document.getElementById('ec-monto2').value) : null,
       medio_pago_2: document.getElementById('ec-pago2-wrap').style.display === 'grid' && document.getElementById('ec-monto2').value ? document.getElementById('ec-pago2').value : null,
+      num_factura: document.getElementById('ec-numfactura').value.trim() || null,
+      factura: !!document.getElementById('ec-numfactura').value.trim(),
+      numero_recibo: document.getElementById('ec-numrecibo').value.trim() || null,
       edited_by: await miPersonalId(),
       edited_at: new Date().toISOString()
     }).eq('id', EDITANDO_CONSULTA.id);
@@ -2293,13 +2466,13 @@ async function abrirTrazabilidad(pacienteId){
   document.getElementById('modal-traza').classList.add('show');
 
   const [visitas, gestiones] = await Promise.all([
-    sb.from('consultas').select('fecha, motivo, tipo_consulta, monto').eq('paciente_id', pacienteId).eq('deleted', false).order('fecha', { ascending:false }),
+    sb.from('consultas').select('fecha, motivo, tipo_consulta, monto, no_vino').eq('paciente_id', pacienteId).eq('deleted', false).order('fecha', { ascending:false }),
     sb.from('gestiones').select('id, tipo, nota, fecha, personal:creado_por(nombre)').eq('paciente_id', pacienteId).order('fecha', { ascending:false })
   ]);
 
   if(visitas.error){ console.error('[CUIVAN] Error cargando visitas:', visitas.error); }
   document.getElementById('traza-lista').innerHTML = (visitas.data && visitas.data.length)
-    ? visitas.data.map(v => `<div class="traza-visita2"><span>${fmtFechaISO(v.fecha)} — ${esc2(v.motivo)}${v.tipo_consulta ? ' · '+esc2(v.tipo_consulta) : ''}</span><span style="color:var(--g4)">$${Number(v.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>`).join('')
+    ? visitas.data.map(v => `<div class="traza-visita2"><span>${fmtFechaISO(v.fecha)} — ${v.no_vino ? '<span class="badge-novino">👻 No vino</span>' : esc2(v.motivo)+(v.tipo_consulta ? ' · '+esc2(v.tipo_consulta) : '')}</span><span style="color:var(--g4)">${v.no_vino ? '—' : '$'+Number(v.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>`).join('')
     : '<div style="color:var(--g4);font-size:11.5px;padding:6px 0">Sin visitas registradas.</div>';
 
   if(gestiones.error){ console.error('[CUIVAN] Error cargando gestiones:', gestiones.error); }
