@@ -599,7 +599,10 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;padding-top:10px;border-top:1px dashed var(--g2)">
-      <div class="fi2"><label class="lbl2">N° Factura</label><input class="app-input" id="ec-numfactura" placeholder="Ej. F-0042"/></div>
+      <div class="fi2">
+        <label class="cbrow2" style="margin-bottom:6px"><input type="checkbox" id="ec-factura"/><span style="font-size:.82rem;font-weight:600">¿Requiere factura?</span></label>
+        <label class="lbl2">N° Factura</label><input class="app-input" id="ec-numfactura" placeholder="Ej. F-0042"/>
+      </div>
       <div class="fi2"><label class="lbl2">N° Recibo</label><input class="app-input" id="ec-numrecibo" placeholder="Ej. REC-0042"/></div>
     </div>
     <div class="modal-footer2" style="justify-content:center;gap:8px;border-top:1px solid var(--g2);padding-top:14px;flex-wrap:nowrap">
@@ -2373,6 +2376,7 @@ function abrirEditarConsulta(consultaId){
   }
   document.getElementById('ec-monto').value = row.monto;
   document.getElementById('ec-pago').value = row.medio_pago;
+  document.getElementById('ec-factura').checked = !!row.factura;
   document.getElementById('ec-numfactura').value = row.num_factura || '';
   document.getElementById('ec-numrecibo').value = row.numero_recibo || '';
   if(row.monto_2 && row.medio_pago_2){
@@ -2422,7 +2426,7 @@ document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
       monto_2: document.getElementById('ec-pago2-wrap').style.display === 'grid' && document.getElementById('ec-monto2').value ? parseFloat(document.getElementById('ec-monto2').value) : null,
       medio_pago_2: document.getElementById('ec-pago2-wrap').style.display === 'grid' && document.getElementById('ec-monto2').value ? document.getElementById('ec-pago2').value : null,
       num_factura: document.getElementById('ec-numfactura').value.trim() || null,
-      factura: !!document.getElementById('ec-numfactura').value.trim(),
+      factura: document.getElementById('ec-factura').checked,
       numero_recibo: document.getElementById('ec-numrecibo').value.trim() || null,
       edited_by: await miPersonalId(),
       edited_at: new Date().toISOString()
