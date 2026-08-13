@@ -93,6 +93,32 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .prm-tab-btn.act{background:var(--navy);border-color:var(--navy);color:#fff}
 .prm-tab-btn.act[data-tab="novino"]{background:#7D3C98;border-color:#7D3C98}
 .prm-row-novino{border-left:4px solid #7D3C98}
+.pago-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.pago-card{border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.pago-card.efectivo{background:#EAF7EE;border:1.5px solid #A8D8B4}
+.pago-card.tarjeta{background:#EEF5FC;border:1.5px solid #BDD5F0}
+.pago-card.transferencia{background:#FDF6EC;border:1.5px solid #EDD49A}
+.pago-card.cortesia{background:#F5F0FC;border:1.5px solid #D2B4DE}
+.pago-card .ico{font-size:22px;margin-bottom:8px}
+.pago-card .nombre{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px}
+.pago-card.efectivo .nombre{color:#2E7D4F}
+.pago-card.tarjeta .nombre{color:#1B5C9E}
+.pago-card.transferencia .nombre{color:#9A6010}
+.pago-card.cortesia .nombre{color:#7D3C98}
+.pago-card .total{font-family:var(--font-d);font-size:20px;font-weight:800;color:var(--navy)}
+.pago-card .sub{font-size:10.5px;color:var(--g6);margin-top:4px}
+.pago-card .barra-bg{height:6px;background:rgba(0,0,0,.06);border-radius:4px;margin-top:10px;overflow:hidden}
+.pago-card .barra-fill{height:100%;border-radius:4px}
+.pago-card.efectivo .barra-fill{background:#2E7D4F}
+.pago-card.tarjeta .barra-fill{background:#1B5C9E}
+.pago-card.transferencia .barra-fill{background:#9A6010}
+.pago-card.cortesia .barra-fill{background:#7D3C98}
+.pago-desglose{margin-top:10px;font-size:10.5px;color:var(--g6)}
+.pago-desglose div{display:flex;justify-content:space-between;padding:3px 0;border-top:1px solid rgba(0,0,0,.06)}
+.pac-row{display:grid;grid-template-columns:2fr 1.4fr auto;gap:10px;padding:5px 0;border-bottom:1px solid var(--g1);font-size:11px;align-items:center}
+.pac-row .pac-nombre{color:var(--navy);font-weight:600}
+.pac-row .pac-detalle{color:var(--g4);text-align:left}
+.pac-row .pac-monto{color:var(--teal);font-weight:700;text-align:right}
 .papelera-title{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#C0392B;margin-bottom:8px}
 .appbtn-s{background:var(--navy2);color:#fff;box-shadow:0 6px 14px -4px rgba(27,58,107,.45)}
 
@@ -402,7 +428,12 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         </select>
       </div>
       <div class="dash-kpi-row" id="cierre-kpis" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+      <div class="prm-tabs">
+        <button type="button" class="prm-tab-btn act" id="cierre-subtab-doctor" data-sub="doctor">👥 Por Doctor</button>
+        <button type="button" class="prm-tab-btn" id="cierre-subtab-pago" data-sub="pago">💳 Por Medio de Pago</button>
+      </div>
       <div id="cierre-lista"></div>
+      <div id="cierre-vista-pago" style="display:none"></div>
     </div>
 
     <!-- ══ DASHBOARD ══ -->
@@ -1957,7 +1988,14 @@ async function cargarCierre(){
     <div class="kpi-tile"><div class="ico">🧾</div><div class="lbl3">Consultas</div><div class="val">${totalConsultas}</div></div>
     <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket promedio</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
   `;
-  // agrupar por doctor (con detalle de pacientes y medios de pago)
+  const MEDIOS_INFO = {
+    Efectivo:{cls:'efectivo', icon:'💵'},
+    Tarjeta:{cls:'tarjeta', icon:'💳'},
+    Transferencia:{cls:'transferencia', icon:'🏦'},
+    Cortesía:{cls:'cortesia', icon:'🎁'}
+  };
+
+  // ── agrupar por doctor (con detalle de pacientes y medios de pago) ──
   const porDoctor = {};
   data.forEach(r=>{
     const doc = r.personal ? r.personal.nombre : 'Sin doctor';
@@ -1972,47 +2010,87 @@ async function cargarCierre(){
     if(porDoctor[doc].pagos[r.medio_pago] !== undefined) porDoctor[doc].pagos[r.medio_pago] += Number(r.monto||0);
     if(r.medio_pago_2 && porDoctor[doc].pagos[r.medio_pago_2] !== undefined) porDoctor[doc].pagos[r.medio_pago_2] += Number(r.monto_2||0);
   });
-  const MEDIOS_INFO = {
-    Efectivo:{cls:'efectivo', icon:'💵'},
-    Tarjeta:{cls:'tarjeta', icon:'💳'},
-    Transferencia:{cls:'transferencia', icon:'🏦'},
-    Cortesía:{cls:'cortesia', icon:'🎁'}
-  };
   const doctores = Object.entries(porDoctor).sort((a,b)=>b[1].total-a[1].total);
   if(doctores.length === 0){
     listaEl.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Sin consultas en este período.</div>';
-    return;
-  }
-  listaEl.innerHTML = doctores.map(([nombre, d], i) => `
-    <div class="cierre-card2">
-      <div class="top"><span class="name">${esc2(nombre)}</span><span class="total">$${d.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>
-      <div class="meta">${d.n} paciente(s)</div>
-      <div>
-        ${Object.entries(d.pagos).filter(([,v])=>v>0).map(([medio,val])=>
-          `<span class="doc-pill ${MEDIOS_INFO[medio].cls}">${MEDIOS_INFO[medio].icon} ${esc2(medio)} $${val.toLocaleString('es-MX',{minimumFractionDigits:2})}</span>`
-        ).join('')}
+  } else {
+    listaEl.innerHTML = doctores.map(([nombre, d], i) => `
+      <div class="cierre-card2">
+        <div class="top"><span class="name">${esc2(nombre)}</span><span class="total">$${d.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>
+        <div class="meta">${d.n} paciente(s)</div>
+        <div>
+          ${Object.entries(d.pagos).filter(([,v])=>v>0).map(([medio,val])=>
+            `<span class="doc-pill ${MEDIOS_INFO[medio].cls}">${MEDIOS_INFO[medio].icon} ${esc2(medio)} $${val.toLocaleString('es-MX',{minimumFractionDigits:2})}</span>`
+          ).join('')}
+        </div>
+        <button class="cierre-toggle-pac" data-idx="${i}" style="background:none;border:none;color:#0B6E6E;font-size:10.5px;cursor:pointer;padding:0;margin-top:7px;font-weight:700;text-decoration:underline;text-underline-offset:2px">Ver pacientes (${d.n}) ▾</button>
+        <div class="cierre-pac-list" id="cierre-pac-${i}" style="display:none;margin-top:8px;border-top:1px dashed var(--g2);padding-top:7px">
+          ${d.pacientes.map(p => `
+            <div class="pac-row">
+              <span class="pac-nombre">${esc2(p.nombre)}</span>
+              <span class="pac-detalle">${esc2(p.detalle || '—')}</span>
+              <span class="pac-monto">$${p.monto.toLocaleString('es-MX',{minimumFractionDigits:2})}</span>
+            </div>
+          `).join('')}
+        </div>
       </div>
-      <button class="cierre-toggle-pac" data-idx="${i}" style="background:none;border:none;color:#0B6E6E;font-size:10.5px;cursor:pointer;padding:0;margin-top:7px;font-weight:700;text-decoration:underline;text-underline-offset:2px">Ver pacientes (${d.n}) ▾</button>
-      <div class="cierre-pac-list" id="cierre-pac-${i}" style="display:none;margin-top:8px;border-top:1px dashed var(--g2);padding-top:7px">
-        ${d.pacientes.map(p => `
-          <div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--g1);font-size:11px">
-            <span style="color:var(--navy);font-weight:600">${esc2(p.nombre)}</span>
-            <span style="color:var(--g4);flex:1;text-align:center">${esc2(p.detalle || '—')}</span>
-            <span style="color:var(--teal);font-weight:700">$${p.monto.toLocaleString('es-MX',{minimumFractionDigits:2})}</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-  listaEl.querySelectorAll('.cierre-toggle-pac').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const panel = document.getElementById('cierre-pac-'+btn.dataset.idx);
-      const abierto = panel.style.display === 'block';
-      panel.style.display = abierto ? 'none' : 'block';
-      btn.textContent = btn.textContent.replace(abierto ? '▴' : '▾', abierto ? '▾' : '▴');
+    `).join('');
+    listaEl.querySelectorAll('.cierre-toggle-pac').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const panel = document.getElementById('cierre-pac-'+btn.dataset.idx);
+        const abierto = panel.style.display === 'block';
+        panel.style.display = abierto ? 'none' : 'block';
+        btn.textContent = btn.textContent.replace(abierto ? '▴' : '▾', abierto ? '▾' : '▴');
+      });
     });
+  }
+
+  // ── agrupar por medio de pago (con desglose por doctor) — sub-pestaña "Por Medio de Pago" ──
+  const porPagoTotal = { Efectivo:{total:0,n:0,doctores:{}}, Tarjeta:{total:0,n:0,doctores:{}}, Transferencia:{total:0,n:0,doctores:{}}, Cortesía:{total:0,n:0,doctores:{}} };
+  function sumarPago(medio, monto, doc){
+    if(!porPagoTotal[medio]) return;
+    porPagoTotal[medio].total += monto;
+    porPagoTotal[medio].n += 1;
+    porPagoTotal[medio].doctores[doc] = (porPagoTotal[medio].doctores[doc]||0) + monto;
+  }
+  data.forEach(r=>{
+    const doc = r.personal ? r.personal.nombre : 'Sin doctor';
+    if(r.medio_pago) sumarPago(r.medio_pago, Number(r.monto||0), doc);
+    if(r.medio_pago_2) sumarPago(r.medio_pago_2, Number(r.monto_2||0), doc);
   });
+  const pagoVistaEl = document.getElementById('cierre-vista-pago');
+  const pagosActivos = Object.entries(porPagoTotal).filter(([,v])=>v.total>0);
+  if(pagosActivos.length === 0){
+    pagoVistaEl.innerHTML = '<div style="color:var(--g4);font-size:12px;padding:10px 0">Sin pagos en este período.</div>';
+  } else {
+    const totalGeneral = pagosActivos.reduce((a,[,v])=>a+v.total,0);
+    pagoVistaEl.innerHTML = `<div class="pago-cards">` + pagosActivos.sort((a,b)=>b[1].total-a[1].total).map(([medio,v]) => `
+      <div class="pago-card ${MEDIOS_INFO[medio].cls}">
+        <div class="ico">${MEDIOS_INFO[medio].icon}</div>
+        <div class="nombre">${esc2(medio)}</div>
+        <div class="total">$${v.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+        <div class="sub">${totalGeneral ? Math.round(v.total/totalGeneral*100) : 0}% del total · ${v.n} pago(s)</div>
+        <div class="barra-bg"><div class="barra-fill" style="width:${totalGeneral ? Math.round(v.total/totalGeneral*100) : 0}%"></div></div>
+        <div class="pago-desglose">
+          ${Object.entries(v.doctores).sort((a,b)=>b[1]-a[1]).map(([doc,monto]) => `<div><span>${esc2(doc)}</span><span>$${monto.toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>`).join('')}
+        </div>
+      </div>
+    `).join('') + `</div>`;
+  }
 }
+document.getElementById('cierre-subtab-doctor').addEventListener('click', ()=>{
+  document.getElementById('cierre-subtab-doctor').classList.add('act');
+  document.getElementById('cierre-subtab-pago').classList.remove('act');
+  document.getElementById('cierre-lista').style.display = 'block';
+  document.getElementById('cierre-vista-pago').style.display = 'none';
+});
+document.getElementById('cierre-subtab-pago').addEventListener('click', ()=>{
+  document.getElementById('cierre-subtab-pago').classList.add('act');
+  document.getElementById('cierre-subtab-doctor').classList.remove('act');
+  document.getElementById('cierre-lista').style.display = 'none';
+  document.getElementById('cierre-vista-pago').style.display = 'block';
+});
+
 
 document.getElementById('btn-cierre-dia').addEventListener('click', ()=>{
   CIERRE_MODO = 'dia';
