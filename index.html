@@ -78,6 +78,8 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .appbtn-danger-soft:hover{background:#FCE0DF}
 .papelera-box{background:#FDF8F7;border:1px solid #F5C2BC;border-radius:10px;padding:12px 14px}
 .novino-box{margin-top:16px;padding:13px 15px;background:#F5EEF8;border:1.5px solid #D9B3D9;border-radius:10px}
+.sugerido-chip{background:#fff;border:1px solid rgba(42,191,191,.5);color:var(--navy);font-size:11px;font-weight:600;padding:5px 11px;border-radius:20px;cursor:pointer}
+.sugerido-chip:hover{background:var(--teal-soft);border-color:var(--teal)}
 .badge-novino{background:#F5EEF8;color:#7D3C98;border:1px solid #D9B3D9;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .badge-fact{background:#EEF8F1;color:#2E7D4F;border:1px solid #A8D8B4;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .badge-nofact{background:#FEF6E7;color:#9A6010;border:1px solid #EDD49A;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
@@ -315,8 +317,18 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
             <option>Vacunas</option><option>Producto Farmacia</option><option>Otro</option>
           </select>
         </div>
-        <div class="fi2"><label class="lbl2">Paciente</label><input class="app-input" type="text" id="r-paciente" placeholder="Nombre completo"/></div>
-        <div class="fi2"><label class="lbl2">Teléfono <span style="color:#e53e3e">*</span></label><input class="app-input" type="tel" id="r-telefono" placeholder="10 dígitos"/></div>
+        <div class="fi2"><label class="lbl2">Paciente</label><input class="app-input" type="text" id="r-paciente" placeholder="Nombre completo"/>
+          <div id="r-nombre-sugeridos" style="display:none;margin-top:6px;padding:8px 10px;background:var(--teal-soft);border:1px solid rgba(42,191,191,.35);border-radius:7px">
+            <div style="font-size:9.5px;font-weight:700;color:#0B6E6E;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">📋 Pacientes con nombre parecido — clic para usar:</div>
+            <div id="r-nombre-sugeridos-lista" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+        </div>
+        <div class="fi2"><label class="lbl2">Teléfono <span style="color:#e53e3e">*</span></label><input class="app-input" type="tel" id="r-telefono" placeholder="10 dígitos"/>
+          <div id="r-pacientes-sugeridos" style="display:none;margin-top:6px;padding:8px 10px;background:var(--teal-soft);border:1px solid rgba(42,191,191,.35);border-radius:7px">
+            <div style="font-size:9.5px;font-weight:700;color:#0B6E6E;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">📋 Ya registrados con este teléfono — clic para usar:</div>
+            <div id="r-pacientes-sugeridos-lista" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+        </div>
         <div class="fi2" id="r-tipoconsulta-wrap"><label class="lbl2" id="r-tipoconsulta-label">Tipo de Consulta</label>
           <select class="app-input" id="r-tipoconsulta-select"><option value="">Selecciona un motivo primero</option></select>
           <input class="app-input" type="text" id="r-tipoconsulta-libre" placeholder="Descripción" style="display:none"/>
@@ -1206,6 +1218,60 @@ function dmyToISO(dmy){
   return `${y}-${m}-${d}`;
 }
 
+// ── Sugerencia de pacientes ya registrados (por teléfono o por nombre) — evita duplicados por error de dedo ──
+function seleccionarPacienteSugerido(nombre, telefono, tipo){
+  document.getElementById('r-paciente').value = nombre;
+  if(telefono) document.getElementById('r-telefono').value = telefono;
+  if(tipo) document.getElementById('r-tipopaciente').value = tipo;
+  document.getElementById('r-pacientes-sugeridos').style.display = 'none';
+  document.getElementById('r-nombre-sugeridos').style.display = 'none';
+  refrescarResumen();
+}
+
+let _telefonoSugeridoTimer = null;
+document.getElementById('r-telefono').addEventListener('input', (e)=>{
+  clearTimeout(_telefonoSugeridoTimer);
+  const valor = e.target.value.trim();
+  const box = document.getElementById('r-pacientes-sugeridos');
+  if(valor.length < 8){ box.style.display = 'none'; return; }
+  _telefonoSugeridoTimer = setTimeout(async ()=>{
+    const { data, error } = await sb.from('pacientes').select('id, nombre, tipo_paciente').eq('telefono', valor);
+    if(error){ console.error('[CUIVAN] Error buscando pacientes por teléfono:', error); return; }
+    if(!data || data.length === 0){ box.style.display = 'none'; return; }
+    const listaEl = document.getElementById('r-pacientes-sugeridos-lista');
+    listaEl.innerHTML = data.map(p =>
+      `<button type="button" class="sugerido-chip" data-nombre="${esc2(p.nombre)}" data-tipo="${esc2(p.tipo_paciente||'')}">👤 ${esc2(p.nombre)}</button>`
+    ).join('');
+    box.style.display = 'block';
+    listaEl.querySelectorAll('.sugerido-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=> seleccionarPacienteSugerido(chip.dataset.nombre, null, chip.dataset.tipo));
+    });
+  }, 400);
+});
+
+let _nombreSugeridoTimer = null;
+document.getElementById('r-paciente').addEventListener('input', (e)=>{
+  clearTimeout(_nombreSugeridoTimer);
+  const valor = e.target.value.trim();
+  const box = document.getElementById('r-nombre-sugeridos');
+  if(valor.length < 3){ box.style.display = 'none'; return; }
+  _nombreSugeridoTimer = setTimeout(async ()=>{
+    const { data, error } = await sb.from('pacientes').select('id, nombre, telefono, tipo_paciente').ilike('nombre', `%${valor}%`).limit(6);
+    if(error){ console.error('[CUIVAN] Error buscando pacientes por nombre:', error); return; }
+    // si ya coincide exacto con lo que están escribiendo, no hace falta mostrar sugerencia
+    const soloExacto = data && data.length === 1 && data[0].nombre.trim().toLowerCase() === valor.toLowerCase();
+    if(!data || data.length === 0 || soloExacto){ box.style.display = 'none'; return; }
+    const listaEl = document.getElementById('r-nombre-sugeridos-lista');
+    listaEl.innerHTML = data.map(p =>
+      `<button type="button" class="sugerido-chip" data-nombre="${esc2(p.nombre)}" data-telefono="${esc2(p.telefono||'')}" data-tipo="${esc2(p.tipo_paciente||'')}">👤 ${esc2(p.nombre)} · ${esc2(p.telefono||'sin tel.')}</button>`
+    ).join('');
+    box.style.display = 'block';
+    listaEl.querySelectorAll('.sugerido-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=> seleccionarPacienteSugerido(chip.dataset.nombre, chip.dataset.telefono, chip.dataset.tipo));
+    });
+  }, 400);
+});
+
 async function guardarRegistro(){
   const btn = document.getElementById('btn-guardar-registro');
   const paciente = document.getElementById('r-paciente').value.trim();
@@ -1220,16 +1286,28 @@ async function guardarRegistro(){
 
   btn.disabled = true; btn.textContent = 'Guardando...';
   try {
-    // 1) upsert paciente por teléfono — un solo viaje a la base en vez de 2-3
-    const { data: pacienteRow, error: pacErr } = await sb
+    // 1) buscar paciente por teléfono + nombre EXACTO (evita fusionar a distintas
+    // personas que comparten el mismo teléfono, ej. familiares); si no coincide el
+    // nombre, se crea un paciente nuevo aunque el teléfono ya exista.
+    let pacienteRow;
+    const { data: candidatos, error: buscarErr } = await sb
       .from('pacientes')
-      .upsert(
-        { nombre: paciente, telefono, tipo_paciente: document.getElementById('r-tipopaciente').value },
-        { onConflict: 'telefono' }
-      )
-      .select('id')
-      .single();
-    if(pacErr) throw pacErr;
+      .select('id, nombre')
+      .eq('telefono', telefono);
+    if(buscarErr) throw buscarErr;
+    const match = (candidatos||[]).find(p => p.nombre.trim().toLowerCase() === paciente.toLowerCase());
+    if(match){
+      pacienteRow = { id: match.id };
+      await sb.from('pacientes').update({ tipo_paciente: document.getElementById('r-tipopaciente').value }).eq('id', match.id);
+    } else {
+      const { data: nuevoPac, error: insPacErr } = await sb
+        .from('pacientes')
+        .insert({ nombre: paciente, telefono, tipo_paciente: document.getElementById('r-tipopaciente').value })
+        .select('id')
+        .single();
+      if(insPacErr) throw insPacErr;
+      pacienteRow = nuevoPac;
+    }
 
     // 2) insert consulta — si es "no vino", no lleva monto/pago/factura
     const payload = {
@@ -1289,6 +1367,8 @@ async function miPersonalId(){
 function limpiarRegistro(){
   document.getElementById('r-paciente').value = '';
   document.getElementById('r-telefono').value = '';
+  document.getElementById('r-pacientes-sugeridos').style.display = 'none';
+  document.getElementById('r-nombre-sugeridos').style.display = 'none';
   document.getElementById('r-tipoconsulta-libre').value = '';
   document.getElementById('r-monto').value = '0';
   document.getElementById('r-notas').value = '';
