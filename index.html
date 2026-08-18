@@ -906,8 +906,9 @@ function toast(msg){
 
 // ── Modales genéricos: reemplazan confirm()/prompt() nativos del navegador ──
 let confirmModalCallback = null;
-function mostrarConfirm(opciones, callback){
-  const { titulo='¿Confirmar?', mensaje='', textoConfirmar='Confirmar', icono='❓', danger=false } = opciones;
+let confirmModalCancelCallback = null;
+function mostrarConfirm(opciones, callback, onCancel){
+  const { titulo='¿Confirmar?', mensaje='', textoConfirmar='Confirmar', textoCancelar='Cancelar', icono='❓', danger=false } = opciones;
   document.getElementById('confirm-modal-icono').textContent = icono;
   document.getElementById('confirm-modal-icono').classList.toggle('danger', danger);
   document.getElementById('confirm-modal-titulo').textContent = titulo;
@@ -915,19 +916,32 @@ function mostrarConfirm(opciones, callback){
   const btnOk = document.getElementById('confirm-modal-btn-ok');
   btnOk.textContent = textoConfirmar;
   btnOk.className = danger ? 'appbtn appbtn-danger-soft' : 'appbtn appbtn-p';
+  document.getElementById('confirm-modal-btn-cancelar').textContent = textoCancelar;
   confirmModalCallback = callback;
+  confirmModalCancelCallback = onCancel || null;
   document.getElementById('confirm-modal-overlay').classList.add('show');
 }
 document.getElementById('confirm-modal-btn-ok').addEventListener('click', ()=>{
   const cb = confirmModalCallback;
   document.getElementById('confirm-modal-overlay').classList.remove('show');
   confirmModalCallback = null;
+  confirmModalCancelCallback = null;
   if(cb) cb();
 });
 document.getElementById('confirm-modal-btn-cancelar').addEventListener('click', ()=>{
+  const cbCancel = confirmModalCancelCallback;
   document.getElementById('confirm-modal-overlay').classList.remove('show');
   confirmModalCallback = null;
+  confirmModalCancelCallback = null;
+  document.getElementById('confirm-modal-btn-cancelar').textContent = 'Cancelar';
+  if(cbCancel) cbCancel();
 });
+// Versión con Promise, útil cuando el flujo necesita "esperar" la respuesta (ej. guardarRegistro)
+function confirmarAsync(opciones){
+  return new Promise(resolve=>{
+    mostrarConfirm(opciones, ()=>resolve(true), ()=>resolve(false));
+  });
+}
 
 let promptModalCallback = null;
 function mostrarPrompt(opciones, callback){
@@ -1297,8 +1311,27 @@ async function guardarRegistro(){
     if(buscarErr) throw buscarErr;
     const match = (candidatos||[]).find(p => p.nombre.trim().toLowerCase() === paciente.toLowerCase());
     if(match){
-      pacienteRow = { id: match.id };
-      await sb.from('pacientes').update({ tipo_paciente: document.getElementById('r-tipopaciente').value }).eq('id', match.id);
+      btn.disabled = false; btn.textContent = 'Guardar registro';
+      const esLaMismaPersona = await confirmarAsync({
+        titulo: '¿Es la misma persona?',
+        mensaje: `Ya existe <b>${esc2(match.nombre)}</b> registrado con este teléfono.<br><br>¿Es la misma persona que estás registrando ahora?`,
+        textoConfirmar: 'Sí, es la misma persona',
+        textoCancelar: 'No, es alguien más',
+        icono: '👤'
+      });
+      btn.disabled = true; btn.textContent = 'Guardando...';
+      if(esLaMismaPersona){
+        pacienteRow = { id: match.id };
+        await sb.from('pacientes').update({ tipo_paciente: document.getElementById('r-tipopaciente').value }).eq('id', match.id);
+      } else {
+        const { data: nuevoPac, error: insPacErr } = await sb
+          .from('pacientes')
+          .insert({ nombre: paciente, telefono, tipo_paciente: document.getElementById('r-tipopaciente').value })
+          .select('id')
+          .single();
+        if(insPacErr) throw insPacErr;
+        pacienteRow = nuevoPac;
+      }
     } else {
       const { data: nuevoPac, error: insPacErr } = await sb
         .from('pacientes')
