@@ -121,6 +121,14 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .pac-row .pac-nombre{color:var(--navy);font-weight:600}
 .pac-row .pac-detalle{color:var(--g4);text-align:left}
 .pac-row .pac-monto{color:var(--teal);font-weight:700;text-align:right}
+.exp-format-card{border:2px solid var(--g2);border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;transition:.15s}
+.exp-format-card.sel{border-color:var(--teal);background:var(--teal-soft)}
+.exp-quick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.exp-quick-btn{border:1.5px solid var(--g2);background:#fff;color:var(--g6);padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-b)}
+.exp-quick-btn.act{background:var(--navy);border-color:var(--navy);color:#fff}
+.exp-check{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1.5px solid var(--g2);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:12.5px;font-weight:600}
+.exp-check input{width:16px;height:16px;accent-color:var(--teal)}
+.exp-check.novino{border-color:#D9B3D9;background:rgba(245,238,248,.4)}
 .papelera-title{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#C0392B;margin-bottom:8px}
 .appbtn-s{background:var(--navy2);color:#fff;box-shadow:0 6px 14px -4px rgba(27,58,107,.45)}
 
@@ -407,7 +415,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         </select>
         <button class="appbtn appbtn-s" id="btn-refrescar-historial" style="font-size:11px;padding:6px 12px">↻</button>
         <button class="appbtn appbtn-s" id="btn-papelera-toggle" style="font-size:11px;padding:6px 12px;display:none">🗑 Papelera</button>
-        <button class="appbtn appbtn-p" id="btn-export-historial" style="font-size:11px;padding:6px 12px;margin-left:auto">⬇ Exportar Excel</button>
+        <button class="appbtn appbtn-p" id="btn-export-historial" style="font-size:11px;padding:6px 12px;margin-left:auto">⬇ Exportar</button>
       </div>
       <div class="hist-filtros-exclusivos">
         <label class="hist-filtro-link"><input type="checkbox" id="h-solo-facturado"/> 🧾 Solo facturado</label>
@@ -603,6 +611,45 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     <div class="modal-footer2" style="justify-content:center;border-top:none;padding-top:0;margin-top:16px">
       <button class="appbtn appbtn-s" id="prompt-modal-btn-cancelar">Cancelar</button>
       <button class="appbtn appbtn-p" id="prompt-modal-btn-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal exportar Historial (Excel / PDF + rango de fecha) -->
+<div class="modal-overlay2" id="modal-exportar">
+  <div class="modal2" style="max-width:440px">
+    <h3>⬇ Exportar Historial</h3>
+
+    <label class="lbl2" style="margin-bottom:8px;display:block">Formato</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="exp-format-card sel" id="exp-fmt-excel" data-fmt="excel">
+        <div style="font-size:24px;margin-bottom:6px">📊</div><div style="font-size:12px;font-weight:700">Excel</div>
+      </div>
+      <div class="exp-format-card" id="exp-fmt-pdf" data-fmt="pdf">
+        <div style="font-size:24px;margin-bottom:6px">📄</div><div style="font-size:12px;font-weight:700">PDF</div>
+      </div>
+    </div>
+
+    <label class="lbl2" style="margin-bottom:8px;display:block">Rango de fecha</label>
+    <div class="exp-quick" id="exp-quick-dates">
+      <button type="button" class="exp-quick-btn act" data-q="hoy">Hoy</button>
+      <button type="button" class="exp-quick-btn" data-q="ayer">Ayer</button>
+      <button type="button" class="exp-quick-btn" data-q="semana">Esta semana</button>
+      <button type="button" class="exp-quick-btn" data-q="mes">Este mes</button>
+      <button type="button" class="exp-quick-btn" data-q="custom">Personalizado</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <input class="app-input" type="date" id="exp-fecha-desde" disabled/>
+      <input class="app-input" type="date" id="exp-fecha-hasta" disabled/>
+    </div>
+
+    <label class="lbl2" style="margin-bottom:8px;display:block">Incluir</label>
+    <label class="exp-check"><input type="checkbox" id="exp-incluir-normales" checked/> ✅ Consultas normales</label>
+    <label class="exp-check novino"><input type="checkbox" id="exp-incluir-novino" checked/> 👻 Pacientes que no vinieron</label>
+
+    <div class="modal-footer2" style="margin-top:18px">
+      <button class="appbtn appbtn-s" id="btn-exp-cancelar">Cancelar</button>
+      <button class="appbtn appbtn-p" id="btn-exp-confirmar">⬇ Exportar</button>
     </div>
   </div>
 </div>
@@ -1554,18 +1601,130 @@ function cargarXLSX(){
     document.head.appendChild(s);
   });
 }
-document.getElementById('btn-export-historial').addEventListener('click', async ()=>{
-  const rows = window._historialFiltrado || [];
-  if(rows.length === 0){ toast('⚠️ No hay datos para exportar'); return; }
-  const btn = document.getElementById('btn-export-historial');
+function cargarJSPDF(){
+  return new Promise((resolve, reject)=>{
+    if(window.jspdf && window.jspdf.jsPDF && document.querySelector('script[data-jspdf-autotable]')){
+      return resolve();
+    }
+    const s1 = document.createElement('script');
+    s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s1.onload = ()=>{
+      const s2 = document.createElement('script');
+      s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+      s2.setAttribute('data-jspdf-autotable', '1');
+      s2.onload = resolve;
+      s2.onerror = reject;
+      document.head.appendChild(s2);
+    };
+    s1.onerror = reject;
+    document.head.appendChild(s1);
+  });
+}
+
+// ── Modal de exportar: formato + rango de fecha + qué incluir ──
+document.getElementById('btn-export-historial').addEventListener('click', ()=>{
+  document.getElementById('modal-exportar').classList.add('show');
+});
+document.getElementById('btn-exp-cancelar').addEventListener('click', ()=>{
+  document.getElementById('modal-exportar').classList.remove('show');
+});
+document.getElementById('exp-fmt-excel').addEventListener('click', ()=>{
+  document.getElementById('exp-fmt-excel').classList.add('sel');
+  document.getElementById('exp-fmt-pdf').classList.remove('sel');
+});
+document.getElementById('exp-fmt-pdf').addEventListener('click', ()=>{
+  document.getElementById('exp-fmt-pdf').classList.add('sel');
+  document.getElementById('exp-fmt-excel').classList.remove('sel');
+});
+document.querySelectorAll('.exp-quick-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.exp-quick-btn').forEach(b=>b.classList.remove('act'));
+    btn.classList.add('act');
+    const q = btn.dataset.q;
+    const desdeInput = document.getElementById('exp-fecha-desde');
+    const hastaInput = document.getElementById('exp-fecha-hasta');
+    const hoy = new Date();
+    if(q === 'custom'){
+      desdeInput.disabled = false; hastaInput.disabled = false;
+      return;
+    }
+    desdeInput.disabled = true; hastaInput.disabled = true;
+    if(q === 'hoy'){
+      desdeInput.value = hastaInput.value = isoLocal(hoy);
+    } else if(q === 'ayer'){
+      const ayer = new Date(hoy); ayer.setDate(ayer.getDate()-1);
+      desdeInput.value = hastaInput.value = isoLocal(ayer);
+    } else if(q === 'semana'){
+      const diaSemana = hoy.getDay() === 0 ? 7 : hoy.getDay(); // lunes=1..domingo=7
+      const lunes = new Date(hoy); lunes.setDate(hoy.getDate() - (diaSemana - 1));
+      desdeInput.value = isoLocal(lunes);
+      hastaInput.value = isoLocal(hoy);
+    } else if(q === 'mes'){
+      desdeInput.value = isoLocal(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+      hastaInput.value = isoLocal(hoy);
+    }
+  });
+});
+document.getElementById('exp-quick-dates').querySelector('[data-q="hoy"]').click();
+
+document.getElementById('btn-exp-confirmar').addEventListener('click', async ()=>{
+  const formato = document.getElementById('exp-fmt-pdf').classList.contains('sel') ? 'pdf' : 'excel';
+  const desde = document.getElementById('exp-fecha-desde').value;
+  const hasta = document.getElementById('exp-fecha-hasta').value;
+  const incluirNormales = document.getElementById('exp-incluir-normales').checked;
+  const incluirNoVino = document.getElementById('exp-incluir-novino').checked;
+  if(!desde || !hasta){ toast('⚠️ Selecciona el rango de fecha'); return; }
+  if(!incluirNormales && !incluirNoVino){ toast('⚠️ Selecciona al menos qué incluir'); return; }
+
+  const btn = document.getElementById('btn-exp-confirmar');
   btn.disabled = true; btn.textContent = 'Preparando...';
   try {
-    await cargarXLSX();
-    const header = ['Fecha','Paciente','Estado','Doctor','Motivo','Tipo de Consulta','Monto 1','Medio de Pago 1','Monto 2','Medio de Pago 2','Total','N° Factura','N° Recibo'];
-    const body = rows.map(r => [
-      r.fecha,
+    let consultasNormales = [];
+    let consultasNoVino = [];
+    if(incluirNormales){
+      const { data, error } = await sb
+        .from('consultas')
+        .select('fecha, motivo, tipo_consulta, monto, medio_pago, monto_2, medio_pago_2, factura, num_factura, numero_recibo, pacientes(nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
+        .eq('deleted', false).eq('no_vino', false)
+        .gte('fecha', desde).lte('fecha', hasta)
+        .order('fecha', { ascending:true });
+      if(error) throw error;
+      consultasNormales = data || [];
+    }
+    if(incluirNoVino){
+      const { data, error } = await sb
+        .from('consultas')
+        .select('fecha, motivo, tipo_consulta, pacientes(nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
+        .eq('deleted', false).eq('no_vino', true)
+        .gte('fecha', desde).lte('fecha', hasta)
+        .order('fecha', { ascending:true });
+      if(error) throw error;
+      consultasNoVino = data || [];
+    }
+    if(consultasNormales.length === 0 && consultasNoVino.length === 0){
+      toast('⚠️ No hay datos en ese rango con esos filtros');
+    } else if(formato === 'excel'){
+      await exportarExcelReal(consultasNormales, consultasNoVino, desde, hasta);
+    } else {
+      await exportarPDFReal(consultasNormales, consultasNoVino, desde, hasta);
+    }
+    document.getElementById('modal-exportar').classList.remove('show');
+  } catch(err){
+    console.error('[CUIVAN] Error exportando:', err);
+    toast('⚠️ No se pudo exportar: ' + (err.message || ''));
+  }
+  btn.disabled = false; btn.textContent = '⬇ Exportar';
+});
+
+async function exportarExcelReal(normales, noVino, desde, hasta){
+  await cargarXLSX();
+  const wb = XLSX.utils.book_new();
+
+  if(normales.length > 0){
+    const header = ['Fecha','Paciente','Doctor','Motivo','Tipo de Consulta','Monto 1','Medio de Pago 1','Monto 2','Medio de Pago 2','Total','N° Factura','N° Recibo'];
+    const body = normales.map(r => [
+      fmtFechaISO(r.fecha),
       r.pacientes ? r.pacientes.nombre : '',
-      r.no_vino ? 'No vino' : 'Normal',
       r.personal ? r.personal.nombre : '',
       r.motivo,
       r.tipo_consulta || '',
@@ -1577,17 +1736,133 @@ document.getElementById('btn-export-historial').addEventListener('click', async 
       r.num_factura || '',
       r.numero_recibo || ''
     ]);
-    const ws = XLSX.utils.aoa_to_sheet([header, ...body]);
-    ws['!cols'] = [{wch:11},{wch:26},{wch:10},{wch:22},{wch:16},{wch:22},{wch:11},{wch:15},{wch:11},{wch:15},{wch:12},{wch:14},{wch:14}];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Historial');
-    XLSX.writeFile(wb, `CUIVAN_Historial_${todayLocal().replace(/\//g,'-')}.xlsx`);
-  } catch(err){
-    console.error('[CUIVAN] Error exportando:', err);
-    toast('⚠️ No se pudo generar el Excel');
+    const totalGeneral = normales.reduce((a,r)=>a+Number(r.monto||0)+Number(r.monto_2||0),0);
+    const filaTotal = ['', '', '', '', '', '', '', '', 'TOTAL', totalGeneral, '', ''];
+    const ws = XLSX.utils.aoa_to_sheet([header, ...body, filaTotal]);
+    ws['!cols'] = [{wch:11},{wch:26},{wch:22},{wch:16},{wch:22},{wch:11},{wch:15},{wch:11},{wch:15},{wch:12},{wch:14},{wch:14}];
+    XLSX.utils.book_append_sheet(wb, ws, 'Consultas');
   }
-  btn.disabled = false; btn.textContent = '⬇ Exportar Excel';
-});
+  if(noVino.length > 0){
+    const header2 = ['Fecha','Paciente','Teléfono','Doctor','Motivo'];
+    const body2 = noVino.map(r => [
+      fmtFechaISO(r.fecha),
+      r.pacientes ? r.pacientes.nombre : '',
+      r.pacientes ? r.pacientes.telefono : '',
+      r.personal ? r.personal.nombre : '',
+      [r.motivo, r.tipo_consulta].filter(Boolean).join(' · ')
+    ]);
+    const ws2 = XLSX.utils.aoa_to_sheet([header2, ...body2]);
+    ws2['!cols'] = [{wch:11},{wch:26},{wch:14},{wch:22},{wch:22}];
+    XLSX.utils.book_append_sheet(wb, ws2, 'No vinieron');
+  }
+  const sufijo = desde === hasta ? desde : `${desde}_a_${hasta}`;
+  XLSX.writeFile(wb, `CUIVAN_Historial_${sufijo}.xlsx`);
+}
+
+async function exportarPDFReal(normales, noVino, desde, hasta){
+  await cargarJSPDF();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const margen = 36;
+
+  // header navy
+  doc.setFillColor(11,22,40);
+  doc.rect(0, 0, pageW, 64, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('PRODUCTIVIDAD CUIVAN', margen, 30);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+  doc.setTextColor(180,200,220);
+  doc.text('Reporte de Historial · Mediconsulting', margen, 44);
+  const generadoTxt = `Generado: ${todayLocal()} · Por: ${esc2(MI_PERFIL?.nombre || '—')}`;
+  doc.text(generadoTxt, pageW - margen, 30, { align:'right' });
+
+  let y = 90;
+  doc.setTextColor(11,22,40);
+  doc.setFont('helvetica','bold'); doc.setFontSize(13);
+  doc.text('Historial de consultas', margen, y);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.setTextColor(100,110,130);
+  const rangoTxt = desde === hasta ? `Período: ${fmtFechaISO(desde)}` : `Período: ${fmtFechaISO(desde)} — ${fmtFechaISO(hasta)}`;
+  doc.text(rangoTxt, margen, y + 14);
+  y += 34;
+
+  // KPIs
+  const totalIngreso = normales.reduce((a,r)=>a+Number(r.monto||0)+Number(r.monto_2||0),0);
+  const kpis = [
+    { l:'Ingreso total', v: '$'+totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}) },
+    { l:'Consultas', v: String(normales.length) },
+    { l:'No vinieron', v: String(noVino.length) }
+  ];
+  const kpiW = (pageW - margen*2 - 20) / 3;
+  kpis.forEach((k,i)=>{
+    const x = margen + i*(kpiW+10);
+    doc.setFillColor(244,246,251);
+    doc.roundedRect(x, y, kpiW, 40, 4, 4, 'F');
+    doc.setTextColor(11,22,40); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text(k.v, x + 10, y + 20);
+    doc.setTextColor(100,110,130); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    doc.text(k.l.toUpperCase(), x + 10, y + 32);
+  });
+  y += 60;
+
+  if(normales.length > 0){
+    doc.setTextColor(27,58,107); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('Consultas del período', margen, y);
+    y += 8;
+    doc.autoTable({
+      startY: y,
+      margin: { left: margen, right: margen },
+      head: [['Paciente','Doctor','Motivo','Pago','Total']],
+      body: normales.map(r => [
+        r.pacientes ? r.pacientes.nombre : '—',
+        r.personal ? r.personal.nombre : '—',
+        [r.motivo, r.tipo_consulta].filter(Boolean).join(' · '),
+        r.medio_pago || '—',
+        '$' + (Number(r.monto||0)+Number(r.monto_2||0)).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})
+      ]),
+      styles: { fontSize:8.5, cellPadding:6 },
+      headStyles: { fillColor:[11,22,40], textColor:255, fontStyle:'bold' },
+      alternateRowStyles: { fillColor:[250,251,253] }
+    });
+    y = doc.lastAutoTable.finalY + 24;
+  }
+
+  if(noVino.length > 0){
+    if(y > doc.internal.pageSize.getHeight() - 120){ doc.addPage(); y = 40; }
+    doc.setTextColor(125,60,152); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text(`No vinieron (${noVino.length})`, margen, y);
+    y += 8;
+    doc.autoTable({
+      startY: y,
+      margin: { left: margen, right: margen },
+      head: [['Paciente','Teléfono','Doctor','Motivo']],
+      body: noVino.map(r => [
+        r.pacientes ? r.pacientes.nombre : '—',
+        r.pacientes ? (r.pacientes.telefono || '—') : '—',
+        r.personal ? r.personal.nombre : '—',
+        [r.motivo, r.tipo_consulta].filter(Boolean).join(' · ')
+      ]),
+      styles: { fontSize:8.5, cellPadding:6 },
+      headStyles: { fillColor:[11,22,40], textColor:255, fontStyle:'bold' },
+      alternateRowStyles: { fillColor:[245,238,248] }
+    });
+  }
+
+  const paginas = doc.internal.getNumberOfPages();
+  for(let p=1; p<=paginas; p++){
+    doc.setPage(p);
+    doc.setDrawColor(226,232,244);
+    doc.line(margen, doc.internal.pageSize.getHeight()-40, pageW-margen, doc.internal.pageSize.getHeight()-40);
+    doc.setTextColor(150,160,175); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    doc.text('© 2026 Mediconsulting — CUIVAN Salud Integral', margen, doc.internal.pageSize.getHeight()-26);
+    doc.text(`Página ${p} de ${paginas}`, pageW-margen, doc.internal.pageSize.getHeight()-26, { align:'right' });
+  }
+
+  const sufijo = desde === hasta ? desde : `${desde}_a_${hasta}`;
+  doc.save(`CUIVAN_Historial_${sufijo}.pdf`);
+}
 
 // ── Papelera: consultas eliminadas (soft-delete), restaurar o borrar definitivo ──
 let PAPELERA_ABIERTA = false;
