@@ -140,6 +140,11 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .htable2 tr:hover td{background:#f0f9f9}
 .pill2{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:600}
 .pt2{background:var(--teal-soft);color:#0B6E6E}
+.tipopac-particular{background:#EEF5FC;color:#1B5C9E}
+.tipopac-broker{background:#FDF6EC;color:#9A6010}
+.tipopac-vrim{background:#F5EEF8;color:#7D3C98}
+.tipopac-integrasalud{background:#EAF7EE;color:#2E7D4F}
+.tipopac-vitalife{background:#FDECEA;color:#C0392B}
 .pn2{background:rgba(27,58,107,.08);color:var(--navy2)}
 .soon{text-align:center;padding:50px 20px;color:var(--g4)}
 .soon-ico{font-size:32px;margin-bottom:10px}
@@ -413,6 +418,11 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
           <option value="">Todos los medios de pago</option>
           <option>Tarjeta</option><option>Efectivo</option><option>Transferencia</option><option>Cortesía</option>
         </select>
+        <select class="app-input" id="h-tipopaciente" style="background:#fff">
+          <option value="">Todos los tipos de paciente</option>
+          <option>Particular</option><option>Broker</option><option>VRIM</option>
+          <option>Integra Salud</option><option>Vitalife</option>
+        </select>
         <button class="appbtn appbtn-s" id="btn-refrescar-historial" style="font-size:11px;padding:6px 12px">↻</button>
         <button class="appbtn appbtn-s" id="btn-papelera-toggle" style="font-size:11px;padding:6px 12px;display:none">🗑 Papelera</button>
         <button class="appbtn appbtn-p" id="btn-export-historial" style="font-size:11px;padding:6px 12px;margin-left:auto">⬇ Exportar</button>
@@ -425,8 +435,8 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <div id="h-papelera-panel" style="display:none;margin-bottom:14px"></div>
       <div style="overflow-x:auto">
         <table class="h2-table">
-          <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th><th>N° Factura</th><th>N° Recibo</th><th></th></tr></thead>
-          <tbody id="h-tbody"><tr><td colspan="10" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
+          <thead><tr><th>Fecha</th><th>Paciente</th><th>Tipo Pac.</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th><th>N° Factura</th><th>N° Recibo</th><th></th></tr></thead>
+          <tbody id="h-tbody"><tr><td colspan="11" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -658,7 +668,15 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 <div class="modal-overlay2" id="modal-editar-consulta">
   <div class="modal2" style="max-width:500px">
     <h3>✏️ Editar consulta</h3>
-    <div class="fi2" style="margin-bottom:10px"><label class="lbl2">Paciente</label><input class="app-input" id="ec-paciente"/></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="fi2"><label class="lbl2">Paciente</label><input class="app-input" id="ec-paciente"/></div>
+      <div class="fi2"><label class="lbl2">Tipo Paciente</label>
+        <select class="app-input" id="ec-tipopaciente">
+          <option>Particular</option><option>Broker</option><option>VRIM</option>
+          <option>Integra Salud</option><option>Vitalife</option>
+        </select>
+      </div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
       <div class="fi2"><label class="lbl2">Fecha</label><input class="app-input" type="date" id="ec-fecha"/></div>
       <div class="fi2"><label class="lbl2">Atendido por</label><select class="app-input" id="ec-doctor"></select></div>
@@ -1471,12 +1489,12 @@ document.getElementById('btn-limpiar-registro').addEventListener('click', limpia
 async function cargarHistorial(){
   const tbody = document.getElementById('h-tbody');
   const kpisEl = document.getElementById('h-kpis');
-  tbody.innerHTML = '<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="11" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
   const periodoRaw = document.getElementById('h-periodo').value;
   const soloNoVino = document.getElementById('h-solo-novino').checked;
   let query = sb
     .from('consultas')
-    .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, factura, num_factura, numero_recibo, no_vino, pacientes(id, nombre), personal!consultas_doctor_id_fkey(nombre)')
+    .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, factura, num_factura, numero_recibo, no_vino, pacientes(id, nombre, tipo_paciente), personal!consultas_doctor_id_fkey(nombre)')
     .eq('deleted', false)
     .order('fecha', { ascending: false })
     .limit(300);
@@ -1493,7 +1511,7 @@ async function cargarHistorial(){
   const { data, error } = await query;
   if(error){
     console.error('[CUIVAN] Error cargando historial:', error);
-    tbody.innerHTML = '<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
     kpisEl.innerHTML = '';
     return;
   }
@@ -1504,19 +1522,21 @@ function aplicarFiltrosHistorial(){
   const q = document.getElementById('h-buscar').value.trim().toLowerCase();
   const motivo = document.getElementById('h-motivo').value;
   const pago = document.getElementById('h-pago').value;
+  const tipoPaciente = document.getElementById('h-tipopaciente').value;
   const soloFacturado = document.getElementById('h-solo-facturado').checked;
   const soloNoFacturado = document.getElementById('h-solo-nofacturado').checked;
   let rows = window._historialData || [];
   if(q) rows = rows.filter(r => (r.pacientes?.nombre || '').toLowerCase().includes(q));
   if(motivo) rows = rows.filter(r => r.motivo === motivo);
   if(pago) rows = rows.filter(r => r.medio_pago === pago);
+  if(tipoPaciente) rows = rows.filter(r => r.pacientes?.tipo_paciente === tipoPaciente);
   if(soloFacturado) rows = rows.filter(r => r.factura);
   if(soloNoFacturado) rows = rows.filter(r => !r.factura);
 
   const kpisEl = document.getElementById('h-kpis');
   const periodoTxt = document.getElementById('h-periodo').selectedOptions[0].text;
   if(rows.length === 0){
-    document.getElementById('h-tbody').innerHTML = '<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
+    document.getElementById('h-tbody').innerHTML = '<tr><td colspan="11" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
     kpisEl.innerHTML = '';
     document.getElementById('h2-subt').textContent = periodoTxt + ' · 0 registros';
     return;
@@ -1552,6 +1572,7 @@ function renderHistorial(rows){
     <tr data-id="${r.id}">
       <td>${fmtFechaISO(r.fecha)}</td>
       <td><b>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</b>${r.no_vino ? '<div><span class="badge-novino">👻 No vino</span></div>' : ''}</td>
+      <td>${r.pacientes && r.pacientes.tipo_paciente ? `<span class="pill2 tipopac-${esc2(r.pacientes.tipo_paciente).toLowerCase().replace(/\s+/g,'')}">${esc2(r.pacientes.tipo_paciente)}</span>` : '—'}</td>
       <td>${esc2(r.personal ? r.personal.nombre : '—')}</td>
       <td><span class="pill2 pt2">${esc2(r.motivo)}</span></td>
       <td>${esc2(r.tipo_consulta || '—')}</td>
@@ -1589,6 +1610,7 @@ document.getElementById('h-periodo').addEventListener('change', cargarHistorial)
 document.getElementById('h-buscar').addEventListener('input', aplicarFiltrosHistorial);
 document.getElementById('h-motivo').addEventListener('change', aplicarFiltrosHistorial);
 document.getElementById('h-pago').addEventListener('change', aplicarFiltrosHistorial);
+document.getElementById('h-tipopaciente').addEventListener('change', aplicarFiltrosHistorial);
 
 // ── Exportar a Excel (datos crudos, sin emojis/HTML) ──
 function cargarXLSX(){
@@ -1684,7 +1706,7 @@ document.getElementById('btn-exp-confirmar').addEventListener('click', async ()=
     if(incluirNormales){
       const { data, error } = await sb
         .from('consultas')
-        .select('fecha, motivo, tipo_consulta, monto, medio_pago, monto_2, medio_pago_2, factura, num_factura, numero_recibo, pacientes(nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
+        .select('fecha, motivo, tipo_consulta, monto, medio_pago, monto_2, medio_pago_2, factura, num_factura, numero_recibo, pacientes(nombre, telefono, tipo_paciente), personal!consultas_doctor_id_fkey(nombre)')
         .eq('deleted', false).eq('no_vino', false)
         .gte('fecha', desde).lte('fecha', hasta)
         .order('fecha', { ascending:true });
@@ -1721,10 +1743,11 @@ async function exportarExcelReal(normales, noVino, desde, hasta){
   const wb = XLSX.utils.book_new();
 
   if(normales.length > 0){
-    const header = ['Fecha','Paciente','Doctor','Motivo','Tipo de Consulta','Monto 1','Medio de Pago 1','Monto 2','Medio de Pago 2','Total','N° Factura','N° Recibo'];
+    const header = ['Fecha','Paciente','Tipo Paciente','Doctor','Motivo','Tipo de Consulta','Monto 1','Medio de Pago 1','Monto 2','Medio de Pago 2','Total','N° Factura','N° Recibo'];
     const body = normales.map(r => [
       fmtFechaISO(r.fecha),
       r.pacientes ? r.pacientes.nombre : '',
+      r.pacientes ? (r.pacientes.tipo_paciente || '') : '',
       r.personal ? r.personal.nombre : '',
       r.motivo,
       r.tipo_consulta || '',
@@ -1737,9 +1760,9 @@ async function exportarExcelReal(normales, noVino, desde, hasta){
       r.numero_recibo || ''
     ]);
     const totalGeneral = normales.reduce((a,r)=>a+Number(r.monto||0)+Number(r.monto_2||0),0);
-    const filaTotal = ['', '', '', '', '', '', '', '', 'TOTAL', totalGeneral, '', ''];
+    const filaTotal = ['', '', '', '', '', '', '', '', '', 'TOTAL', totalGeneral, '', ''];
     const ws = XLSX.utils.aoa_to_sheet([header, ...body, filaTotal]);
-    ws['!cols'] = [{wch:11},{wch:26},{wch:22},{wch:16},{wch:22},{wch:11},{wch:15},{wch:11},{wch:15},{wch:12},{wch:14},{wch:14}];
+    ws['!cols'] = [{wch:11},{wch:26},{wch:13},{wch:22},{wch:16},{wch:22},{wch:11},{wch:15},{wch:11},{wch:15},{wch:12},{wch:14},{wch:14}];
     XLSX.utils.book_append_sheet(wb, ws, 'Consultas');
   }
   if(noVino.length > 0){
@@ -1814,9 +1837,10 @@ async function exportarPDFReal(normales, noVino, desde, hasta){
     doc.autoTable({
       startY: y,
       margin: { left: margen, right: margen },
-      head: [['Paciente','Doctor','Motivo','Pago','Total']],
+      head: [['Paciente','Tipo','Doctor','Motivo','Pago','Total']],
       body: normales.map(r => [
         r.pacientes ? r.pacientes.nombre : '—',
+        r.pacientes ? (r.pacientes.tipo_paciente || '—') : '—',
         r.personal ? r.personal.nombre : '—',
         [r.motivo, r.tipo_consulta].filter(Boolean).join(' · '),
         r.medio_pago || '—',
@@ -2833,6 +2857,7 @@ function abrirEditarConsulta(consultaId){
   EDITANDO_CONSULTA = row;
 
   document.getElementById('ec-paciente').value = row.pacientes ? row.pacientes.nombre : '';
+  document.getElementById('ec-tipopaciente').value = row.pacientes?.tipo_paciente || 'Particular';
   document.getElementById('ec-fecha').value = row.fecha;
   document.getElementById('ec-doctor').innerHTML = document.getElementById('r-doctor').innerHTML;
   document.getElementById('ec-doctor').value = row.doctor_id || '';
@@ -2882,8 +2907,9 @@ document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
   if(!nuevoNombre || !fechaVal || !doctorId){ toast('⚠️ Completa paciente, fecha y doctor'); return; }
   btn.disabled = true; btn.textContent = 'Guardando...';
   try {
-    if(EDITANDO_CONSULTA.pacientes && nuevoNombre !== EDITANDO_CONSULTA.pacientes.nombre){
-      await sb.from('pacientes').update({ nombre: nuevoNombre }).eq('id', EDITANDO_CONSULTA.paciente_id);
+    const nuevoTipoPaciente = document.getElementById('ec-tipopaciente').value;
+    if(EDITANDO_CONSULTA.pacientes && (nuevoNombre !== EDITANDO_CONSULTA.pacientes.nombre || nuevoTipoPaciente !== EDITANDO_CONSULTA.pacientes.tipo_paciente)){
+      await sb.from('pacientes').update({ nombre: nuevoNombre, tipo_paciente: nuevoTipoPaciente }).eq('id', EDITANDO_CONSULTA.paciente_id);
     }
     const { error } = await sb.from('consultas').update({
       fecha: fechaVal,
