@@ -653,6 +653,11 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <input class="app-input" type="date" id="exp-fecha-hasta" disabled/>
     </div>
 
+    <label class="lbl2" style="margin-bottom:8px;display:block">Doctor</label>
+    <select class="app-input" id="exp-doctor-filtro" style="margin-bottom:16px">
+      <option value="">Todos los doctores</option>
+    </select>
+
     <label class="lbl2" style="margin-bottom:8px;display:block">Incluir</label>
     <label class="exp-check"><input type="checkbox" id="exp-incluir-normales" checked/> ✅ Consultas normales</label>
     <label class="exp-check novino"><input type="checkbox" id="exp-incluir-novino" checked/> 👻 Pacientes que no vinieron</label>
@@ -1188,6 +1193,7 @@ async function cargarDoctores(){
   const sel = document.getElementById('r-doctor');
   const selCierre = document.getElementById('cierre-doctor-filtro');
   const selDash = document.getElementById('dash-doctor-filtro');
+  const selExp = document.getElementById('exp-doctor-filtro');
   const { data, error } = await sb.from('personal').select('id, nombre').eq('rol','doctor').eq('activo', true).order('nombre');
   if(error){ console.error('[CUIVAN] Error cargando doctores:', error); sel.innerHTML = '<option value="">Error al cargar</option>'; return; }
   if(!data || data.length === 0){ sel.innerHTML = '<option value="">Sin doctores registrados</option>'; return; }
@@ -1197,6 +1203,9 @@ async function cargarDoctores(){
   }
   if(selDash){
     selDash.innerHTML = '<option value="">Todos los doctores</option>' + data.map(d => `<option value="${d.id}">${esc2(d.nombre)}</option>`).join('');
+  }
+  if(selExp){
+    selExp.innerHTML = '<option value="">Todos los doctores</option>' + data.map(d => `<option value="${d.id}">${esc2(d.nombre)}</option>`).join('');
   }
   refrescarResumen();
   actualizarTipoConsulta();
@@ -1693,6 +1702,7 @@ document.getElementById('btn-exp-confirmar').addEventListener('click', async ()=
   const formato = document.getElementById('exp-fmt-pdf').classList.contains('sel') ? 'pdf' : 'excel';
   const desde = document.getElementById('exp-fecha-desde').value;
   const hasta = document.getElementById('exp-fecha-hasta').value;
+  const doctorFiltro = document.getElementById('exp-doctor-filtro').value;
   const incluirNormales = document.getElementById('exp-incluir-normales').checked;
   const incluirNoVino = document.getElementById('exp-incluir-novino').checked;
   if(!desde || !hasta){ toast('⚠️ Selecciona el rango de fecha'); return; }
@@ -1704,22 +1714,26 @@ document.getElementById('btn-exp-confirmar').addEventListener('click', async ()=
     let consultasNormales = [];
     let consultasNoVino = [];
     if(incluirNormales){
-      const { data, error } = await sb
+      let q = sb
         .from('consultas')
         .select('fecha, motivo, tipo_consulta, monto, medio_pago, monto_2, medio_pago_2, factura, num_factura, numero_recibo, pacientes(nombre, telefono, tipo_paciente), personal!consultas_doctor_id_fkey(nombre)')
         .eq('deleted', false).eq('no_vino', false)
         .gte('fecha', desde).lte('fecha', hasta)
         .order('fecha', { ascending:true });
+      if(doctorFiltro) q = q.eq('doctor_id', doctorFiltro);
+      const { data, error } = await q;
       if(error) throw error;
       consultasNormales = data || [];
     }
     if(incluirNoVino){
-      const { data, error } = await sb
+      let q = sb
         .from('consultas')
         .select('fecha, motivo, tipo_consulta, pacientes(nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
         .eq('deleted', false).eq('no_vino', true)
         .gte('fecha', desde).lte('fecha', hasta)
         .order('fecha', { ascending:true });
+      if(doctorFiltro) q = q.eq('doctor_id', doctorFiltro);
+      const { data, error } = await q;
       if(error) throw error;
       consultasNoVino = data || [];
     }
@@ -1728,7 +1742,8 @@ document.getElementById('btn-exp-confirmar').addEventListener('click', async ()=
     } else if(formato === 'excel'){
       await exportarExcelReal(consultasNormales, consultasNoVino, desde, hasta);
     } else {
-      await exportarPDFReal(consultasNormales, consultasNoVino, desde, hasta);
+      const doctorNombre = doctorFiltro ? document.getElementById('exp-doctor-filtro').selectedOptions[0].text : '';
+      await exportarPDFReal(consultasNormales, consultasNoVino, desde, hasta, doctorNombre);
     }
     document.getElementById('modal-exportar').classList.remove('show');
   } catch(err){
@@ -1782,7 +1797,7 @@ async function exportarExcelReal(normales, noVino, desde, hasta){
   XLSX.writeFile(wb, `CUIVAN_Historial_${sufijo}.xlsx`);
 }
 
-async function exportarPDFReal(normales, noVino, desde, hasta){
+async function exportarPDFReal(normales, noVino, desde, hasta, doctorNombre){
   await cargarJSPDF();
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit:'pt', format:'letter' });
@@ -1807,7 +1822,7 @@ async function exportarPDFReal(normales, noVino, desde, hasta){
   doc.text('Historial de consultas', margen, y);
   doc.setFont('helvetica','normal'); doc.setFontSize(9);
   doc.setTextColor(100,110,130);
-  const rangoTxt = desde === hasta ? `Período: ${fmtFechaISO(desde)}` : `Período: ${fmtFechaISO(desde)} — ${fmtFechaISO(hasta)}`;
+  const rangoTxt = (desde === hasta ? `Período: ${fmtFechaISO(desde)}` : `Período: ${fmtFechaISO(desde)} — ${fmtFechaISO(hasta)}`) + (doctorNombre ? ` · Doctor: ${doctorNombre}` : '');
   doc.text(rangoTxt, margen, y + 14);
   y += 34;
 
