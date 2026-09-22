@@ -281,6 +281,99 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 @keyframes girar-spinner{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
 .spinner-grande{width:38px;height:38px;border:3.5px solid rgba(255,255,255,0.2);border-top-color:var(--teal);border-radius:50%;animation:girar-spinner 0.8s linear infinite;margin-bottom:20px}
 .loading-text{color:#fff;font-weight:700;font-size:14px}
+
+/* ══════════════════════════════════════════════════════════════
+   MÓVIL — mismo patrón ya probado en Skin Fabric
+   ══════════════════════════════════════════════════════════════ */
+
+/* Header: el logo/título + insignia/usuario/botones competían por espacio
+   en una sola fila de grid. Se apilan en columna, centrados, con aire. */
+@media (max-width:700px){
+  .s3-strip{grid-template-columns:1fr;justify-items:center;text-align:center;gap:10px;padding:16px 18px}
+  .s3-brand-left{justify-self:center}
+  .s3-brand-center{justify-self:center}
+  .s3-right{justify-self:center;justify-content:center;width:100%;gap:8px 10px}
+  main.appmain{padding:16px 14px 28px}
+  .tab-title{flex-wrap:wrap;row-gap:10px}
+  .s3-navrow{padding:10px 12px}
+  .s3-segment{width:100%;justify-content:center}
+  .s3-segment button{padding:7px 11px;font-size:11px}
+}
+
+/* Formularios: los grids de 3 columnas se apilan en 1 */
+@media (max-width:820px){
+  .b1-grid{grid-template-columns:1fr 1fr}
+  .row4{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  .b1-grid{grid-template-columns:1fr}
+  .row4{grid-template-columns:1fr}
+  #r-pago2-wrap{grid-template-columns:1fr!important}
+  #ec-pago2-wrap{grid-template-columns:1fr!important}
+}
+
+/* KPIs: de 3/4 columnas a 2, y en pantallas muy chicas a 1 */
+@media (max-width:820px){
+  #dash-kpis{grid-template-columns:1fr 1fr!important}
+}
+@media (max-width:560px){
+  #cierre-kpis,#dash-kpis,#prm-kpis{grid-template-columns:1fr!important}
+}
+
+/* Dashboard: las 2 filas de gráficas (1.3fr/1fr y 1fr/1fr) se apilan */
+@media (max-width:820px){
+  .dash-chart-row1,.dash-chart-row2{grid-template-columns:1fr!important}
+}
+
+/* Filtros con selects en fila: en móvil ocupan todo el ancho en vez de
+   quedar apretados o con el margin-left:auto dejando un hueco raro */
+@media (max-width:700px){
+  .filt2 select,.filt2 input{flex:1 1 100%;margin-left:0!important}
+  #cierre-doctor-filtro{margin-left:0!important}
+}
+
+/* Modales: menos aire lateral para aprovechar la pantalla chica */
+@media (max-width:560px){
+  .modal2{padding:16px}
+  .modal-overlay2{padding:10px}
+}
+
+/* Configuración: filas tipo grid (Personal, servicios) se apilan, con
+   una micro-etiqueta antes de cada campo para que se entienda qué es */
+@media (max-width:700px){
+  .p-header,.p-header-sin{display:none}
+  .p-row,.p-row-sin,.svc-row{grid-template-columns:1fr!important;gap:6px;padding:12px 10px;background:#fff;border:1px solid var(--g2);border-radius:10px;margin-bottom:8px}
+  .p-row>div:first-child{order:1}
+  .mob-lbl{display:block;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4);margin:6px 0 2px}
+  .p-row .p-actions2,.p-row-sin>div:last-child{justify-content:flex-start!important}
+}
+@media (min-width:701px){
+  .mob-lbl{display:none}
+}
+
+/* Cierre: la lista de pacientes dentro de cada tarjeta de doctor —
+   nombre/servicio/monto en columnas fijas se apila en móvil */
+@media (max-width:560px){
+  .pac-row{grid-template-columns:1fr!important;gap:2px;padding:8px 0}
+  .pac-row .pac-detalle,.pac-row .pac-monto{text-align:left!important}
+}
+
+/* ══ Tablas de datos en móvil: cada fila se convierte en una "tarjeta" apilada ══
+   Aplica a Historial, Papelera y PRM/CRM. Cada celda lleva su etiqueta arriba
+   usando data-label (puesto por JS al renderizar cada fila). */
+@media (max-width:700px){
+  .h2-table-wrap,.htable2-wrap{overflow-x:visible}
+  .h2-table thead,.htable2 thead{display:none}
+  .h2-table,.h2-table tbody,.htable2,.htable2 tbody{display:block;width:100%}
+  .h2-table tr,.htable2 tr{display:block;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(11,22,40,.08);margin-bottom:10px;padding:4px 14px;border-left:3px solid var(--teal)}
+  .h2-table td,.htable2 td{display:block;padding:8px 0;border-bottom:1px solid var(--g1);vertical-align:top}
+  .h2-table td:last-child,.htable2 td:last-child{border-bottom:none;padding-top:10px;text-align:left}
+  .h2-table td[colspan],.htable2 td[colspan]{text-align:center}
+  .h2-table td[colspan]::before,.htable2 td[colspan]::before{display:none}
+  .h2-table td input,.htable2 td input{width:100%}
+  .h2-table td::before,.htable2 td::before{content:attr(data-label);display:block;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4);margin-bottom:3px}
+  .h2-table td:not([data-label])::before,.htable2 td:not([data-label])::before{content:none}
+}
 </style>
 </head>
 <body>
@@ -433,7 +526,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         <label class="hist-filtro-link"><input type="checkbox" id="h-solo-novino"/> 👻 Solo "No vino"</label>
       </div>
       <div id="h-papelera-panel" style="display:none;margin-bottom:14px"></div>
-      <div style="overflow-x:auto">
+      <div class="h2-table-wrap" style="overflow-x:auto">
         <table class="h2-table">
           <thead><tr><th>Fecha</th><th>Paciente</th><th>Tipo Pac.</th><th>Doctor</th><th>Motivo</th><th>Tipo</th><th>Monto</th><th>Pago</th><th>N° Factura</th><th>N° Recibo</th><th></th></tr></thead>
           <tbody id="h-tbody"><tr><td colspan="11" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr></tbody>
@@ -489,7 +582,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         </select>
       </div>
       <div class="dash-kpi-row" id="dash-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px"></div>
-      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="dash-chart-row1" style="display:grid;grid-template-columns:1.3fr 1fr;gap:10px;margin-bottom:10px">
         <div class="fac2">
           <div class="lbl2" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
             <span>📈 Tendencia de ingresos</span>
@@ -502,7 +595,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         </div>
         <div class="fac2"><div class="lbl2" style="margin-bottom:8px">🩺 Ingreso por doctor</div><div style="height:170px"><canvas id="ch-dash-doc"></canvas></div></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="dash-chart-row2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="fac2"><div class="lbl2" style="margin-bottom:8px">💳 Medios de pago</div><div style="height:190px"><canvas id="ch-dash-pago"></canvas></div></div>
         <div class="fac2"><div class="lbl2" style="margin-bottom:8px">📋 Ingreso por tipo de consulta</div><div style="height:190px"><canvas id="ch-dash-tipo"></canvas></div></div>
       </div>
@@ -521,7 +614,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         <input class="app-input" type="number" id="prm-dias" value="60" style="width:70px"/>
         <button class="appbtn appbtn-p" id="btn-prm-aplicar" style="font-size:11px;padding:6px 12px">Aplicar</button>
       </div>
-      <div style="overflow-x:auto">
+      <div class="htable2-wrap" style="overflow-x:auto">
         <table class="htable2">
           <thead id="prm-thead"><tr><th>Paciente</th><th>Teléfono</th><th>Última visita</th><th>Inactividad</th><th>Último servicio</th><th>Doctor</th><th></th></tr></thead>
           <tbody id="prm-tbody"></tbody>
@@ -1579,16 +1672,16 @@ function renderHistorial(rows){
   const tbody = document.getElementById('h-tbody');
   tbody.innerHTML = rows.map(r => `
     <tr data-id="${r.id}">
-      <td>${fmtFechaISO(r.fecha)}</td>
-      <td><b>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</b>${r.no_vino ? '<div><span class="badge-novino">👻 No vino</span></div>' : ''}</td>
-      <td>${r.pacientes && r.pacientes.tipo_paciente ? `<span class="pill2 tipopac-${esc2(r.pacientes.tipo_paciente).toLowerCase().replace(/\s+/g,'')}">${esc2(r.pacientes.tipo_paciente)}</span>` : '—'}</td>
-      <td>${esc2(r.personal ? r.personal.nombre : '—')}</td>
-      <td><span class="pill2 pt2">${esc2(r.motivo)}</span></td>
-      <td>${esc2(r.tipo_consulta || '—')}</td>
-      <td>${r.no_vino ? '—' : `<b style="color:var(--teal)">$${(Number(r.monto)+Number(r.monto_2||0)).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</b>${r.monto_2 ? `<div style="font-size:9px;color:var(--g4)">$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})} + $${Number(r.monto_2).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>` : ''}`}</td>
-      <td>${r.no_vino ? '—' : (PAGO_ICON[r.medio_pago]||'') + ' ' + esc2(r.medio_pago||'') + (r.medio_pago_2 ? `<div style="font-size:9px;color:var(--g4)">+ ${PAGO_ICON[r.medio_pago_2]||''} ${esc2(r.medio_pago_2)}</div>` : '')}</td>
-      <td>${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-factura${r.factura && !r.num_factura ? ' pendiente-factura' : ''}" data-id="${r.id}" value="${esc2(r.num_factura||'')}" placeholder="${r.factura && !r.num_factura ? 'Pendiente' : '—'}"/>`}</td>
-      <td>${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-recibo" data-id="${r.id}" value="${esc2(r.numero_recibo||'')}" placeholder="—"/>`}</td>
+      <td data-label="Fecha">${fmtFechaISO(r.fecha)}</td>
+      <td data-label="Paciente"><b>${esc2(r.pacientes ? r.pacientes.nombre : '—')}</b>${r.no_vino ? '<div><span class="badge-novino">👻 No vino</span></div>' : ''}</td>
+      <td data-label="Tipo Pac.">${r.pacientes && r.pacientes.tipo_paciente ? `<span class="pill2 tipopac-${esc2(r.pacientes.tipo_paciente).toLowerCase().replace(/\s+/g,'')}">${esc2(r.pacientes.tipo_paciente)}</span>` : '—'}</td>
+      <td data-label="Doctor">${esc2(r.personal ? r.personal.nombre : '—')}</td>
+      <td data-label="Motivo"><span class="pill2 pt2">${esc2(r.motivo)}</span></td>
+      <td data-label="Tipo">${esc2(r.tipo_consulta || '—')}</td>
+      <td data-label="Monto">${r.no_vino ? '—' : `<b style="color:var(--teal)">$${(Number(r.monto)+Number(r.monto_2||0)).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</b>${r.monto_2 ? `<div style="font-size:9px;color:var(--g4)">$${Number(r.monto).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})} + $${Number(r.monto_2).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>` : ''}`}</td>
+      <td data-label="Pago">${r.no_vino ? '—' : (PAGO_ICON[r.medio_pago]||'') + ' ' + esc2(r.medio_pago||'') + (r.medio_pago_2 ? `<div style="font-size:9px;color:var(--g4)">+ ${PAGO_ICON[r.medio_pago_2]||''} ${esc2(r.medio_pago_2)}</div>` : '')}</td>
+      <td data-label="N° Factura">${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-factura${r.factura && !r.num_factura ? ' pendiente-factura' : ''}" data-id="${r.id}" value="${esc2(r.num_factura||'')}" placeholder="${r.factura && !r.num_factura ? 'Pendiente' : '—'}"/>`}</td>
+      <td data-label="N° Recibo">${r.no_vino ? '—' : `<input class="app-input recibo-input h-inline-recibo" data-id="${r.id}" value="${esc2(r.numero_recibo||'')}" placeholder="—"/>`}</td>
       <td><button class="h-editar-btn" data-id="${r.id}" style="background:none;border:none;color:#0B6E6E;cursor:pointer;font-size:13px" title="Editar">✏️</button></td>
     </tr>
   `).join('');
@@ -1941,19 +2034,19 @@ async function cargarPapelera(){
         <span>🗑 Papelera — ${data.length} registro(s) eliminado(s)</span>
         ${window.MI_PUEDE_ELIMINAR_PAPELERA ? `<button class="appbtn appbtn-danger-soft" id="btn-vaciar-papelera" style="font-size:10.5px;padding:5px 10px;text-transform:none;letter-spacing:0;font-weight:700">Vaciar papelera</button>` : ''}
       </div>
-      <div style="overflow-x:auto">
+      <div class="htable2-wrap" style="overflow-x:auto">
         <table class="htable2">
           <thead><tr><th>Fecha</th><th>Paciente</th><th>Doctor</th><th>Motivo</th><th>Monto</th><th>Eliminado</th><th>Por</th><th></th></tr></thead>
           <tbody>
             ${data.map(c => `
               <tr>
-                <td>${fmtFechaISO(c.fecha)}</td>
-                <td>${esc2(c.pacientes ? c.pacientes.nombre : '—')}</td>
-                <td>${esc2(c.personal ? c.personal.nombre : '—')}</td>
-                <td>${esc2(c.motivo)}</td>
-                <td>$${Number(c.monto).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-                <td style="font-size:10.5px;color:var(--g4)">${c.deleted_at ? new Date(c.deleted_at).toLocaleString('es-MX') : '—'}</td>
-                <td style="font-size:10.5px;color:var(--g4)">${esc2(c.eliminador ? c.eliminador.nombre : '—')}</td>
+                <td data-label="Fecha">${fmtFechaISO(c.fecha)}</td>
+                <td data-label="Paciente">${esc2(c.pacientes ? c.pacientes.nombre : '—')}</td>
+                <td data-label="Doctor">${esc2(c.personal ? c.personal.nombre : '—')}</td>
+                <td data-label="Motivo">${esc2(c.motivo)}</td>
+                <td data-label="Monto">$${Number(c.monto).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                <td data-label="Eliminado" style="font-size:10.5px;color:var(--g4)">${c.deleted_at ? new Date(c.deleted_at).toLocaleString('es-MX') : '—'}</td>
+                <td data-label="Por" style="font-size:10.5px;color:var(--g4)">${esc2(c.eliminador ? c.eliminador.nombre : '—')}</td>
                 <td style="white-space:nowrap">
                   <button class="appbtn appbtn-s pap-restaurar" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">↺ Restaurar</button>
                   ${window.MI_PUEDE_ELIMINAR_PAPELERA ? `<button class="appbtn appbtn-danger-soft pap-eliminar-def" data-id="${c.id}" style="font-size:10.5px;padding:5px 9px">✕ Eliminar</button>` : ''}
@@ -2026,12 +2119,18 @@ async function cargarPersonal(){
         <input class="app-input p-nombre" value="${esc2(p.nombre)}"/>
         <div class="p-email">✉️ ${p.email ? esc2(p.email) : '—'}</div>
       </div>
-      <select class="app-input p-rol">
-        <option value="recepcion" ${p.rol==='recepcion'?'selected':''}>Recepción</option>
-        <option value="doctor" ${p.rol==='doctor'?'selected':''}>Doctor/a</option>
-        <option value="admin" ${p.rol==='admin'?'selected':''}>Admin</option>
-      </select>
-      <label class="cbwrap p-activo-label"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/><span class="p-activo-txt">${p.activo?'Activo':'Inactivo'}</span></label>
+      <div>
+        <span class="mob-lbl">Rol</span>
+        <select class="app-input p-rol">
+          <option value="recepcion" ${p.rol==='recepcion'?'selected':''}>Recepción</option>
+          <option value="doctor" ${p.rol==='doctor'?'selected':''}>Doctor/a</option>
+          <option value="admin" ${p.rol==='admin'?'selected':''}>Admin</option>
+        </select>
+      </div>
+      <div>
+        <span class="mob-lbl">Activo</span>
+        <label class="cbwrap p-activo-label"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/><span class="p-activo-txt">${p.activo?'Activo':'Inactivo'}</span></label>
+      </div>
       <button class="appbtn appbtn-s p-guardar" style="font-size:11px;padding:6px 10px;white-space:nowrap">Guardar</button>
       <div class="p-actions2">
         <button class="appbtn appbtn-s p-reset" style="font-size:11px;padding:6px 10px;white-space:nowrap">🔑 Reset</button>
@@ -2049,7 +2148,10 @@ async function cargarPersonal(){
   contSin.innerHTML = sinAcceso.map(p => `
     <div class="p-row-sin" data-id="${p.id}">
       <input class="app-input p-nombre" value="${esc2(p.nombre)}"/>
-      <label class="cbwrap p-activo-label"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/><span class="p-activo-txt">${p.activo?'Activo':'Inactivo'}</span></label>
+      <div>
+        <span class="mob-lbl">Activo</span>
+        <label class="cbwrap p-activo-label"><input type="checkbox" class="p-activo" ${p.activo?'checked':''}/><span class="p-activo-txt">${p.activo?'Activo':'Inactivo'}</span></label>
+      </div>
       <div style="display:flex;gap:6px;justify-content:flex-end">
         <button class="appbtn appbtn-s p-guardar" style="font-size:10.5px;padding:6px 9px;white-space:nowrap">Guardar</button>
         <button class="appbtn appbtn-p p-dar-acceso" style="font-size:10.5px;padding:6px 9px;white-space:nowrap">Dar acceso</button>
@@ -2754,12 +2856,12 @@ function renderPRMInactivos(data){
   window._prmData = inactivos;
   tbody.innerHTML = inactivos.map(p => `
     <tr>
-      <td><b>${esc2(p.nombre)}</b></td>
-      <td>${esc2(p.telefono || '—')}</td>
-      <td>${fmtFechaISO(p.fecha)}</td>
-      <td><span class="pill2" style="background:${p.diasSin>=dias*2?'#FDECEA':'#FDF6EC'};color:${p.diasSin>=dias*2?'#C0392B':'#9A6010'}">${p.diasSin} días</span></td>
-      <td>${esc2(p.servicio || '—')}</td>
-      <td>${esc2(p.doctor)}</td>
+      <td data-label="Paciente"><b>${esc2(p.nombre)}</b></td>
+      <td data-label="Teléfono">${esc2(p.telefono || '—')}</td>
+      <td data-label="Última visita">${fmtFechaISO(p.fecha)}</td>
+      <td data-label="Inactividad"><span class="pill2" style="background:${p.diasSin>=dias*2?'#FDECEA':'#FDF6EC'};color:${p.diasSin>=dias*2?'#C0392B':'#9A6010'}">${p.diasSin} días</span></td>
+      <td data-label="Último servicio">${esc2(p.servicio || '—')}</td>
+      <td data-label="Doctor">${esc2(p.doctor)}</td>
       <td><button class="appbtn appbtn-p prm-ver-btn" data-id="${p.id}" style="font-size:10.5px;padding:6px 11px">📖 Ver / gestionar</button></td>
     </tr>
   `).join('');
@@ -2802,12 +2904,12 @@ function renderPRMNoVino(data){
   window._prmData = pendientes;
   tbody.innerHTML = pendientes.map(p => `
     <tr class="prm-row-novino">
-      <td><b>${esc2(p.nombre)}</b></td>
-      <td>${esc2(p.telefono || '—')}</td>
-      <td>${fmtFechaISO(p.fecha)}</td>
-      <td><span class="badge-novino">👻 No vino</span></td>
-      <td>${esc2([p.motivo, p.tipoConsulta].filter(Boolean).join(' · ') || '—')}</td>
-      <td>${esc2(p.doctor)}</td>
+      <td data-label="Paciente"><b>${esc2(p.nombre)}</b></td>
+      <td data-label="Teléfono">${esc2(p.telefono || '—')}</td>
+      <td data-label="No vino el">${fmtFechaISO(p.fecha)}</td>
+      <td data-label="Estado"><span class="badge-novino">👻 No vino</span></td>
+      <td data-label="Motivo">${esc2([p.motivo, p.tipoConsulta].filter(Boolean).join(' · ') || '—')}</td>
+      <td data-label="Doctor">${esc2(p.doctor)}</td>
       <td><button class="appbtn appbtn-p prm-ver-btn" data-id="${p.id}" style="font-size:10.5px;padding:6px 11px">📖 Ver / gestionar</button></td>
     </tr>
   `).join('');
