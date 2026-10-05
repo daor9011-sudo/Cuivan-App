@@ -379,6 +379,74 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
   .h2-table td::before,.htable2 td::before{content:attr(data-label);display:block;font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4);margin-bottom:1px}
   .h2-table td:not([data-label])::before,.htable2 td:not([data-label])::before{content:none}
 }
+/* ══ MÓDULO AUDITORÍA (solo admin) ══ */
+.aud-kpi{display:grid;grid-template-columns:minmax(170px,220px) 1fr;gap:22px;align-items:center;background:var(--g1);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.aud-pct{font-family:var(--font-d);font-size:48px;font-weight:800;line-height:1;color:var(--navy);letter-spacing:-.02em}
+.aud-pct small{font-size:22px;color:var(--g6);font-weight:700}
+.aud-pct-lbl{font-size:11.5px;color:var(--g6);margin-top:4px}
+.aud-bar{display:flex;height:9px;border-radius:6px;overflow:hidden;background:var(--g2);margin-bottom:9px}
+.aud-bar span{display:block;height:100%}
+.aud-legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--g6)}
+.aud-legend b{color:var(--navy)}
+.aud-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:baseline}
+.aud-next{margin-top:10px;padding-top:10px;border-top:1px solid var(--g2);font-size:12px;color:var(--g6)}
+.aud-next b{color:var(--navy)}
+.aud-tl-wrap{overflow-x:auto;border:1px solid var(--g2);border-radius:12px;padding:6px 14px 4px;margin-bottom:14px}
+.aud-tl{position:relative;min-width:640px;height:86px}
+.aud-tl-axis{position:absolute;left:0;right:0;top:37px;height:2px;background:var(--g2)}
+.aud-tl-done{position:absolute;left:0;top:37px;height:2px;background:var(--navy)}
+.aud-tl-today{position:absolute;top:15px;height:42px;border-left:2px dashed var(--teal)}
+.aud-tl-today span{position:absolute;top:-15px;left:-22px;width:44px;text-align:center;font-size:10px;font-weight:800;color:#0f8f8f;background:var(--teal-soft);border-radius:5px;padding:1px 0}
+.aud-ms{position:absolute;top:26px;transform:translateX(-50%);background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--font-b)}
+.aud-ms .d{font-size:10.5px;font-weight:800;color:var(--navy);white-space:nowrap}
+.aud-ms .n{font-size:10px;color:var(--g4);white-space:nowrap}
+.aud-ms.sel .d{color:#0f8f8f;text-decoration:underline;text-underline-offset:3px}
+.aud-filt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.aud-seg{display:inline-flex;background:var(--g1);border-radius:9px;padding:3px;gap:3px}
+.aud-seg button{border:0;background:none;padding:6px 11px;border-radius:7px;font-size:11.5px;font-weight:700;color:var(--g6);cursor:pointer;font-family:var(--font-b)}
+.aud-seg button.on{background:#fff;color:var(--navy);box-shadow:0 2px 6px rgba(11,22,40,.14)}
+.aud-filt .app-input{width:auto}
+.aud-filt input.app-input{flex:1;min-width:150px}
+.aud-chip{border:1.5px solid var(--teal);background:var(--teal-soft);color:var(--navy);border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:var(--font-b)}
+.aud-group{margin-top:16px}
+.aud-group h4{font-family:var(--font-d);font-size:13.5px;color:var(--navy);margin:0 0 6px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.aud-group h4 .m{font-family:var(--font-b);font-weight:500;font-size:11.5px;color:var(--g6)}
+.aud-group h4 .late{font-family:var(--font-b);font-weight:800;font-size:11.5px;color:var(--red)}
+.aud-rows{border:1px solid var(--g2);border-radius:11px;overflow:hidden}
+.aud-row{display:grid;grid-template-columns:50px 1fr auto;gap:3px 12px;padding:11px 13px;align-items:start;background:#fff}
+.aud-row+.aud-row{border-top:1px solid var(--g2)}
+.aud-row.late{box-shadow:inset 3px 0 0 var(--red)}
+.aud-code{font-weight:800;font-size:12px;text-align:center;border-radius:6px;padding:3px 0;width:44px}
+.aud-c{background:#fde8e8;color:#c53030}
+.aud-mm{background:#fef3dc;color:#a8650a}
+.aud-l{background:var(--teal-soft);color:#0f7f7f}
+.aud-t{font-weight:700;font-size:12.5px;color:var(--navy);line-height:1.35}
+.aud-i{font-size:11px;color:var(--g6);margin-top:2px}
+.aud-i .w{color:var(--red);font-weight:800}
+.aud-st{display:inline-flex;border:1.5px solid var(--g2);border-radius:8px;overflow:hidden;flex-shrink:0}
+.aud-st button{border:0;background:#fff;padding:5px 9px;font-size:11px;font-weight:700;color:var(--g4);cursor:pointer;white-space:nowrap;font-family:var(--font-b)}
+.aud-st button+button{border-left:1.5px solid var(--g2)}
+.aud-st button.on[data-v="sin_iniciar"]{background:var(--g2);color:var(--navy)}
+.aud-st button.on[data-v="en_proceso"]{background:#fef3dc;color:#a8650a}
+.aud-st button.on[data-v="cerrado"]{background:var(--green);color:#fff}
+.aud-note{grid-column:2 / 4;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.aud-note textarea{flex:1;min-width:180px;border:1.5px solid transparent;background:transparent;border-radius:7px;padding:4px 8px;font-size:11.5px;font-family:var(--font-b);color:var(--navy);resize:vertical;min-height:28px;outline:none}
+.aud-note textarea:hover{border-color:var(--g2)}
+.aud-note textarea:focus{border-color:var(--teal);background:var(--g1)}
+.aud-who{font-size:10.5px;color:var(--g4);white-space:nowrap}
+.aud-mrow{display:grid;grid-template-columns:28px 1fr auto;gap:2px 12px;padding:10px 13px;align-items:center;background:#fff}
+.aud-mrow+.aud-mrow{border-top:1px solid var(--g2)}
+.aud-mrow.late{box-shadow:inset 3px 0 0 var(--red)}
+.aud-mn{font-weight:800;color:var(--g4);font-size:12px}
+.aud-empty{padding:18px;text-align:center;color:var(--g4);font-size:12px}
+@media (max-width:700px){
+  .aud-kpi{grid-template-columns:1fr;gap:8px}
+  .aud-pct{font-size:40px}
+  .aud-row{grid-template-columns:44px 1fr}
+  .aud-row .aud-st,.aud-mrow .aud-st{grid-column:1 / 3;justify-self:start}
+  .aud-note{grid-column:1 / 3}
+  .aud-mrow{grid-template-columns:24px 1fr}
+}
 </style>
 </head>
 <body>
@@ -410,6 +478,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <button data-screen2="cierre"><span>🧾</span>Cierre</button>
       <button class="locked" data-screen2="dash"><span>📊</span>Dashboard</button>
       <button data-screen2="prm"><span>💬</span>PRM / CRM</button>
+      <button data-screen2="auditoria" id="nav-auditoria" style="display:none"><span>📋</span>Auditoría</button>
     </div>
   </div>
 
@@ -625,6 +694,25 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
           <tbody id="prm-tbody"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- ══ AUDITORÍA (solo admin) ══ -->
+    <div class="card screen2" id="app-screen-auditoria">
+      <div class="tab-title"><span>📋 Seguimiento auditoría COFEPRIS / STPS</span><button class="appbtn" id="aud-export" style="background:var(--g1);color:var(--navy);font-size:.75rem;padding:6px 12px">⬇️ Exportar CSV</button></div>
+      <div id="aud-kpi"><div class="aud-empty">Cargando avance...</div></div>
+      <div class="aud-tl-wrap"><div class="aud-tl" id="aud-tl"></div></div>
+      <div class="aud-filt">
+        <div class="aud-seg" id="aud-seg">
+          <button data-f="todos" class="on">Todos</button><button data-f="abiertos">Abiertos</button><button data-f="vencidos">Vencidos</button><button data-f="cerrados">Cerrados</button>
+        </div>
+        <select class="app-input" id="aud-cat"><option value="all">Todos los tipos</option><option value="C">Críticos</option><option value="M">Mayores</option><option value="L">Laborales</option></select>
+        <input class="app-input" id="aud-q" type="search" placeholder="Buscar hallazgo o responsable"/>
+        <span id="aud-fecha-chip"></span>
+      </div>
+      <div id="aud-lista"></div>
+      <div class="tab-title" style="margin-top:22px">📚 Manuales obligatorios</div>
+      <p style="font-size:11px;color:var(--g6);margin:-6px 0 10px">5 prioritarios con firma al 3 de noviembre y 8 complementarios al 31 de diciembre.</p>
+      <div class="aud-rows" id="aud-manuales"><div class="aud-empty">Cargando manuales...</div></div>
     </div>
 
     <!-- ══ PERSONAL ══ -->
@@ -1209,6 +1297,7 @@ function entrarAlShell(perfil){
   document.getElementById('btn-personal-header').style.display = showPersonal ? 'inline-flex' : 'none';
   document.getElementById('btn-papelera-toggle').style.display = showPapelera ? 'inline-flex' : 'none';
   window.MI_ROL_ADMIN = perfil.rol === 'admin';
+  document.getElementById('nav-auditoria').style.display = window.MI_ROL_ADMIN ? '' : 'none';
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
   document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
@@ -1278,10 +1367,12 @@ document.getElementById('app-nav').addEventListener('click',(e)=>{
   if(b.dataset.screen2 === 'cierre') cargarCierre();
   if(b.dataset.screen2 === 'dash') cargarDashboard();
   if(b.dataset.screen2 === 'prm') cargarPRM();
+  if(b.dataset.screen2 === 'auditoria') cargarAuditoria();
 });
 
 document.getElementById('btn-logout').addEventListener('click', async ()=>{
   if(REALTIME_CHANNEL){ sb.removeChannel(REALTIME_CHANNEL); REALTIME_CHANNEL = null; }
+  if(AUD_CHANNEL){ sb.removeChannel(AUD_CHANNEL); AUD_CHANNEL = null; }
   await sb.auth.signOut();
   window.location.reload();
 });
@@ -2440,13 +2531,284 @@ document.getElementById('btn-guardar-horario').addEventListener('click', async (
   toast('✅ Horario actualizado');
 });
 
+// ═══════════════════════════════════════════════════════════
+// MÓDULO AUDITORÍA COFEPRIS / STPS — solo admin (RLS: mi_es_admin)
+// ═══════════════════════════════════════════════════════════
+const AUD = { h:[], m:[], filtro:'todos', cat:'all', q:'', fecha:null, drafts:{}, cargado:false };
+let AUD_CHANNEL = null, AUD_RELOAD_T = null;
+const AUD_ST = [ {v:'sin_iniciar', l:'Sin iniciar'}, {v:'en_proceso', l:'En proceso'}, {v:'cerrado', l:'Cerrado'} ];
+const AUD_MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const AUD_DIA = ['dom','lun','mar','mié','jue','vie','sáb'];
+const AUD_CAT = { C:'Crítico', M:'Mayor', L:'Laboral' };
+
+function audParse(s){ const p = s.split('-').map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function audFmt(s, dia){ const d = audParse(s); return (dia ? AUD_DIA[d.getDay()] + ' ' : '') + d.getDate() + ' ' + AUD_MES[d.getMonth()]; }
+function audHoy(){ return isoLocal(new Date()); }
+function audVencido(x, campo){ const f = x[campo || 'fecha_final']; return x.estatus !== 'cerrado' && !!f && f < audHoy(); }
+function audHitoAtrasado(x){
+  if(x.estatus !== 'sin_iniciar' || !Array.isArray(x.hitos)) return null;
+  const t = audHoy(); return x.hitos.find(h => h.fecha < t) || null;
+}
+function audHace(iso){
+  if(!iso) return '';
+  const m = Math.round((Date.now() - new Date(iso).getTime())/60000);
+  if(m < 1) return 'ahora';
+  if(m < 60) return 'hace ' + m + ' min';
+  const h = Math.round(m/60); if(h < 24) return 'hace ' + h + ' h';
+  const d = Math.round(h/24); return 'hace ' + d + (d === 1 ? ' día' : ' días');
+}
+function audConteo(arr){
+  const c = { total:arr.length, cerrado:0, en_proceso:0, sin_iniciar:0, late:0 };
+  arr.forEach(x => { c[x.estatus] = (c[x.estatus] || 0) + 1; if(audVencido(x)) c.late++; });
+  return c;
+}
+
+async function cargarAuditoria(){
+  if(!window.MI_ROL_ADMIN) return;
+  const [rh, rm] = await Promise.all([
+    sb.from('auditoria_hallazgos').select('id, codigo, titulo, categoria, ejecutor, hitos, fecha_final, estatus, nota, orden, actualizado_en, actor:actualizado_por(nombre)').order('orden'),
+    sb.from('auditoria_manuales').select('id, numero, nombre, responsable, fecha_firma, estatus, actualizado_en, actor:actualizado_por(nombre)').order('numero')
+  ]);
+  if(rh.error || rm.error){
+    console.error('[CUIVAN] Error cargando auditoría:', rh.error || rm.error);
+    document.getElementById('aud-kpi').innerHTML = '<div class="aud-empty" style="color:var(--red)">No se pudo cargar el seguimiento. Recarga la página.</div>';
+    return;
+  }
+  AUD.h = rh.data || []; AUD.m = rm.data || []; AUD.cargado = true;
+  activarRealtimeAuditoria();
+  renderAuditoria();
+}
+
+function activarRealtimeAuditoria(){
+  if(AUD_CHANNEL || !window.MI_ROL_ADMIN) return;
+  const recargar = () => { clearTimeout(AUD_RELOAD_T); AUD_RELOAD_T = setTimeout(cargarAuditoria, 350); };
+  AUD_CHANNEL = sb.channel('cuivan-auditoria')
+    .on('postgres_changes', { event:'*', schema:'public', table:'auditoria_hallazgos' }, recargar)
+    .on('postgres_changes', { event:'*', schema:'public', table:'auditoria_manuales' }, recargar)
+    .subscribe();
+}
+
+function renderAuditoria(){ audRenderKpi(); audRenderTimeline(); audRenderLista(); audRenderManuales(); }
+
+function audRenderKpi(){
+  const el = document.getElementById('aud-kpi');
+  if(!AUD.h.length){ el.innerHTML = '<div class="aud-empty">Sin hallazgos cargados.</div>'; return; }
+  const c = audConteo(AUD.h), pct = Math.round(c.cerrado / c.total * 100);
+  const w = k => (c[k] / c.total * 100).toFixed(2) + '%';
+  const t = audHoy();
+  const abiertos = AUD.h.filter(x => x.estatus !== 'cerrado' && x.fecha_final && x.fecha_final >= t);
+  let next = 'No quedan fechas límite pendientes.';
+  if(abiertos.length){
+    const nd = abiertos.map(x => x.fecha_final).sort()[0];
+    const n = abiertos.filter(x => x.fecha_final === nd).length;
+    next = 'Próxima fecha límite: <b>' + audFmt(nd, true) + '</b>, con ' + n + (n === 1 ? ' hallazgo abierto.' : ' hallazgos abiertos.');
+  }
+  el.innerHTML =
+    '<div class="aud-kpi">' +
+      '<div><div class="aud-pct">' + pct + '<small>%</small></div><div class="aud-pct-lbl">' + c.cerrado + ' de ' + c.total + ' hallazgos cerrados con evidencia</div></div>' +
+      '<div>' +
+        '<div class="aud-bar"><span style="width:' + w('cerrado') + ';background:var(--green)"></span><span style="width:' + w('en_proceso') + ';background:#e0a526"></span></div>' +
+        '<div class="aud-legend">' +
+          '<span><i style="background:var(--green)"></i><b>' + c.cerrado + '</b> cerrados</span>' +
+          '<span><i style="background:#e0a526"></i><b>' + c.en_proceso + '</b> en proceso</span>' +
+          '<span><i style="background:var(--g2)"></i><b>' + c.sin_iniciar + '</b> sin iniciar</span>' +
+          '<span style="color:var(--red)"><i style="background:var(--red)"></i><b style="color:var(--red)">' + c.late + '</b> vencidos</span>' +
+        '</div>' +
+        '<div class="aud-next">' + next + '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function audRenderTimeline(){
+  const el = document.getElementById('aud-tl');
+  const grupos = {};
+  AUD.h.forEach(x => { if(x.fecha_final) (grupos[x.fecha_final] = grupos[x.fecha_final] || []).push(x); });
+  const fechas = Object.keys(grupos).sort();
+  const slots = fechas.length + 1; // + cierre
+  const pos = i => (i + 0.5) / slots * 100;
+  const hoy = audHoy();
+  // Marca de hoy: interpolada entre los hitos que la rodean (eje ordinal, no proporcional al tiempo)
+  let tpos = 0;
+  if(fechas.length){
+    const idx = fechas.findIndex(f => f >= hoy);
+    if(idx === -1) tpos = pos(fechas.length - 1) + (pos(fechas.length) - pos(fechas.length - 1)) / 2;
+    else if(fechas[idx] === hoy) tpos = pos(idx);
+    else if(idx === 0) tpos = pos(0) / 2;
+    else {
+      const a = audParse(fechas[idx - 1]), b = audParse(fechas[idx]), t = audParse(hoy);
+      tpos = pos(idx - 1) + (pos(idx) - pos(idx - 1)) * ((t - a) / (b - a));
+    }
+  }
+  let html = '<div class="aud-tl-axis"></div><div class="aud-tl-done" style="width:' + tpos + '%"></div>';
+  html += '<div class="aud-tl-today" style="left:' + tpos + '%"><span>Hoy</span></div>';
+  fechas.forEach((f, i) => {
+    const c = audConteo(grupos[f]), ratio = c.cerrado / c.total, late = c.late > 0;
+    const col = late ? 'var(--red)' : (ratio === 1 ? 'var(--green)' : 'var(--navy)');
+    const r = 9, circ = 2 * Math.PI * r;
+    html += '<button class="aud-ms' + (AUD.fecha === f ? ' sel' : '') + '" data-f="' + f + '" style="left:' + pos(i) + '%" ' +
+      'aria-label="' + audFmt(f, true) + ': ' + c.cerrado + ' de ' + c.total + ' cerrados">' +
+      '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="' + r + '" fill="#fff" stroke="var(--g2)" stroke-width="4"/>' +
+      '<circle cx="12" cy="12" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="4" stroke-dasharray="' + (circ * ratio) + ' ' + circ + '" transform="rotate(-90 12 12)"/>' +
+      (late ? '<circle cx="12" cy="12" r="3" fill="var(--red)"/>' : '') + '</svg>' +
+      '<span class="d">' + audFmt(f) + '</span><span class="n">' + c.cerrado + '/' + c.total + (late ? ' <b style="color:var(--red)">!</b>' : '') + '</span></button>';
+  });
+  html += '<div class="aud-ms" style="left:' + pos(fechas.length) + '%;cursor:default"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)" fill="var(--navy)"/></svg><span class="d">Cierre</span><span class="n">ene 2027</span></div>';
+  el.innerHTML = html;
+  el.querySelectorAll('button.aud-ms').forEach(b => b.onclick = () => { AUD.fecha = AUD.fecha === b.dataset.f ? null : b.dataset.f; renderAuditoria(); });
+  const wrap = el.parentElement;
+  if(!wrap.dataset.init && wrap.scrollWidth > wrap.clientWidth){ wrap.scrollLeft = Math.max(0, el.scrollWidth * tpos / 100 - 60); wrap.dataset.init = '1'; }
+}
+
+function audCoincide(x){
+  if(AUD.filtro === 'abiertos' && x.estatus === 'cerrado') return false;
+  if(AUD.filtro === 'cerrados' && x.estatus !== 'cerrado') return false;
+  if(AUD.filtro === 'vencidos' && !audVencido(x)) return false;
+  if(AUD.cat !== 'all' && x.categoria !== AUD.cat) return false;
+  if(AUD.fecha && x.fecha_final !== AUD.fecha) return false;
+  if(AUD.q){
+    const txt = (x.codigo + ' ' + x.titulo + ' ' + (x.ejecutor || '') + ' ' + (x.nota || '')).toLowerCase();
+    if(!txt.includes(AUD.q.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function audStatusCtl(tabla, id, val){
+  return '<div class="aud-st">' + AUD_ST.map(s =>
+    '<button data-t="' + tabla + '" data-id="' + id + '" data-v="' + s.v + '" class="' + (val === s.v ? 'on' : '') + '">' + s.l + '</button>'
+  ).join('') + '</div>';
+}
+
+function audRenderLista(){
+  const el = document.getElementById('aud-lista');
+  document.getElementById('aud-fecha-chip').innerHTML = AUD.fecha ? '<button class="aud-chip" id="aud-fecha-clear">Mostrando ' + audFmt(AUD.fecha, true) + ' ✕</button>' : '';
+  const ch = document.getElementById('aud-fecha-clear'); if(ch) ch.onclick = () => { AUD.fecha = null; renderAuditoria(); };
+  if(!AUD.cargado){ el.innerHTML = '<div class="aud-empty">Cargando hallazgos...</div>'; return; }
+  const act = document.activeElement;
+  const focoId = act && act.dataset ? act.dataset.audNota : null;
+  const s0 = focoId ? act.selectionStart : 0, s1 = focoId ? act.selectionEnd : 0;
+  const vis = AUD.h.filter(audCoincide);
+  if(!vis.length){ el.innerHTML = '<div class="aud-rows"><div class="aud-empty">Ningún hallazgo coincide con este filtro.</div></div>'; return; }
+  const grupos = {};
+  vis.forEach(x => { const f = x.fecha_final || '9999-12-31'; (grupos[f] = grupos[f] || []).push(x); });
+  const ordenCat = { C:0, M:1, L:2 };
+  let html = '';
+  Object.keys(grupos).sort().forEach(f => {
+    const g = grupos[f].sort((a,b) => ordenCat[a.categoria] - ordenCat[b.categoria] || (a.orden||0) - (b.orden||0));
+    const c = audConteo(g);
+    html += '<div class="aud-group"><h4>' + (f === '9999-12-31' ? 'Sin fecha' : audFmt(f, true)) +
+      '<span class="m">' + c.cerrado + ' de ' + c.total + ' cerrados</span>' +
+      (c.late ? '<span class="late">' + c.late + (c.late > 1 ? ' vencidos' : ' vencido') + '</span>' : '') + '</h4><div class="aud-rows">';
+    g.forEach(x => {
+      const late = audVencido(x), atr = audHitoAtrasado(x);
+      const hitos = (Array.isArray(x.hitos) ? x.hitos : []).map(h => esc2(h.etiqueta) + ' ' + audFmt(h.fecha)).join(', ');
+      const nota = AUD.drafts[x.id] !== undefined ? AUD.drafts[x.id] : (x.nota || '');
+      const cls = x.categoria === 'C' ? 'aud-c' : x.categoria === 'M' ? 'aud-mm' : 'aud-l';
+      const quien = x.actualizado_en ? '<span class="aud-who">' + esc2(x.actor ? x.actor.nombre : 'Alguien') + ', ' + audHace(x.actualizado_en) + '</span>' : '';
+      html += '<div class="aud-row' + (late ? ' late' : '') + '">' +
+        '<span class="aud-code ' + cls + '" title="' + (AUD_CAT[x.categoria] || '') + '">' + esc2(x.codigo) + '</span>' +
+        '<div><div class="aud-t">' + esc2(x.titulo) + '</div><div class="aud-i">' + esc2(x.ejecutor || '') + (hitos ? '. ' + hitos : '') +
+          (late ? ' <span class="w">Vencido</span>' : (atr ? ' <span class="w">Atrasado (' + esc2(atr.etiqueta) + ')</span>' : '')) + '</div></div>' +
+        audStatusCtl('auditoria_hallazgos', x.id, x.estatus) +
+        '<div class="aud-note"><textarea rows="1" data-aud-nota="' + x.id + '" placeholder="Agregar nota o evidencia">' + esc2(nota) + '</textarea>' + quien + '</div>' +
+      '</div>';
+    });
+    html += '</div></div>';
+  });
+  el.innerHTML = html;
+  audBindStatus(el);
+  el.querySelectorAll('textarea[data-aud-nota]').forEach(ta => {
+    ta.oninput = () => { AUD.drafts[ta.dataset.audNota] = ta.value; };
+    ta.onblur = () => audGuardarNota(ta.dataset.audNota);
+  });
+  if(focoId){
+    const ta = el.querySelector('textarea[data-aud-nota="' + focoId + '"]');
+    if(ta){ ta.focus(); try{ ta.setSelectionRange(s0, s1); }catch(e){} }
+  }
+}
+
+function audRenderManuales(){
+  const el = document.getElementById('aud-manuales');
+  if(!AUD.cargado){ el.innerHTML = '<div class="aud-empty">Cargando manuales...</div>'; return; }
+  if(!AUD.m.length){ el.innerHTML = '<div class="aud-empty">Sin manuales cargados.</div>'; return; }
+  el.innerHTML = AUD.m.map(m => {
+    const late = audVencido(m, 'fecha_firma');
+    return '<div class="aud-mrow' + (late ? ' late' : '') + '"><span class="aud-mn">' + m.numero + '</span>' +
+      '<div><div class="aud-t">' + esc2(m.nombre) + '</div><div class="aud-i">' + esc2(m.responsable || '') + '. Firma ' + (m.fecha_firma ? audFmt(m.fecha_firma) : 'sin fecha') +
+      (late ? ' <span class="w">Vencido</span>' : '') + '</div></div>' +
+      audStatusCtl('auditoria_manuales', m.id, m.estatus) + '</div>';
+  }).join('');
+  audBindStatus(el);
+}
+
+function audBindStatus(root){
+  root.querySelectorAll('.aud-st button').forEach(b => b.onclick = () => audSetEstatus(b.dataset.t, b.dataset.id, b.dataset.v));
+}
+
+async function audSetEstatus(tabla, id, v){
+  const lista = tabla === 'auditoria_manuales' ? AUD.m : AUD.h;
+  const reg = lista.find(x => x.id === id);
+  if(!reg || reg.estatus === v) return;
+  const previo = reg.estatus;
+  reg.estatus = v; renderAuditoria();
+  const { data, error } = await sb.from(tabla).update({ estatus: v }).eq('id', id).select('id');
+  if(error || !data || !data.length){
+    reg.estatus = previo; renderAuditoria();
+    console.error('[CUIVAN] Error actualizando auditoría:', error);
+    toast('⚠️ No se pudo guardar el estatus');
+    return;
+  }
+  toast(v === 'cerrado' ? '✅ ' + (reg.codigo || ('Manual ' + reg.numero)) + ' cerrado' : '✅ Estatus actualizado');
+}
+
+async function audGuardarNota(id){
+  const draft = AUD.drafts[id];
+  const reg = AUD.h.find(x => x.id === id);
+  if(draft === undefined || !reg || draft === (reg.nota || '')){ delete AUD.drafts[id]; return; }
+  const { data, error } = await sb.from('auditoria_hallazgos').update({ nota: draft }).eq('id', id).select('id');
+  if(error || !data || !data.length){ console.error('[CUIVAN] Error guardando nota:', error); toast('⚠️ No se pudo guardar la nota'); return; }
+  reg.nota = draft; delete AUD.drafts[id];
+  toast('✅ Nota guardada');
+}
+
+document.getElementById('aud-seg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  AUD.filtro = b.dataset.f;
+  document.querySelectorAll('#aud-seg button').forEach(x => x.classList.toggle('on', x === b));
+  audRenderLista();
+});
+document.getElementById('aud-cat').addEventListener('change', e => { AUD.cat = e.target.value; audRenderLista(); });
+document.getElementById('aud-q').addEventListener('input', e => { AUD.q = e.target.value.trim(); audRenderLista(); });
+document.getElementById('aud-export').addEventListener('click', () => {
+  const lbl = { sin_iniciar:'Sin iniciar', en_proceso:'En proceso', cerrado:'Cerrado' };
+  const cel = v => { const s = String(v == null ? '' : v); return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const filas = [['Tipo','ID','Hallazgo','Ejecutor directo','Hitos','Fecha límite','Estatus','Vencido','Nota','Actualizó','Fecha actualización']];
+  AUD.h.slice().sort((a,b) => (a.fecha_final || '').localeCompare(b.fecha_final || '')).forEach(x => filas.push([
+    AUD_CAT[x.categoria] || '', x.codigo, x.titulo, x.ejecutor, (x.hitos || []).map(h => h.etiqueta + ' ' + h.fecha).join(' / '),
+    x.fecha_final || '', lbl[x.estatus], audVencido(x) ? 'Sí' : 'No', x.nota || '', x.actor ? x.actor.nombre : '', x.actualizado_en || ''
+  ]));
+  filas.push([]); filas.push(['Manual','No.','Nombre','Responsable','','Fecha firma','Estatus','Vencido','','Actualizó','Fecha actualización']);
+  AUD.m.forEach(m => filas.push(['Manual', m.numero, m.nombre, m.responsable, '', m.fecha_firma || '', lbl[m.estatus], audVencido(m, 'fecha_firma') ? 'Sí' : 'No', '', m.actor ? m.actor.nombre : '', m.actualizado_en || '']));
+  const csv = '\ufeff' + filas.map(r => r.map(cel).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  a.download = 'seguimiento-auditoria-cuivan-' + audHoy() + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+setInterval(() => {
+  const act = document.activeElement;
+  const enModulo = document.getElementById('app-screen-auditoria').classList.contains('act');
+  if(AUD.cargado && enModulo && !(act && act.dataset && act.dataset.audNota)) renderAuditoria();
+}, 60000);
+
 // ── Actividad reciente (audit_log), solo admin ──
 const AUDIT_LABEL = {
   crear_personal: '➕ Dio de alta a',
   reset_password: '🔑 Restableció contraseña de',
   cambiar_correo: '✉️ Cambió el correo de',
   eliminar_personal: '🗑️ Eliminó a',
-  eliminar_personal_auth_fallo: '⚠️ Eliminó de personal (falló borrar acceso) a'
+  eliminar_personal_auth_fallo: '⚠️ Eliminó de personal (falló borrar acceso) a',
+  auditoria_actualizar: '📋 Actualizó el seguimiento de auditoría'
 };
 async function cargarAuditLog(){
   const cont = document.getElementById('audit-lista');
