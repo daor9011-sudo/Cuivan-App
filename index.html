@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.05"/>
-<!-- Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
+<meta name="app-version" content="2026.10.05-2"/>
+<!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -736,7 +736,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <div class="row4" style="border-top:none;padding-top:0;margin-top:0;grid-template-columns:1fr 1fr 1fr">
         <div class="fi2"><label class="lbl2">Nombre</label><input class="app-input" id="np-nombre" placeholder="Ej. Dra. Nueva Doctora"/></div>
         <div class="fi2"><label class="lbl2">Rol</label>
-          <select class="app-input" id="np-rol"><option value="recepcion">Recepción</option><option value="doctor">Doctor/a</option><option value="admin">Admin</option></select>
+          <select class="app-input" id="np-rol"><option value="recepcion">Recepción</option><option value="doctor">Doctor/a</option><option value="admin">Admin</option><option value="enfermeria">Enfermería (solo Auditoría)</option></select>
         </div>
         <div class="fi2"><label class="lbl2">&nbsp;</label><label class="cbrow2" style="margin-top:6px"><input type="checkbox" id="np-con-acceso"/><span style="font-size:.8rem">Con acceso al sistema</span></label></div>
       </div>
@@ -1293,7 +1293,9 @@ function entrarAlShell(perfil){
     doctor: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M6 2v6a4 4 0 0 0 8 0V2"/><path d="M10 15v3a4 4 0 0 0 8 0v-2a7 7 0 0 0-7-7"/><circle cx="20" cy="10" r="2"/></svg>',
     recepcion: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
   };
-  document.getElementById('app-role-chip').innerHTML = (roleIcons[perfil.rol] || '') + perfil.rol.toUpperCase();
+  roleIcons.enfermeria = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z"/></svg>';
+  const roleLabels = { enfermeria: 'ENFERMERÍA' };
+  document.getElementById('app-role-chip').innerHTML = (roleIcons[perfil.rol] || '') + (roleLabels[perfil.rol] || perfil.rol.toUpperCase());
   document.getElementById('app-user-name').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + esc2(perfil.nombre);
 
   const showDash = perfil.rol !== 'recepcion';
@@ -1303,10 +1305,27 @@ function entrarAlShell(perfil){
   document.getElementById('btn-personal-header').style.display = showPersonal ? 'inline-flex' : 'none';
   document.getElementById('btn-papelera-toggle').style.display = showPapelera ? 'inline-flex' : 'none';
   window.MI_ROL_ADMIN = perfil.rol === 'admin';
-  document.getElementById('nav-auditoria').style.display = window.MI_ROL_ADMIN ? '' : 'none';
+  window.MI_PUEDE_AUDITORIA = perfil.rol === 'admin' || perfil.rol === 'enfermeria';
+  document.getElementById('nav-auditoria').style.display = window.MI_PUEDE_AUDITORIA ? '' : 'none';
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
   document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
+
+  // Enfermería: acceso EXCLUSIVO a Auditoría. Se ocultan las demás pestañas y no se
+  // consultan datos clínicos ni financieros (además, el RLS de la base se los niega).
+  if(perfil.rol === 'enfermeria'){
+    document.querySelectorAll('#app-nav button').forEach(b => {
+      const esAud = b.dataset.screen2 === 'auditoria';
+      b.style.display = esAud ? '' : 'none';
+      b.classList.toggle('navact', esAud);
+    });
+    document.querySelectorAll('.screen2').forEach(x => x.classList.remove('act'));
+    document.getElementById('app-screen-auditoria').classList.add('act');
+    document.getElementById('btn-papelera-toggle').style.display = 'none';
+    document.getElementById('btn-export-historial').style.display = 'none';
+    cargarAuditoria();
+    return;
+  }
 
   cargarDoctores();
   cargarCatalogoServiciosCache();
@@ -2256,6 +2275,7 @@ async function cargarPersonal(){
           <option value="recepcion" ${p.rol==='recepcion'?'selected':''}>Recepción</option>
           <option value="doctor" ${p.rol==='doctor'?'selected':''}>Doctor/a</option>
           <option value="admin" ${p.rol==='admin'?'selected':''}>Admin</option>
+          <option value="enfermeria" ${p.rol==='enfermeria'?'selected':''}>Enfermería</option>
         </select>
       </div>
       <div>
@@ -2560,7 +2580,7 @@ document.getElementById('btn-guardar-horario').addEventListener('click', async (
 });
 
 // ═══════════════════════════════════════════════════════════
-// MÓDULO AUDITORÍA COFEPRIS / STPS — solo admin (RLS: mi_es_admin)
+// MÓDULO AUDITORÍA COFEPRIS / STPS — admin y enfermería (RLS: mi_puede_auditoria)
 // ═══════════════════════════════════════════════════════════
 const AUD = { h:[], m:[], filtro:'todos', cat:'all', q:'', fecha:null, drafts:{}, cargado:false };
 let AUD_CHANNEL = null, AUD_RELOAD_T = null;
@@ -2592,10 +2612,10 @@ function audConteo(arr){
 }
 
 async function cargarAuditoria(){
-  if(!window.MI_ROL_ADMIN) return;
+  if(!window.MI_PUEDE_AUDITORIA) return;
   const [rh, rm] = await Promise.all([
-    sb.from('auditoria_hallazgos').select('id, codigo, titulo, categoria, ejecutor, hitos, fecha_final, estatus, nota, orden, actualizado_en, actor:actualizado_por(nombre)').order('orden'),
-    sb.from('auditoria_manuales').select('id, numero, nombre, responsable, fecha_firma, estatus, actualizado_en, actor:actualizado_por(nombre)').order('numero')
+    sb.from('auditoria_hallazgos').select('id, codigo, titulo, categoria, ejecutor, hitos, fecha_final, estatus, nota, orden, actualizado_en, actualizado_por_nombre').order('orden'),
+    sb.from('auditoria_manuales').select('id, numero, nombre, responsable, fecha_firma, estatus, actualizado_en, actualizado_por_nombre').order('numero')
   ]);
   if(rh.error || rm.error){
     console.error('[CUIVAN] Error cargando auditoría:', rh.error || rm.error);
@@ -2608,7 +2628,7 @@ async function cargarAuditoria(){
 }
 
 function activarRealtimeAuditoria(){
-  if(AUD_CHANNEL || !window.MI_ROL_ADMIN) return;
+  if(AUD_CHANNEL || !window.MI_PUEDE_AUDITORIA) return;
   const recargar = () => { clearTimeout(AUD_RELOAD_T); AUD_RELOAD_T = setTimeout(cargarAuditoria, 350); };
   AUD_CHANNEL = sb.channel('cuivan-auditoria')
     .on('postgres_changes', { event:'*', schema:'public', table:'auditoria_hallazgos' }, recargar)
@@ -2731,7 +2751,7 @@ function audRenderLista(){
       const hitos = (Array.isArray(x.hitos) ? x.hitos : []).map(h => esc2(h.etiqueta) + ' ' + audFmt(h.fecha)).join(', ');
       const nota = AUD.drafts[x.id] !== undefined ? AUD.drafts[x.id] : (x.nota || '');
       const cls = x.categoria === 'C' ? 'aud-c' : x.categoria === 'M' ? 'aud-mm' : 'aud-l';
-      const quien = x.actualizado_en ? '<span class="aud-who">' + esc2(x.actor ? x.actor.nombre : 'Alguien') + ', ' + audHace(x.actualizado_en) + '</span>' : '';
+      const quien = x.actualizado_en ? '<span class="aud-who">' + esc2(x.actualizado_por_nombre || 'Alguien') + ', ' + audHace(x.actualizado_en) + '</span>' : '';
       html += '<div class="aud-row' + (late ? ' late' : '') + '">' +
         '<span class="aud-code ' + cls + '" title="' + (AUD_CAT[x.categoria] || '') + '">' + esc2(x.codigo) + '</span>' +
         '<div><div class="aud-t">' + esc2(x.titulo) + '</div><div class="aud-i">' + esc2(x.ejecutor || '') + (hitos ? '. ' + hitos : '') +
@@ -2812,10 +2832,10 @@ document.getElementById('aud-export').addEventListener('click', () => {
   const filas = [['Tipo','ID','Hallazgo','Ejecutor directo','Hitos','Fecha límite','Estatus','Vencido','Nota','Actualizó','Fecha actualización']];
   AUD.h.slice().sort((a,b) => (a.fecha_final || '').localeCompare(b.fecha_final || '')).forEach(x => filas.push([
     AUD_CAT[x.categoria] || '', x.codigo, x.titulo, x.ejecutor, (x.hitos || []).map(h => h.etiqueta + ' ' + h.fecha).join(' / '),
-    x.fecha_final || '', lbl[x.estatus], audVencido(x) ? 'Sí' : 'No', x.nota || '', x.actor ? x.actor.nombre : '', x.actualizado_en || ''
+    x.fecha_final || '', lbl[x.estatus], audVencido(x) ? 'Sí' : 'No', x.nota || '', x.actualizado_por_nombre || '', x.actualizado_en || ''
   ]));
   filas.push([]); filas.push(['Manual','No.','Nombre','Responsable','','Fecha firma','Estatus','Vencido','','Actualizó','Fecha actualización']);
-  AUD.m.forEach(m => filas.push(['Manual', m.numero, m.nombre, m.responsable, '', m.fecha_firma || '', lbl[m.estatus], audVencido(m, 'fecha_firma') ? 'Sí' : 'No', '', m.actor ? m.actor.nombre : '', m.actualizado_en || '']));
+  AUD.m.forEach(m => filas.push(['Manual', m.numero, m.nombre, m.responsable, '', m.fecha_firma || '', lbl[m.estatus], audVencido(m, 'fecha_firma') ? 'Sí' : 'No', '', m.actualizado_por_nombre || '', m.actualizado_en || '']));
   const csv = '\ufeff' + filas.map(r => r.map(cel).join(',')).join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
@@ -3534,6 +3554,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.05</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.05-2</div>
 </body>
 </html>
