@@ -1350,6 +1350,25 @@ function isoLocal(d){
   const mm = String(d.getMonth()+1).padStart(2,'0');
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
+// ── Utilidades compartidas: normalización de nombres y paginación completa ──
+// Colapsa espacios repetidos y recorta bordes (ej. "CONCATO  MESSICO" → "CONCATO MESSICO")
+function limpiarNombre(s){ return String(s || '').replace(/\s+/g, ' ').trim(); }
+// Para comparar/buscar: sin acentos, minúsculas y espacios colapsados
+function normTxt(s){ return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+// Trae TODAS las filas en páginas de 1000 (PostgREST corta en 1000 por petición).
+// construir() debe devolver una consulta NUEVA con orden estable (incluir .order('id')).
+async function traerTodo(construir){
+  const PAG = 1000; let desde = 0, todos = [];
+  for(;;){
+    const { data, error } = await construir().range(desde, desde + PAG - 1);
+    if(error) return { data: null, error };
+    todos = todos.concat(data || []);
+    if(!data || data.length < PAG) break;
+    desde += PAG;
+  }
+  return { data: todos, error: null };
+}
+
 function isoDesdeHace(dias){
   const d = new Date();
   d.setDate(d.getDate() - dias + 1);
@@ -1533,7 +1552,7 @@ document.getElementById('r-paciente').addEventListener('input', (e)=>{
   const box = document.getElementById('r-nombre-sugeridos');
   if(valor.length < 3){ box.style.display = 'none'; return; }
   _nombreSugeridoTimer = setTimeout(async ()=>{
-    const { data, error } = await sb.from('pacientes').select('id, nombre, telefono, tipo_paciente').ilike('nombre', `%${valor}%`).limit(6);
+    const { data, error } = await sb.from('pacientes').select('id, nombre, telefono, tipo_paciente').ilike('nombre', `%${valor.trim().split(/\s+/).join('%')}%`).limit(6);
     if(error){ console.error('[CUIVAN] Error buscando pacientes por nombre:', error); return; }
     // si ya coincide exacto con lo que están escribiendo, no hace falta mostrar sugerencia
     const soloExacto = data && data.length === 1 && data[0].nombre.trim().toLowerCase() === valor.toLowerCase();
@@ -1551,7 +1570,7 @@ document.getElementById('r-paciente').addEventListener('input', (e)=>{
 
 async function guardarRegistro(){
   const btn = document.getElementById('btn-guardar-registro');
-  const paciente = document.getElementById('r-paciente').value.trim();
+  const paciente = limpiarNombre(document.getElementById('r-paciente').value);
   const telefono = document.getElementById('r-telefono').value.trim();
   const doctorId = document.getElementById('r-doctor').value;
   const fecha = document.getElementById('r-fecha').value.trim();
@@ -1572,7 +1591,7 @@ async function guardarRegistro(){
       .select('id, nombre')
       .eq('telefono', telefono);
     if(buscarErr) throw buscarErr;
-    const match = (candidatos||[]).find(p => p.nombre.trim().toLowerCase() === paciente.toLowerCase());
+    const match = (candidatos||[]).find(p => limpiarNombre(p.nombre).toLowerCase() === paciente.toLowerCase());
     if(match){
       btn.disabled = false; btn.textContent = 'Guardar registro';
       const esLaMismaPersona = await confirmarAsync({
@@ -1690,23 +1709,23 @@ async function cargarHistorial(){
   tbody.innerHTML = '<tr><td colspan="11" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
   const periodoRaw = document.getElementById('h-periodo').value;
   const soloNoVino = document.getElementById('h-solo-novino').checked;
-  let query = sb
-    .from('consultas')
-    .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, factura, num_factura, numero_recibo, no_vino, pacientes(id, nombre, tipo_paciente), personal!consultas_doctor_id_fkey(nombre)')
-    .eq('deleted', false)
-    .order('fecha', { ascending: false })
-    .limit(300);
-  // por defecto el historial NUNCA muestra "no vino" (no son visitas reales);
-  // solo se muestran cuando ese filtro específico está activo — mismo patrón que CANOPY
-  query = soloNoVino ? query.eq('no_vino', true) : query.eq('no_vino', false);
-  if(periodoRaw === 'hoy'){
-    const hoyIso = isoLocal(new Date());
-    query = query.gte('fecha', hoyIso).lte('fecha', hoyIso);
-  } else {
-    const periodo = parseInt(periodoRaw) || 0;
-    if(periodo > 0) query = query.gte('fecha', isoDesdeHace(periodo));
-  }
-  const { data, error } = await query;
+  const hoyIso = isoLocal(new Date());
+  const periodo = parseInt(periodoRaw) || 0;
+  const construir = () => {
+    let q = sb
+      .from('consultas')
+      .select('id, fecha, motivo, tipo_consulta, monto, medio_pago, medio_pago_2, monto_2, paciente_id, doctor_id, factura, num_factura, numero_recibo, no_vino, pacientes(id, nombre, tipo_paciente), personal!consultas_doctor_id_fkey(nombre)')
+      .eq('deleted', false)
+      .order('fecha', { ascending: false })
+      .order('id', { ascending: true });
+    // por defecto el historial NUNCA muestra "no vino" (no son visitas reales);
+    // solo se muestran cuando ese filtro específico está activo — mismo patrón que CANOPY
+    q = soloNoVino ? q.eq('no_vino', true) : q.eq('no_vino', false);
+    if(periodoRaw === 'hoy') q = q.gte('fecha', hoyIso).lte('fecha', hoyIso);
+    else if(periodo > 0) q = q.gte('fecha', isoDesdeHace(periodo));
+    return q;
+  };
+  const { data, error } = await traerTodo(construir);
   if(error){
     console.error('[CUIVAN] Error cargando historial:', error);
     tbody.innerHTML = '<tr><td colspan="11" style="padding:20px;text-align:center;color:var(--red)">Error al cargar el historial</td></tr>';
@@ -1717,14 +1736,17 @@ async function cargarHistorial(){
   aplicarFiltrosHistorial();
 }
 function aplicarFiltrosHistorial(){
-  const q = document.getElementById('h-buscar').value.trim().toLowerCase();
+  const q = normTxt(document.getElementById('h-buscar').value);
   const motivo = document.getElementById('h-motivo').value;
   const pago = document.getElementById('h-pago').value;
   const tipoPaciente = document.getElementById('h-tipopaciente').value;
   const soloFacturado = document.getElementById('h-solo-facturado').checked;
   const soloNoFacturado = document.getElementById('h-solo-nofacturado').checked;
   let rows = window._historialData || [];
-  if(q) rows = rows.filter(r => (r.pacientes?.nombre || '').toLowerCase().includes(q));
+  if(q){
+    const palabras = q.split(' ');
+    rows = rows.filter(r => { const n = normTxt(r.pacientes?.nombre); return palabras.every(w => n.includes(w)); });
+  }
   if(motivo) rows = rows.filter(r => r.motivo === motivo);
   if(pago) rows = rows.filter(r => r.medio_pago === pago);
   if(tipoPaciente) rows = rows.filter(r => r.pacientes?.tipo_paciente === tipoPaciente);
@@ -2870,15 +2892,14 @@ async function cargarCierre(){
   actualizarLabelCierre();
   const { desde, hasta } = rangoCierreActual();
   const doctorFiltro = document.getElementById('cierre-doctor-filtro').value;
-  let query = sb
-    .from('consultas')
-    .select('monto, medio_pago, monto_2, medio_pago_2, tipo_consulta, motivo, pacientes(nombre), personal!consultas_doctor_id_fkey(id, nombre)')
-    .eq('deleted', false)
-    .eq('no_vino', false)
-    .gte('fecha', desde)
-    .lte('fecha', hasta);
-  if(doctorFiltro) query = query.eq('doctor_id', doctorFiltro);
-  const { data, error } = await query;
+  const construirCierre = () => {
+    let q = sb.from('consultas')
+      .select('monto, medio_pago, monto_2, medio_pago_2, tipo_consulta, motivo, pacientes(nombre), personal!consultas_doctor_id_fkey(id, nombre)')
+      .eq('deleted', false).eq('no_vino', false).gte('fecha', desde).lte('fecha', hasta).order('id');
+    if(doctorFiltro) q = q.eq('doctor_id', doctorFiltro);
+    return q;
+  };
+  const { data, error } = await traerTodo(construirCierre);
   const kpisEl = document.getElementById('cierre-kpis');
   const listaEl = document.getElementById('cierre-lista');
   if(error){
@@ -3055,17 +3076,21 @@ async function cargarDashboard(){
   const motivoFiltro = document.getElementById('dash-motivo-filtro').value;
   const tipoFiltro = document.getElementById('dash-tipo-filtro').value;
 
-  let query = sb
-    .from('consultas')
-    .select('fecha, monto, medio_pago, motivo, tipo_consulta, paciente_id, pacientes(id), personal!consultas_doctor_id_fkey(id, nombre)')
-    .eq('deleted', false)
-    .eq('no_vino', false);
-  if(periodo > 0) query = query.gte('fecha', isoDesdeHace(periodo));
-  if(doctorFiltro) query = query.eq('doctor_id', doctorFiltro);
-  if(motivoFiltro) query = query.eq('motivo', motivoFiltro);
-  if(tipoFiltro) query = query.eq('tipo_consulta', tipoFiltro);
+  const construirDash = () => {
+    let q = sb
+      .from('consultas')
+      .select('fecha, monto, medio_pago, motivo, tipo_consulta, paciente_id, pacientes(id), personal!consultas_doctor_id_fkey(id, nombre)')
+      .eq('deleted', false)
+      .eq('no_vino', false)
+      .order('id');
+    if(periodo > 0) q = q.gte('fecha', isoDesdeHace(periodo));
+    if(doctorFiltro) q = q.eq('doctor_id', doctorFiltro);
+    if(motivoFiltro) q = q.eq('motivo', motivoFiltro);
+    if(tipoFiltro) q = q.eq('tipo_consulta', tipoFiltro);
+    return q;
+  };
 
-  const { data, error } = await query;
+  const { data, error } = await traerTodo(construirDash);
   const kpisEl = document.getElementById('dash-kpis');
   if(error){ console.error('[CUIVAN] Error cargando dashboard:', error); kpisEl.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
 
@@ -3183,11 +3208,12 @@ let PRM_TAB_ACTUAL = 'inactivos';
 async function cargarPRM(){
   const tbody = document.getElementById('prm-tbody');
   tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
-  const { data, error } = await sb
+  const { data, error } = await traerTodo(() => sb
     .from('consultas')
     .select('fecha, paciente_id, motivo, tipo_consulta, no_vino, pacientes(id, nombre, telefono), personal!consultas_doctor_id_fkey(nombre)')
     .eq('deleted', false)
-    .order('fecha', { ascending:false });
+    .order('fecha', { ascending:false })
+    .order('id', { ascending:true }));
   if(error){ console.error('[CUIVAN] Error cargando PRM:', error); tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--red)">Error al cargar</td></tr>'; return; }
 
   if(PRM_TAB_ACTUAL === 'inactivos') renderPRMInactivos(data);
@@ -3391,7 +3417,7 @@ document.getElementById('btn-ec-cerrar').addEventListener('click', ()=>{
 });
 document.getElementById('btn-ec-guardar').addEventListener('click', async ()=>{
   if(!EDITANDO_CONSULTA) return;
-  const nuevoNombre = document.getElementById('ec-paciente').value.trim();
+  const nuevoNombre = limpiarNombre(document.getElementById('ec-paciente').value);
   const fechaVal = document.getElementById('ec-fecha').value.trim();
   const doctorId = document.getElementById('ec-doctor').value;
   const btn = document.getElementById('btn-ec-guardar');
