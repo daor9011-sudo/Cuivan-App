@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
+<meta name="app-version" content="2026.10.05"/>
+<!-- Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -447,6 +449,8 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
   .aud-note{grid-column:1 / 3}
   .aud-mrow{grid-template-columns:24px 1fr}
 }
+.app-version-wm{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(6px + env(safe-area-inset-bottom,0px));font-family:var(--font-b);font-size:10px;font-weight:700;letter-spacing:.4px;color:rgba(148,163,184,.6);pointer-events:none;user-select:none;z-index:9999}
+@media print{.app-version-wm{display:none}}
 </style>
 </head>
 <body>
@@ -1031,6 +1035,8 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 </div>
 
 <script>
+const APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || 'dev';
+console.info('[CUIVAN] Versión ' + APP_VERSION);
 const SUPABASE_URL = 'https://ekuaqcmlkjywagrgjooe.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrdWFxY21sa2p5d2Fncmdqb29lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjUzNTgsImV4cCI6MjEwMTY0MTM1OH0.1xnf1NbyhP2JqC9UKhjX6rppyWs4POy2YnqdLnnlGmI';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -3528,5 +3534,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.05</div>
 </body>
 </html>
