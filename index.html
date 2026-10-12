@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.05-2"/>
+<meta name="app-version" content="2026.10.12-2"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -1036,7 +1036,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 
 <script>
 const APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || 'dev';
-console.info('[CUIVAN] Versión ' + APP_VERSION);
+try { (console.info || console.log).call(console, '[CUIVAN] Versión ' + APP_VERSION); } catch(_) {}  // la vista previa de Claude no trae console.info
 const SUPABASE_URL = 'https://ekuaqcmlkjywagrgjooe.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrdWFxY21sa2p5d2Fncmdqb29lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjUzNTgsImV4cCI6MjEwMTY0MTM1OH0.1xnf1NbyhP2JqC9UKhjX6rppyWs4POy2YnqdLnnlGmI';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1305,7 +1305,7 @@ function entrarAlShell(perfil){
   document.getElementById('btn-personal-header').style.display = showPersonal ? 'inline-flex' : 'none';
   document.getElementById('btn-papelera-toggle').style.display = showPapelera ? 'inline-flex' : 'none';
   window.MI_ROL_ADMIN = perfil.rol === 'admin';
-  window.MI_PUEDE_AUDITORIA = perfil.rol === 'admin' || perfil.rol === 'enfermeria';
+  window.MI_PUEDE_AUDITORIA = perfil.rol === 'admin' || perfil.rol === 'enfermeria' || perfil.permisos?.puede_auditoria === true;
   document.getElementById('nav-auditoria').style.display = window.MI_PUEDE_AUDITORIA ? '' : 'none';
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
@@ -3554,6 +3554,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.05-2</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.12-2</div>
 </body>
 </html>
