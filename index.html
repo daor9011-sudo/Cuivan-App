@@ -1222,9 +1222,9 @@ function entrarAlShell(perfil){
   window.MI_ROL_ADMIN = perfil.rol === 'admin';
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
-  // Auditoría: admins siempre (la ven dentro de Configuración); el resto solo si tiene el permiso
+  // Auditoría: admins siempre; el resto solo si tiene el permiso (botón en el header para todos ellos)
   window.MI_PUEDE_VER_AUDITORIA = perfil.rol === 'admin' || perfil.permisos?.puede_ver_auditoria === true;
-  document.getElementById('btn-auditoria-header').style.display = (window.MI_PUEDE_VER_AUDITORIA && perfil.rol !== 'admin') ? 'inline-flex' : 'none';
+  document.getElementById('btn-auditoria-header').style.display = window.MI_PUEDE_VER_AUDITORIA ? 'inline-flex' : 'none';
   document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
 
   cargarDoctores();
