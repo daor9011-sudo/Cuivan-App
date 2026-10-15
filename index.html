@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.12-2"/>
+<meta name="app-version" content="2026.10.15-1"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -451,6 +451,90 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
 }
 .app-version-wm{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(6px + env(safe-area-inset-bottom,0px));font-family:var(--font-b);font-size:10px;font-weight:700;letter-spacing:.4px;color:rgba(148,163,184,.6);pointer-events:none;user-select:none;z-index:9999}
 @media print{.app-version-wm{display:none}}
+/* ══════════ CONTRATOS · alertas de vencimiento (solo admin) ══════════ */
+.s3-right{position:relative}
+.ct-bell{position:relative;font-size:13px;line-height:1.2;padding:5px 10px}
+.ct-bell.has{border-color:#FBBFBB;background:rgba(192,57,43,.25);animation:ct-pulse 1.9s infinite}
+.ct-bell.open{animation:none}
+@keyframes ct-pulse{0%{box-shadow:0 0 0 0 rgba(229,72,77,.65)}70%{box-shadow:0 0 0 9px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+.ct-badge{position:absolute;top:-7px;right:-7px;background:#E5484D;color:#fff;font-size:9.5px;font-weight:800;min-width:17px;height:17px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;border:2px solid #0B1628;display:flex}
+.ct-dd{position:absolute;right:0;top:calc(100% + 10px);width:360px;max-width:92vw;background:#fff;color:var(--navy);border-radius:12px;box-shadow:0 20px 50px -8px rgba(0,0,0,.45);border:1px solid var(--g2);z-index:300;text-align:left;overflow:hidden;font-weight:500}
+.ct-dd h5{font-family:var(--font-d);font-size:13px;padding:12px 14px;border-bottom:1px solid var(--g2);display:flex;justify-content:space-between}
+.ct-dd .grp{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4);padding:9px 14px 3px}
+.ct-dd .it{padding:8px 14px;border-bottom:1px solid var(--g1);font-size:12px;display:flex;justify-content:space-between;gap:8px;align-items:center;cursor:pointer}
+.ct-dd .it:hover{background:var(--g1)}.ct-dd .it small{display:block;color:var(--g6);font-size:10.5px}
+.ct-dd .ft{padding:10px 14px;text-align:center;font-size:11.5px;font-weight:700;color:#0B6E6E;cursor:pointer;background:var(--g1)}
+.ct-dd .empty{padding:18px 14px;font-size:12px;color:var(--g6);line-height:1.5}
+.ct-st{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;border:1px solid}
+.ct-st-v{background:#C0392B;color:#fff;border-color:#C0392B}
+.ct-st-2{background:#FEF0EF;color:#C0392B;border-color:#FBBFBB}
+.ct-st-1{background:#FDF6EC;color:#9A6010;border-color:#EDD49A}
+.ct-st-ok{background:#EAF7EE;color:#2E7D4F;border-color:#A8D8B4}
+.ct-cat{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;display:inline-block}
+.ct-cat-Trabajador{background:#EEF5FC;color:#1B5C9E}.ct-cat-Doctor{background:var(--teal-soft);color:#0B6E6E}.ct-cat-Arrendamiento{background:#F5EEF8;color:#7D3C98}
+.ct-ok-tag{font-size:9.5px;font-weight:700;color:#2E7D4F;margin-left:6px}
+.ct-banner{border-radius:12px;border:1.5px solid #FBBFBB;background:#FFF8F7;padding:14px 16px;margin-bottom:14px}
+.ct-banner.amber{border-color:#EDD49A;background:#FFFBF2}
+.ct-banner h4{font-family:var(--font-d);font-size:14px;margin-bottom:8px}
+.ct-banner .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid rgba(0,0,0,.06);font-size:12px;flex-wrap:wrap}
+.ct-banner .row small{color:var(--g6);display:block;font-size:10.5px}
+.ct-banner .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
+.ct-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.ct-k-v{border-color:#C0392B}.ct-k-v .val{color:#C0392B}.ct-k-2{border-color:#FBBFBB}.ct-k-2 .val{color:#C0392B}.ct-k-1{border-color:#EDD49A}.ct-k-1 .val{color:#9A6010}.ct-k-ok .val{color:#2E7D4F}
+.ct-sub{font-size:11.5px;color:var(--g6);line-height:1.5;margin:-6px 0 14px}
+.ct-filt{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.ct-fchip{border:1px solid var(--g2);background:#fff;color:var(--g6);padding:6px 13px;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-b)}
+.ct-fchip.act{background:var(--teal-soft);border-color:rgba(42,191,191,.5);color:#0B6E6E;font-weight:700}
+.ct-filt input{margin-left:auto;min-width:200px;width:auto}
+.ct-table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:11.5px}
+.ct-table th{text-align:left;padding:0 10px 4px;color:var(--g4);font-size:9px;letter-spacing:.6px;text-transform:uppercase;font-weight:800}
+.ct-table td{padding:10px;background:#fff;border-top:1px solid var(--g1);border-bottom:1px solid var(--g1);vertical-align:middle}
+.ct-table td:first-child{border-left:3px solid var(--g2);border-radius:9px 0 0 9px}.ct-table td:last-child{border-right:1px solid var(--g1);border-radius:0 9px 9px 0}
+.ct-table tr.r-v td:first-child{border-left-color:#C0392B}.ct-table tr.r-2 td:first-child{border-left-color:#E5484D}.ct-table tr.r-1 td:first-child{border-left-color:#E0A33A}.ct-table tr.r-ok td:first-child{border-left-color:var(--teal)}
+.ct-table tr.row{cursor:pointer}.ct-table tr.row:hover td{background:#fafcff}
+.ct-table .nm{font-weight:700;font-size:12px}.ct-table td small{display:block;color:var(--g6);font-size:10.5px;margin-top:1px}
+.ct-nw{white-space:nowrap}
+.ct-bar{height:6px;background:var(--g2);border-radius:4px;overflow:hidden;min-width:70px}.ct-bar i{display:block;height:100%;border-radius:4px;background:var(--teal)}
+.ct-b-v i{background:#C0392B}.ct-b-2 i{background:#E5484D}.ct-b-1 i{background:#E0A33A}
+.ct-prox{background:#fafbfd;border:1px solid var(--g2);border-radius:12px;padding:14px 16px;margin-top:12px}.ct-prox h4{font-family:var(--font-d);font-size:13px;margin-bottom:6px}
+.ct-pegrid{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+.ct-pe{display:grid;grid-template-columns:62px 1fr;gap:9px;padding:8px 0;border-top:1px solid var(--g1);font-size:11.5px}
+.ct-pe .d{font-weight:800;font-size:12px;color:var(--navy2)}.ct-pe .d small{display:block;font-size:9.5px;color:var(--g4);font-weight:600}
+.ct-lv{font-size:9.5px;font-weight:800;border-radius:10px;padding:1px 7px;margin-right:4px}
+.ct-lv1{background:#FDF6EC;color:#9A6010}.ct-lv2{background:#FEF0EF;color:#C0392B}
+.ct-shade{position:fixed;inset:0;background:rgba(11,22,40,.35);z-index:440;display:none}
+.ct-drawer{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100%;background:#fff;z-index:450;box-shadow:-18px 0 40px -12px rgba(0,0,0,.3);padding:20px;overflow-y:auto;display:none}
+.ct-drawer h3{font-family:var(--font-d);font-size:17px;margin-top:6px}.ct-drawer .x{position:absolute;top:12px;right:14px;border:none;background:none;font-size:22px;color:var(--g4);cursor:pointer}
+.ct-big{margin:14px 0;border-radius:12px;padding:14px;text-align:center}
+.ct-big .n{font-family:var(--font-d);font-size:30px;font-weight:800;line-height:1}.ct-big small{display:block;font-size:11px;margin-top:4px}
+.ct-big.k-v,.ct-big.k-2{background:#FEF0EF;color:#C0392B}.ct-big.k-1{background:#FDF6EC;color:#9A6010}.ct-big.k-ok{background:#EAF7EE;color:#2E7D4F}
+.ct-lbl{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4);margin:16px 0 7px}
+.ct-al{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--g2);border-radius:9px;margin-bottom:6px;font-size:11.5px}
+.ct-al .t{flex:1}.ct-al .t small{display:block;color:var(--g6);font-size:10.5px}.ct-al.on{border-color:#FBBFBB;background:#FFF8F7}
+.ct-tl{border-left:2px solid var(--g2);margin-left:6px;padding-left:14px}
+.ct-tl .p{position:relative;padding:5px 0 11px;font-size:11.5px;color:var(--g6)}
+.ct-tl .p::before{content:'';position:absolute;left:-20px;top:9px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--g4)}
+.ct-tl .p.cur{color:var(--navy);font-weight:600}.ct-tl .p.cur::before{background:var(--teal);border-color:var(--teal)}
+.ct-tl .p small{display:block;font-weight:500;color:var(--g6);font-size:10.5px}
+.ct-warn{display:inline-block;font-size:9.5px;font-weight:700;color:#9A6010;background:#FDF6EC;border:1px solid #EDD49A;border-radius:10px;padding:1px 8px;margin-top:3px}
+.ct-foot{display:flex;gap:8px;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid var(--g2);flex-wrap:wrap}
+.ct-foot .appbtn{flex:1 1 auto}
+.ct-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:860px){
+  .ct-kpis{grid-template-columns:1fr 1fr}.ct-pegrid{grid-template-columns:1fr}.ct-nw{white-space:normal}
+  .ct-dd{position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top,0px));width:auto;max-width:none;max-height:80vh;overflow-y:auto}
+  .ct-filt input{margin-left:0;min-width:0;flex:1 1 100%}
+  .ct-table,.ct-table thead,.ct-table tbody{display:block}.ct-table thead{display:none}
+  .ct-table tr.row{display:block;background:#fff;border-radius:10px;border-left:3px solid var(--g2);padding:2px 12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(11,22,40,.08)}
+  .ct-table tr.r-v{border-left-color:#C0392B}.ct-table tr.r-2{border-left-color:#E5484D}.ct-table tr.r-1{border-left-color:#E0A33A}.ct-table tr.r-ok{border-left-color:var(--teal)}
+  .ct-table td,.ct-table td:first-child,.ct-table td:last-child{display:block;border:none;border-bottom:1px solid var(--g1);border-radius:0;padding:4px 0;background:none}
+  .ct-table td:last-child{border-bottom:none;padding:6px 0 8px}
+  .ct-table td::before{content:attr(data-l);display:block;font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4);margin-bottom:0}
+  .ct-table td:not([data-l])::before,.ct-table td[data-l="Persona"]::before,.ct-table td[data-l="Avance"]::before,.ct-table td[data-l="Estado"]::before{content:none}
+  .ct-table tr.row{padding:4px 12px}
+}
+@media (max-width:560px){.ct-kpis{grid-template-columns:1fr}.ct-two{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -465,6 +549,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     <div class="s3-right">
       <span class="s3-role-chip" id="app-role-chip">—</span>
       <span id="app-user-name"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>—</span>
+      <button class="s3-logout ct-bell" id="btn-contratos-bell" style="display:none" title="Contratos por vencer">🔔<span class="ct-badge" id="ct-badge" style="display:none">0</span></button>
       <button class="s3-logout" id="btn-personal-header" style="display:none">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Configuración
@@ -473,6 +558,7 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Cerrar sesión
       </button>
+      <div class="ct-dd" id="ct-dd" style="display:none"></div>
     </div>
   </div>
   <div class="s3-navrow">
@@ -483,10 +569,12 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
       <button class="locked" data-screen2="dash"><span>📊</span>Dashboard</button>
       <button data-screen2="prm"><span>💬</span>PRM / CRM</button>
       <button data-screen2="auditoria" id="nav-auditoria" style="display:none"><span>📋</span>Auditoría</button>
+      <button data-screen2="contratos" id="nav-contratos" style="display:none"><span>📑</span>Contratos</button>
     </div>
   </div>
 
   <main class="appmain">
+    <div id="ct-banner"></div>
     <!-- ══ REGISTRO ══ -->
     <div class="card screen2 act" id="app-screen-registro">
       <div class="tab-title">📝 Registrar Consulta / Servicio</div>
@@ -720,6 +808,11 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
     </div>
 
     <!-- ══ PERSONAL ══ -->
+    <div class="card screen2" id="app-screen-contratos">
+      <div class="tab-title">📑 Contratos</div>
+      <div id="ct-body"><div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div></div>
+    </div>
+
     <div class="card screen2" id="app-screen-personal">
       <div class="tab-title">⚙️ Configuración</div>
       <div class="lbl2" style="margin-bottom:8px">👥 Usuarios con acceso al sistema</div>
@@ -774,10 +867,44 @@ input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(4
         <p style="font-size:10.5px;color:var(--g4);margin-top:8px;line-height:1.5">Solo afecta a cuentas con rol Recepción — doctoras y admins siempre tienen acceso, sin importar la hora ni el día. Si el horario cruza medianoche (ej. 20:00 a 08:45), funciona igual.</p>
       </div>
 
+      <div class="tab-title" style="margin-top:6px">🔔 Alertas de contratos</div>
+      <div class="fac2" style="margin-bottom:14px">
+        <p style="font-size:11px;color:var(--g6);line-height:1.5;margin-bottom:12px">Se avisa a los administradores cuando a un contrato le falten estos días para vencer. Los cambios se aplican al instante a todos los contratos.</p>
+        <div class="ct-two">
+          <div class="fi2"><label class="lbl2">1ª alerta · días antes</label><input class="app-input" type="number" id="ct-cfg-d1" min="2" max="365"/></div>
+          <div class="fi2"><label class="lbl2">2ª alerta · días antes</label><input class="app-input" type="number" id="ct-cfg-d2" min="1" max="364"/></div>
+        </div>
+        <div id="ct-cfg-err" style="display:none;color:#C0392B;font-size:11.5px;font-weight:600;margin-top:8px">La 2ª alerta debe ser menor que la 1ª (ej. 30 y 15 días).</div>
+        <label class="cbrow2" style="margin-top:12px"><input type="checkbox" id="ct-cfg-aviso"/><span style="font-weight:600">Mostrar el aviso al iniciar sesión (la campana 🔔 siempre está disponible)</span></label>
+        <div class="traza-resumen2" id="ct-cfg-prev" style="margin:12px 0 10px"></div>
+        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin-bottom:10px">Solo los administradores ven estas alertas y la pestaña Contratos.</p>
+        <button class="appbtn appbtn-p" id="btn-ct-cfg-guardar">Guardar</button>
+      </div>
+
       <div class="tab-title" style="margin-top:6px">📜 Actividad reciente</div>
       <div id="audit-lista"></div>
     </div>
   </main>
+
+  <div class="ct-shade" id="ct-shade"></div>
+  <div class="ct-drawer" id="ct-drawer"></div>
+  <div class="modal-overlay2" id="modal-ct-renovar">
+    <div class="modal2" style="max-width:420px">
+      <h3>Registrar renovación</h3>
+      <div id="ct-ren-quien" style="font-size:12px;color:var(--g6);margin-bottom:6px"></div>
+      <div class="ct-two">
+        <div class="fi2"><label class="lbl2">Duración</label>
+          <select class="app-input" id="ct-ren-dur"><option value="1|1 MES">1 mes</option><option value="3|3 MESES">3 meses</option><option value="6|6 MESES">6 meses</option><option value="12|1 AÑO" selected>1 año</option></select></div>
+        <div class="fi2"><label class="lbl2">Inicio</label><input class="app-input" type="date" id="ct-ren-ini"/></div>
+      </div>
+      <div class="fi2" style="margin-top:10px"><label class="lbl2">Fin del nuevo periodo</label><input class="app-input" type="date" id="ct-ren-fin"/></div>
+      <div class="traza-resumen2" style="margin:12px 0 0;font-size:11px">Al guardar, el nuevo periodo pasa a ser el vigente: el contrato sale de alerta y se calculan de nuevo sus avisos. El periodo anterior queda en el historial.</div>
+      <div class="modal-footer2" style="margin-top:16px">
+        <button class="appbtn appbtn-s" id="btn-ct-ren-cancelar">Cancelar</button>
+        <button class="appbtn appbtn-p" id="btn-ct-ren-guardar">Guardar renovación</button>
+      </div>
+    </div>
+  </div>
   <div class="app-footer">
     <span class="app-footer-text">© 2026 Mediconsulting. Uso exclusivo para CUIVAN Salud Integral. <span class="app-footer-link" id="link-aviso-legal-2">Aviso legal completo</span></span>
   </div>
@@ -1307,6 +1434,10 @@ function entrarAlShell(perfil){
   window.MI_ROL_ADMIN = perfil.rol === 'admin';
   window.MI_PUEDE_AUDITORIA = perfil.rol === 'admin' || perfil.rol === 'enfermeria' || perfil.permisos?.puede_auditoria === true;
   document.getElementById('nav-auditoria').style.display = window.MI_PUEDE_AUDITORIA ? '' : 'none';
+  // Contratos: SOLO admin (campana, aviso y pestaña). El RLS de la base lo exige también.
+  document.getElementById('nav-contratos').style.display = window.MI_ROL_ADMIN ? '' : 'none';
+  document.getElementById('btn-contratos-bell').style.display = window.MI_ROL_ADMIN ? 'inline-flex' : 'none';
+  if(window.MI_ROL_ADMIN) cargarContratos(); else ctLimpiar();
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
   document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
@@ -1412,6 +1543,7 @@ document.getElementById('app-nav').addEventListener('click',(e)=>{
   if(b.dataset.screen2 === 'dash') cargarDashboard();
   if(b.dataset.screen2 === 'prm') cargarPRM();
   if(b.dataset.screen2 === 'auditoria') cargarAuditoria();
+  if(b.dataset.screen2 === 'contratos') cargarContratos();
 });
 
 document.getElementById('btn-logout').addEventListener('click', async ()=>{
@@ -2554,7 +2686,341 @@ document.getElementById('btn-personal-header').addEventListener('click', ()=>{
   cargarServicios();
   cargarAuditLog();
   cargarHorarioAcceso();
+  ctCfgCargar();
 });
+
+// ═══════════════════════════════════════════════════════════
+// CONTRATOS — alertas de vencimiento (SOLO rol admin; el RLS de la base también lo exige)
+// El contrato vigente es el periodo con la fecha de fin más lejana. Las alertas se calculan en
+// el momento con los días configurados (no se guardan), por eso al cambiarlos se actualiza todo.
+// ═══════════════════════════════════════════════════════════
+const CT = { contratos: [], cfg: { d1: 30, d2: 15, aviso: true }, atend: {}, cargado: false, cat: 'todos', q: '', drawer: null, renovando: null, bell: false };
+const ctHoy = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+const ctDate = iso => new Date(iso + 'T00:00:00');
+const ctIso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const ctFmt = d => String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+const ctFmtIso = s => ctFmt(ctDate(s));
+const ctDiff = (a, b) => Math.round((b - a) / 86400000);
+const ctPl = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+function ctAddMonths(d, n){
+  const t = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  const ultimo = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+  t.setDate(Math.min(d.getDate(), ultimo));
+  return t;
+}
+function ctInfo(c, cfg = CT.cfg){
+  const ps = (c.contrato_periodos || []).slice().sort((a, b) => a.fin < b.fin ? -1 : a.fin > b.fin ? 1 : a.numero - b.numero);
+  const v = ps[ps.length - 1];
+  if(!v) return null;
+  const hoy = ctHoy(), ini = ctDate(v.inicio), fin = ctDate(v.fin), dias = ctDiff(hoy, fin);
+  let est = 'ok', nivel = null;
+  if(dias < 0){ est = 'v'; nivel = 'v'; } else if(dias <= cfg.d2){ est = '2'; nivel = '2'; } else if(dias <= cfg.d1){ est = '1'; nivel = '1'; }
+  const total = Math.max(1, ctDiff(ini, fin));
+  const pct = Math.max(0, Math.min(100, Math.round(ctDiff(ini, hoy) / total * 100)));
+  return { c, v, ps, ini, fin, dias, est, nivel, pct, atendida: !!(nivel && CT.atend[v.id + '|' + nivel]) };
+}
+const ctItems = cfg => CT.contratos.filter(c => c.activo !== false).map(c => ctInfo(c, cfg)).filter(Boolean);
+function ctConteos(cfg){ const it = ctItems(cfg); return { v: it.filter(x => x.est === 'v'), a2: it.filter(x => x.est === '2'), a1: it.filter(x => x.est === '1'), ok: it.filter(x => x.est === 'ok') }; }
+const ctPendientes = () => { const k = ctConteos(); return [...k.v, ...k.a2, ...k.a1].filter(x => !x.atendida); };
+function ctProximas(){
+  const hoy = ctHoy(), ev = [];
+  ctItems().forEach(x => {
+    if(x.dias < 0) return;
+    [[CT.cfg.d1, '1'], [CT.cfg.d2, '2']].forEach(([d, n]) => { const f = new Date(x.fin); f.setDate(f.getDate() - d); if(f > hoy) ev.push({ f, n, x }); });
+  });
+  return ev.sort((a, b) => a.f - b.f);
+}
+function ctChip(x){
+  if(x.est === 'v') return `<span class="ct-st ct-st-v">Vencido hace ${ctPl(-x.dias, 'día', 'días')}</span>`;
+  const cuando = x.dias === 0 ? 'vence hoy' : 'en ' + ctPl(x.dias, 'día', 'días');
+  if(x.est === '2') return `<span class="ct-st ct-st-2">2ª alerta · ${cuando}</span>`;
+  if(x.est === '1') return `<span class="ct-st ct-st-1">1ª alerta · ${cuando}</span>`;
+  return `<span class="ct-st ct-st-ok">Vigente · ${ctPl(x.dias, 'día', 'días')}</span>`;
+}
+
+async function cargarContratos(){
+  if(!window.MI_ROL_ADMIN) return;
+  const [rc, rcfg, rat] = await Promise.all([
+    sb.from('contratos').select('id, categoria, nombre, puesto, tipo, activo, contrato_periodos(id, numero, duracion, inicio, fin, nota)').order('nombre'),
+    sb.from('contratos_config').select('dias_alerta_1, dias_alerta_2, aviso_al_entrar').eq('id', true).maybeSingle(),
+    sb.from('contratos_atenciones').select('periodo_id, nivel')
+  ]);
+  if(rc.error || rcfg.error || rat.error){
+    console.error('[CUIVAN] Error cargando contratos:', rc.error || rcfg.error || rat.error);
+    const b = document.getElementById('ct-body');
+    if(b && !CT.cargado) b.innerHTML = '<div style="color:var(--red);font-size:12px;padding:10px 0">No se pudieron cargar los contratos. Recarga la página.</div>';
+    return;
+  }
+  CT.contratos = rc.data || [];
+  if(rcfg.data) CT.cfg = { d1: rcfg.data.dias_alerta_1, d2: rcfg.data.dias_alerta_2, aviso: rcfg.data.aviso_al_entrar };
+  CT.atend = {}; (rat.data || []).forEach(a => { CT.atend[a.periodo_id + '|' + a.nivel] = true; });
+  CT.cargado = true;
+  ctRenderTodo();
+}
+function ctLimpiar(){
+  CT.contratos = []; CT.atend = {}; CT.cargado = false; CT.drawer = null; CT.bell = false;
+  ['ct-banner', 'ct-dd', 'ct-drawer'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = ''; });
+  const b = document.getElementById('ct-body'); if(b) b.innerHTML = '';
+  document.getElementById('ct-shade').style.display = 'none';
+}
+function ctRenderTodo(){
+  if(!window.MI_ROL_ADMIN) return;
+  ctRenderHeader(); ctRenderBanner(); ctRenderPantalla(); ctRenderDrawer();
+}
+
+/* ── campana + desplegable ── */
+function ctRenderHeader(){
+  const n = ctPendientes().length;
+  const bell = document.getElementById('btn-contratos-bell'), badge = document.getElementById('ct-badge'), dd = document.getElementById('ct-dd');
+  bell.classList.toggle('has', n > 0); bell.classList.toggle('open', CT.bell);
+  badge.style.display = n ? 'flex' : 'none'; badge.textContent = n;
+  dd.style.display = CT.bell ? 'block' : 'none';
+  if(CT.bell) dd.innerHTML = ctDropdownHtml();
+}
+function ctDropdownHtml(){
+  const k = ctConteos();
+  const grp = (t, arr) => arr.length ? `<div class="grp">${t}</div>` + arr.map(x => `
+    <div class="it" data-id="${x.c.id}"><div><b>${esc2(x.c.nombre)}</b><small>${esc2(x.c.puesto || '')} · vence ${ctFmt(x.fin)}</small></div><div>${ctChip(x)}${x.atendida ? '<span class="ct-ok-tag">✓</span>' : ''}</div></div>`).join('') : '';
+  const body = grp('Vencidos', k.v) + grp(`2ª alerta (${CT.cfg.d2} días o menos)`, k.a2) + grp(`1ª alerta (${CT.cfg.d1} días o menos)`, k.a1);
+  const pr = ctProximas()[0];
+  const vacio = `<div class="empty">✅ Ningún contrato está por vencer.${pr ? `<br>La próxima alerta será el <b>${ctFmt(pr.f)}</b> (${esc2(pr.x.c.nombre)}).` : ''}</div>`;
+  return `<h5><span>🔔 Contratos por vencer</span><span style="color:var(--g4);font-weight:600;font-size:11px">${ctPendientes().length} sin atender</span></h5>${body || vacio}<div class="ft">Ver todos los contratos →</div>`;
+}
+
+/* ── aviso al entrar ── */
+function ctAvisoCerradoHoy(){ try { return localStorage.getItem('cuivan_ct_aviso') === ctIso(ctHoy()); } catch(_) { return false; } }
+function ctRenderBanner(){
+  const el = document.getElementById('ct-banner');
+  const pend = ctPendientes();
+  if(!CT.cfg.aviso || ctAvisoCerradoHoy() || pend.length === 0){ el.innerHTML = ''; return; }
+  const urgente = pend.some(x => x.est === 'v' || x.est === '2');
+  el.innerHTML = `<div class="ct-banner ${urgente ? '' : 'amber'}">
+    <h4>🔔 ${ctPl(pend.length, 'contrato requiere', 'contratos requieren')} tu atención</h4>
+    ${pend.slice(0, 5).map(x => `<div class="row"><div><b>${esc2(x.c.nombre)}</b><small>${esc2(x.c.puesto || '')} · vence el ${ctFmt(x.fin)}</small></div><div style="display:flex;gap:8px;align-items:center">${ctChip(x)}<button class="appbtn appbtn-s" data-ver="${x.c.id}" style="font-size:10.5px;padding:5px 11px">Ver</button></div></div>`).join('')}
+    ${pend.length > 5 ? `<div class="row"><small>… y ${pend.length - 5} más</small></div>` : ''}
+    <div class="acts"><button class="appbtn appbtn-p" data-ver="todos">Ver todos los contratos</button><button class="appbtn appbtn-s" data-cerrar="1">Cerrar por hoy</button></div>
+  </div>`;
+}
+
+/* ── ir a la pantalla Contratos (opcionalmente abriendo un contrato) ── */
+function ctIr(id){
+  CT.bell = false; ctRenderHeader();
+  document.getElementById('nav-contratos').click();
+  if(id && id !== 'todos') CT.drawer = id;
+  ctRenderTodo();
+}
+
+/* ── pantalla ── */
+function ctRenderPantalla(){
+  const body = document.getElementById('ct-body');
+  if(!CT.cargado){ return; }
+  const k = ctConteos();
+  const archivados = CT.contratos.filter(c => c.activo === false);
+  let list = CT.cat === 'archivados'
+    ? archivados.map(c => ctInfo(c)).filter(Boolean)
+    : ctItems().filter(x => {
+        if(CT.cat === 'alerta') return x.est !== 'ok';
+        if(['Trabajador', 'Doctor', 'Arrendamiento'].includes(CT.cat)) return x.c.categoria === CT.cat;
+        return true;
+      });
+  list = list.filter(x => !CT.q || (x.c.nombre + ' ' + (x.c.puesto || '')).toLowerCase().includes(CT.q));
+  list.sort((a, b) => a.dias - b.dias);
+  const chips = [['todos', 'Todos'], ['alerta', '⚠️ Con alerta'], ['Trabajador', 'Trabajadores'], ['Doctor', 'Doctores'], ['Arrendamiento', 'Arrendamientos']];
+  if(archivados.length) chips.push(['archivados', `📁 Archivados (${archivados.length})`]);
+  const pr = ctProximas().slice(0, 6);
+  const hadFocus = document.activeElement && document.activeElement.id === 'ct-q';
+  const pos = hadFocus ? document.activeElement.selectionStart : 0;
+  body.innerHTML = `
+    <p class="ct-sub">Se toma el último periodo de cada contrato como el vigente. Alertas a <b>${CT.cfg.d1}</b> y <b>${CT.cfg.d2}</b> días del vencimiento (se cambian en ⚙️ Configuración). Solo visible para administradores.</p>
+    <div class="ct-kpis">
+      <div class="kpi-tile ct-k-v"><div class="lbl3">Vencidos</div><div class="val">${k.v.length}</div></div>
+      <div class="kpi-tile ct-k-2"><div class="lbl3">2ª alerta · ≤ ${CT.cfg.d2} días</div><div class="val">${k.a2.length}</div></div>
+      <div class="kpi-tile ct-k-1"><div class="lbl3">1ª alerta · ≤ ${CT.cfg.d1} días</div><div class="val">${k.a1.length}</div></div>
+      <div class="kpi-tile ct-k-ok"><div class="lbl3">Vigentes</div><div class="val">${k.ok.length}</div></div>
+    </div>
+    <div class="ct-filt">${chips.map(([v, t]) => `<button class="ct-fchip ${CT.cat === v ? 'act' : ''}" data-cat="${v}">${t}</button>`).join('')}
+      <input class="app-input" id="ct-q" placeholder="Buscar persona o puesto…" value="${esc2(CT.q)}"/></div>
+    <table class="ct-table"><thead><tr><th>Persona</th><th>Categoría</th><th>Periodo vigente</th><th>Avance</th><th>Estado</th><th></th></tr></thead><tbody>
+    ${list.map(x => `<tr class="row r-${x.est}" data-id="${x.c.id}">
+      <td data-l="Persona"><div class="nm">${esc2(x.c.nombre)}</div><small>${esc2(x.c.puesto || '')}</small></td>
+      <td data-l="Categoría"><span class="ct-cat ct-cat-${x.c.categoria}">${x.c.categoria}</span><small>${esc2(x.c.tipo || '')}</small></td>
+      <td data-l="Periodo vigente" class="ct-nw">${ctFmt(x.ini)} → <b>${ctFmt(x.fin)}</b><small>${esc2(x.v.duracion || '')}</small></td>
+      <td data-l="Avance"><div class="ct-bar ct-b-${x.est}"><i style="width:${x.pct}%"></i></div><small>${x.pct}%</small></td>
+      <td data-l="Estado">${x.c.activo === false ? '<span class="ct-st ct-st-ok" style="background:#F4F6FB;color:var(--g6);border-color:var(--g2)">Archivado</span>' : ctChip(x)}${x.atendida ? '<span class="ct-ok-tag">✓ atendida</span>' : ''}</td>
+      <td>${x.c.activo === false ? `<button class="appbtn appbtn-s" data-react="${x.c.id}" style="font-size:10.5px;padding:5px 11px">Reactivar</button>` : `<button class="appbtn appbtn-p" data-ren="${x.c.id}" style="font-size:10.5px;padding:5px 11px">Renovar</button>`}</td></tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--g4);background:none;border:none">Sin resultados</td></tr>`}
+    </tbody></table>
+    <div class="ct-prox"><h4>🗓️ Próximas alertas</h4>
+      ${pr.length ? '<div class="ct-pegrid">' + pr.map(e => `<div class="ct-pe"><div class="d">${String(e.f.getDate()).padStart(2, '0')}/${String(e.f.getMonth() + 1).padStart(2, '0')}<small>${e.f.getFullYear()}</small></div><div><span class="ct-lv ct-lv${e.n}">${e.n}ª alerta</span><b>${esc2(e.x.c.nombre)}</b><small style="display:block;color:var(--g6);font-size:10.5px">vence ${ctFmt(e.x.fin)}</small></div></div>`).join('') + '</div>' : '<div style="font-size:11.5px;color:var(--g4);padding:6px 0">No hay alertas programadas.</div>'}
+    </div>`;
+  if(hadFocus){ const q = document.getElementById('ct-q'); q.focus(); q.setSelectionRange(pos, pos); }
+}
+
+/* ── panel de detalle ── */
+function ctRenderDrawer(){
+  const d = document.getElementById('ct-drawer'), sh = document.getElementById('ct-shade');
+  const c = CT.drawer ? CT.contratos.find(x => x.id === CT.drawer) : null;
+  const x = c ? ctInfo(c) : null;
+  if(!x){ d.style.display = 'none'; sh.style.display = 'none'; return; }
+  const a1 = new Date(x.fin); a1.setDate(a1.getDate() - CT.cfg.d1);
+  const a2 = new Date(x.fin); a2.setDate(a2.getDate() - CT.cfg.d2);
+  const hoy = ctHoy();
+  const estadoAl = (f, nivel) => hoy >= f ? (CT.atend[x.v.id + '|' + nivel] ? 'atendida' : 'activa') : 'pendiente';
+  const alRow = (n, f, nivel, dias) => {
+    const e = estadoAl(f, nivel);
+    return `<div class="ct-al ${e === 'activa' ? 'on' : ''}"><div class="t"><b>${n}ª alerta · ${dias} días antes</b><small>${ctFmt(f)} — ${e === 'pendiente' ? 'todavía no llega' : e === 'atendida' ? '✓ atendida' : 'activa: falta atenderla'}</small></div>
+      ${e !== 'pendiente' ? `<button class="appbtn appbtn-s" data-at="${nivel}" style="font-size:10.5px;padding:5px 11px">${e === 'atendida' ? 'Reabrir' : 'Marcar atendida'}</button>` : ''}</div>`;
+  };
+  const bigTxt = x.est === 'v' ? `<div class="n">−${-x.dias}</div><small>días vencido</small>` : `<div class="n">${x.dias}</div><small>días para el vencimiento (${ctFmt(x.fin)})</small>`;
+  const asc = x.ps; // de más antiguo a más reciente
+  d.innerHTML = `<button class="x" data-cerrar-d="1">×</button>
+    <span class="ct-cat ct-cat-${c.categoria}">${c.categoria}</span>${c.activo === false ? ' <span class="ct-warn">Archivado</span>' : ''}
+    <h3>${esc2(c.nombre)}</h3>
+    <div style="font-size:12px;color:var(--g6);margin-top:2px">${esc2(c.puesto || '')} · ${esc2(c.tipo || '')}</div>
+    <div class="ct-big k-${x.est}">${bigTxt}</div>
+    ${c.activo === false ? '' : `<div class="ct-lbl">Alertas de este contrato</div>
+    ${alRow(1, a1, '1', CT.cfg.d1)}${alRow(2, a2, '2', CT.cfg.d2)}
+    ${x.est === 'v' ? `<div class="ct-al on"><div class="t"><b>Contrato vencido</b><small>${ctFmt(x.fin)} — sin renovación registrada</small></div><button class="appbtn appbtn-s" data-at="v" style="font-size:10.5px;padding:5px 11px">${CT.atend[x.v.id + '|v'] ? 'Reabrir' : 'Marcar atendida'}</button></div>` : ''}`}
+    <div class="ct-lbl">Historial de periodos (${asc.length})</div>
+    <div class="ct-tl">${asc.slice().reverse().map((p, j) => {
+      const orig = asc.length - 1 - j, prev = asc[orig - 1];
+      const dup = prev && prev.inicio === p.inicio;
+      return `<div class="p ${j === 0 ? 'cur' : ''}"><b>${esc2(p.duracion || '')}</b> ${j === 0 ? '· vigente' : ''}<small>${ctFmtIso(p.inicio)} → ${ctFmtIso(p.fin)}${p.nota ? ' · ' + esc2(p.nota) : ''}</small>${dup ? '<span class="ct-warn">⚠ Empieza el mismo día que el periodo anterior — revisar</span>' : ''}</div>`;
+    }).join('')}</div>
+    <div class="ct-foot">
+      ${c.activo === false ? `<button class="appbtn appbtn-s" data-react="${c.id}">Reactivar</button>` : `<button class="appbtn appbtn-danger-soft" data-archivar="${c.id}">Archivar (no se renueva)</button><button class="appbtn appbtn-p" data-ren="${c.id}">Registrar renovación</button>`}
+    </div>`;
+  d.style.display = 'block'; sh.style.display = 'block';
+}
+
+/* ── acciones ── */
+async function ctToggleAtendida(periodoId, nivel){
+  const key = periodoId + '|' + nivel;
+  if(CT.atend[key]){
+    const { error } = await sb.from('contratos_atenciones').delete().eq('periodo_id', periodoId).eq('nivel', nivel);
+    if(error){ console.error('[CUIVAN] Error reabriendo alerta:', error); toast('⚠️ No se pudo reabrir: ' + error.message); return; }
+    delete CT.atend[key]; toast('Alerta reabierta');
+  } else {
+    const { error } = await sb.from('contratos_atenciones').insert({ periodo_id: periodoId, nivel, atendido_por: await miPersonalId() });
+    if(error){ console.error('[CUIVAN] Error marcando atendida:', error); toast('⚠️ No se pudo guardar: ' + error.message); return; }
+    CT.atend[key] = true; toast('✓ Marcada como atendida: sale del conteo de la campana');
+  }
+  ctRenderTodo();
+}
+function ctAbrirRenovar(id){
+  const c = CT.contratos.find(x => x.id === id); const x = c && ctInfo(c);
+  if(!x) return;
+  CT.renovando = id;
+  document.getElementById('ct-ren-quien').innerHTML = `${esc2(c.nombre)} · el periodo actual vence el <b>${ctFmt(x.fin)}</b>`;
+  document.getElementById('ct-ren-dur').value = '12|1 AÑO';
+  document.getElementById('ct-ren-ini').value = ctIso(x.fin);
+  document.getElementById('ct-ren-fin').value = ctIso(ctAddMonths(x.fin, 12));
+  document.getElementById('modal-ct-renovar').classList.add('show');
+}
+function ctSyncFin(){
+  const n = +document.getElementById('ct-ren-dur').value.split('|')[0];
+  const ini = document.getElementById('ct-ren-ini').value;
+  if(ini) document.getElementById('ct-ren-fin').value = ctIso(ctAddMonths(ctDate(ini), n));
+}
+async function ctGuardarRenovacion(){
+  const c = CT.contratos.find(x => x.id === CT.renovando); const x = c && ctInfo(c);
+  if(!x) return;
+  const label = document.getElementById('ct-ren-dur').value.split('|')[1];
+  const ini = document.getElementById('ct-ren-ini').value, fin = document.getElementById('ct-ren-fin').value;
+  if(!ini || !fin){ toast('⚠️ Completa las fechas del nuevo periodo'); return; }
+  if(fin <= ini){ toast('⚠️ El fin debe ser posterior al inicio'); return; }
+  if(fin <= x.v.fin){ toast('⚠️ La renovación debe terminar después del periodo actual (' + ctFmtIso(x.v.fin) + ')'); return; }
+  const btn = document.getElementById('btn-ct-ren-guardar'); btn.disabled = true;
+  const numero = Math.max(0, ...x.ps.map(p => p.numero)) + 1;
+  const { error } = await sb.from('contrato_periodos').insert({ contrato_id: c.id, numero, duracion: label, inicio: ini, fin, created_by: await miPersonalId() });
+  btn.disabled = false;
+  if(error){ console.error('[CUIVAN] Error guardando renovación:', error); toast('⚠️ No se pudo guardar: ' + error.message); return; }
+  document.getElementById('modal-ct-renovar').classList.remove('show'); CT.renovando = null;
+  await cargarContratos();
+  toast('✅ Renovación guardada: el contrato ya no está en alerta');
+}
+function ctArchivar(id, activo){
+  const c = CT.contratos.find(x => x.id === id); if(!c) return;
+  const aplicar = async () => {
+    const { error } = await sb.from('contratos').update({ activo }).eq('id', id);
+    if(error){ console.error('[CUIVAN] Error archivando:', error); toast('⚠️ No se pudo actualizar: ' + error.message); return; }
+    CT.drawer = null; await cargarContratos();
+    toast(activo ? '✅ Contrato reactivado' : '📁 Contrato archivado: ya no genera alertas');
+  };
+  if(activo) return aplicar();
+  mostrarConfirm({ titulo: '¿Archivar este contrato?', mensaje: `<b>${esc2(c.nombre)}</b> dejará de generar alertas y de contar como vencido. Seguirá guardado en el filtro “Archivados” y podrás reactivarlo.`, textoConfirmar: 'Archivar', icono: '📁' }, aplicar);
+}
+
+/* ── configuración de las alertas ── */
+function ctCfgLeer(){
+  const a = parseInt(document.getElementById('ct-cfg-d1').value), b = parseInt(document.getElementById('ct-cfg-d2').value);
+  return { a, b, ok: Number.isFinite(a) && Number.isFinite(b) && b >= 1 && a > b && a <= 365 };
+}
+function ctCfgPreview(){
+  const { a, b, ok } = ctCfgLeer();
+  document.getElementById('ct-cfg-err').style.display = ok ? 'none' : 'block';
+  const box = document.getElementById('ct-cfg-prev');
+  if(!ok){ box.textContent = 'Corrige los días para ver la vista previa.'; return; }
+  if(!CT.cargado){ box.textContent = 'Cargando contratos…'; return; }
+  const k = ctConteos({ d1: a, d2: b });
+  box.innerHTML = `<b>Vista previa con ${a} y ${b} días:</b> ${k.v.length} vencidos · ${k.a2.length} en 2ª alerta · ${k.a1.length} en 1ª alerta · ${k.ok.length} vigentes`;
+}
+function ctCfgPintar(){
+  document.getElementById('ct-cfg-d1').value = CT.cfg.d1;
+  document.getElementById('ct-cfg-d2').value = CT.cfg.d2;
+  document.getElementById('ct-cfg-aviso').checked = !!CT.cfg.aviso;
+  ctCfgPreview();
+}
+async function ctCfgCargar(){ if(!window.MI_ROL_ADMIN) return; ctCfgPintar(); await cargarContratos(); ctCfgPintar(); }
+async function ctCfgGuardar(){
+  const { a, b, ok } = ctCfgLeer();
+  if(!ok){ toast('⚠️ Revisa los días: la 2ª alerta debe ser menor que la 1ª'); return; }
+  const aviso = document.getElementById('ct-cfg-aviso').checked;
+  const btn = document.getElementById('btn-ct-cfg-guardar'); btn.disabled = true;
+  const { error } = await sb.from('contratos_config').update({ dias_alerta_1: a, dias_alerta_2: b, aviso_al_entrar: aviso }).eq('id', true);
+  btn.disabled = false;
+  if(error){ console.error('[CUIVAN] Error guardando alertas:', error); toast('⚠️ No se pudo guardar: ' + error.message); return; }
+  CT.cfg = { d1: a, d2: b, aviso }; ctRenderTodo(); ctCfgPreview();
+  toast(`✅ Alertas guardadas: 1ª a ${a} días y 2ª a ${b} días`);
+}
+
+/* ── eventos (una sola vez) ── */
+document.getElementById('btn-contratos-bell').addEventListener('click', (e) => { e.stopPropagation(); CT.bell = !CT.bell; ctRenderHeader(); });
+document.getElementById('ct-dd').addEventListener('click', (e) => {
+  const it = e.target.closest('.it'); if(it){ ctIr(it.dataset.id); return; }
+  if(e.target.closest('.ft')) ctIr('todos');
+});
+document.addEventListener('click', (e) => {
+  if(CT.bell && !e.target.closest('#ct-dd') && !e.target.closest('#btn-contratos-bell')){ CT.bell = false; ctRenderHeader(); }
+});
+document.getElementById('ct-banner').addEventListener('click', (e) => {
+  const v = e.target.closest('[data-ver]'); if(v){ ctIr(v.dataset.ver); return; }
+  if(e.target.closest('[data-cerrar]')){ try { localStorage.setItem('cuivan_ct_aviso', ctIso(ctHoy())); } catch(_) {} ctRenderBanner(); toast('Aviso cerrado por hoy. La campana 🔔 sigue mostrando el conteo.'); }
+});
+document.getElementById('ct-body').addEventListener('click', (e) => {
+  const ren = e.target.closest('[data-ren]'); if(ren){ e.stopPropagation(); ctAbrirRenovar(ren.dataset.ren); return; }
+  const rea = e.target.closest('[data-react]'); if(rea){ e.stopPropagation(); ctArchivar(rea.dataset.react, true); return; }
+  const cat = e.target.closest('[data-cat]'); if(cat){ CT.cat = cat.dataset.cat; ctRenderPantalla(); return; }
+  const row = e.target.closest('tr.row'); if(row){ CT.drawer = row.dataset.id; ctRenderDrawer(); }
+});
+document.getElementById('ct-body').addEventListener('input', (e) => { if(e.target.id === 'ct-q'){ CT.q = e.target.value.toLowerCase(); ctRenderPantalla(); } });
+document.getElementById('ct-drawer').addEventListener('click', (e) => {
+  if(e.target.closest('[data-cerrar-d]')){ CT.drawer = null; ctRenderDrawer(); return; }
+  const at = e.target.closest('[data-at]');
+  if(at){ const c = CT.contratos.find(x => x.id === CT.drawer); const x = c && ctInfo(c); if(x) ctToggleAtendida(x.v.id, at.dataset.at); return; }
+  const ren = e.target.closest('[data-ren]'); if(ren){ ctAbrirRenovar(ren.dataset.ren); return; }
+  const arc = e.target.closest('[data-archivar]'); if(arc){ ctArchivar(arc.dataset.archivar, false); return; }
+  const rea = e.target.closest('[data-react]'); if(rea){ ctArchivar(rea.dataset.react, true); }
+});
+document.getElementById('ct-shade').addEventListener('click', () => { CT.drawer = null; ctRenderDrawer(); });
+document.getElementById('ct-ren-dur').addEventListener('change', ctSyncFin);
+document.getElementById('ct-ren-ini').addEventListener('change', ctSyncFin);
+document.getElementById('btn-ct-ren-cancelar').addEventListener('click', () => { CT.renovando = null; document.getElementById('modal-ct-renovar').classList.remove('show'); });
+document.getElementById('btn-ct-ren-guardar').addEventListener('click', ctGuardarRenovacion);
+document.getElementById('ct-cfg-d1').addEventListener('input', ctCfgPreview);
+document.getElementById('ct-cfg-d2').addEventListener('input', ctCfgPreview);
+document.getElementById('btn-ct-cfg-guardar').addEventListener('click', ctCfgGuardar);
+// si la app queda abierta de un día a otro, al volver a la pestaña se recalculan los días
+document.addEventListener('visibilitychange', () => { if(!document.hidden && CT.cargado) ctRenderTodo(); });
 
 // ── Horario de acceso (solo Recepción se restringe) ──
 async function cargarHorarioAcceso(){
@@ -2856,7 +3322,9 @@ const AUDIT_LABEL = {
   cambiar_correo: '✉️ Cambió el correo de',
   eliminar_personal: '🗑️ Eliminó a',
   eliminar_personal_auth_fallo: '⚠️ Eliminó de personal (falló borrar acceso) a',
-  auditoria_actualizar: '📋 Actualizó el seguimiento de auditoría'
+  auditoria_actualizar: '📋 Actualizó el seguimiento de auditoría',
+  contrato_renovar: '📑 Renovó un contrato:',
+  contratos_config: '🔔 Cambió los días de alerta de contratos'
 };
 async function cargarAuditLog(){
   const cont = document.getElementById('audit-lista');
@@ -3554,6 +4022,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.12-2</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.15-1</div>
 </body>
 </html>
