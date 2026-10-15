@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.15-1"/>
+<meta name="app-version" content="2026.10.15-2"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -530,6 +530,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
   .ct-table tr.r-v{border-left-color:#C0392B}.ct-table tr.r-2{border-left-color:#E5484D}.ct-table tr.r-1{border-left-color:#E0A33A}.ct-table tr.r-ok{border-left-color:var(--teal)}
   .ct-table td,.ct-table td:first-child,.ct-table td:last-child{display:block;border:none;border-bottom:1px solid var(--g1);border-radius:0;padding:4px 0;background:none}
   .ct-table td:last-child{border-bottom:none;padding:6px 0 8px}
+  .ct-table td:empty{display:none}
   .ct-table td::before{content:attr(data-l);display:block;font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4);margin-bottom:0}
   .ct-table td:not([data-l])::before,.ct-table td[data-l="Persona"]::before,.ct-table td[data-l="Avance"]::before,.ct-table td[data-l="Estado"]::before{content:none}
   .ct-table tr.row{padding:4px 12px}
@@ -877,7 +878,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
         <div id="ct-cfg-err" style="display:none;color:#C0392B;font-size:11.5px;font-weight:600;margin-top:8px">La 2ª alerta debe ser menor que la 1ª (ej. 30 y 15 días).</div>
         <label class="cbrow2" style="margin-top:12px"><input type="checkbox" id="ct-cfg-aviso"/><span style="font-weight:600">Mostrar el aviso al iniciar sesión (la campana 🔔 siempre está disponible)</span></label>
         <div class="traza-resumen2" id="ct-cfg-prev" style="margin:12px 0 10px"></div>
-        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin-bottom:10px">Solo los administradores ven estas alertas y la pestaña Contratos.</p>
+        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin-bottom:10px">Los administradores ven y modifican los contratos; otras personas solo pueden verlos si se les da permiso de lectura.</p>
         <button class="appbtn appbtn-p" id="btn-ct-cfg-guardar">Guardar</button>
       </div>
 
@@ -1434,10 +1435,13 @@ function entrarAlShell(perfil){
   window.MI_ROL_ADMIN = perfil.rol === 'admin';
   window.MI_PUEDE_AUDITORIA = perfil.rol === 'admin' || perfil.rol === 'enfermeria' || perfil.permisos?.puede_auditoria === true;
   document.getElementById('nav-auditoria').style.display = window.MI_PUEDE_AUDITORIA ? '' : 'none';
-  // Contratos: SOLO admin (campana, aviso y pestaña). El RLS de la base lo exige también.
-  document.getElementById('nav-contratos').style.display = window.MI_ROL_ADMIN ? '' : 'none';
-  document.getElementById('btn-contratos-bell').style.display = window.MI_ROL_ADMIN ? 'inline-flex' : 'none';
-  if(window.MI_ROL_ADMIN) cargarContratos(); else ctLimpiar();
+  // Contratos: el admin ve y modifica; quien tenga permisos.puede_ver_contratos solo puede VER (sin botones
+  // de modificar). El RLS de la base exige lo mismo: escribir sigue siendo solo del admin.
+  window.MI_EDITA_CONTRATOS = perfil.rol === 'admin';
+  window.MI_VE_CONTRATOS = window.MI_EDITA_CONTRATOS || perfil.permisos?.puede_ver_contratos === true;
+  document.getElementById('nav-contratos').style.display = window.MI_VE_CONTRATOS ? '' : 'none';
+  document.getElementById('btn-contratos-bell').style.display = window.MI_VE_CONTRATOS ? 'inline-flex' : 'none';
+  if(window.MI_VE_CONTRATOS) cargarContratos(); else ctLimpiar();
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
   document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
@@ -2739,7 +2743,7 @@ function ctChip(x){
 }
 
 async function cargarContratos(){
-  if(!window.MI_ROL_ADMIN) return;
+  if(!window.MI_VE_CONTRATOS) return;
   const [rc, rcfg, rat] = await Promise.all([
     sb.from('contratos').select('id, categoria, nombre, puesto, tipo, activo, contrato_periodos(id, numero, duracion, inicio, fin, nota)').order('nombre'),
     sb.from('contratos_config').select('dias_alerta_1, dias_alerta_2, aviso_al_entrar').eq('id', true).maybeSingle(),
@@ -2764,7 +2768,7 @@ function ctLimpiar(){
   document.getElementById('ct-shade').style.display = 'none';
 }
 function ctRenderTodo(){
-  if(!window.MI_ROL_ADMIN) return;
+  if(!window.MI_VE_CONTRATOS) return;
   ctRenderHeader(); ctRenderBanner(); ctRenderPantalla(); ctRenderDrawer();
 }
 
@@ -2831,7 +2835,7 @@ function ctRenderPantalla(){
   const hadFocus = document.activeElement && document.activeElement.id === 'ct-q';
   const pos = hadFocus ? document.activeElement.selectionStart : 0;
   body.innerHTML = `
-    <p class="ct-sub">Se toma el último periodo de cada contrato como el vigente. Alertas a <b>${CT.cfg.d1}</b> y <b>${CT.cfg.d2}</b> días del vencimiento (se cambian en ⚙️ Configuración). Solo visible para administradores.</p>
+    <p class="ct-sub">Se toma el último periodo de cada contrato como el vigente. Alertas a <b>${CT.cfg.d1}</b> y <b>${CT.cfg.d2}</b> días del vencimiento. ${window.MI_EDITA_CONTRATOS ? 'Los días se cambian en ⚙️ Configuración. Los administradores pueden modificar los contratos; quien tenga permiso de lectura solo puede verlos.' : '<b>Modo solo lectura:</b> puedes ver los contratos y las alertas, pero no modificarlos.'}</p>
     <div class="ct-kpis">
       <div class="kpi-tile ct-k-v"><div class="lbl3">Vencidos</div><div class="val">${k.v.length}</div></div>
       <div class="kpi-tile ct-k-2"><div class="lbl3">2ª alerta · ≤ ${CT.cfg.d2} días</div><div class="val">${k.a2.length}</div></div>
@@ -2847,7 +2851,7 @@ function ctRenderPantalla(){
       <td data-l="Periodo vigente" class="ct-nw">${ctFmt(x.ini)} → <b>${ctFmt(x.fin)}</b><small>${esc2(x.v.duracion || '')}</small></td>
       <td data-l="Avance"><div class="ct-bar ct-b-${x.est}"><i style="width:${x.pct}%"></i></div><small>${x.pct}%</small></td>
       <td data-l="Estado">${x.c.activo === false ? '<span class="ct-st ct-st-ok" style="background:#F4F6FB;color:var(--g6);border-color:var(--g2)">Archivado</span>' : ctChip(x)}${x.atendida ? '<span class="ct-ok-tag">✓ atendida</span>' : ''}</td>
-      <td>${x.c.activo === false ? `<button class="appbtn appbtn-s" data-react="${x.c.id}" style="font-size:10.5px;padding:5px 11px">Reactivar</button>` : `<button class="appbtn appbtn-p" data-ren="${x.c.id}" style="font-size:10.5px;padding:5px 11px">Renovar</button>`}</td></tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--g4);background:none;border:none">Sin resultados</td></tr>`}
+      <td>${!window.MI_EDITA_CONTRATOS ? '' : x.c.activo === false ? `<button class="appbtn appbtn-s" data-react="${x.c.id}" style="font-size:10.5px;padding:5px 11px">Reactivar</button>` : `<button class="appbtn appbtn-p" data-ren="${x.c.id}" style="font-size:10.5px;padding:5px 11px">Renovar</button>`}</td></tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--g4);background:none;border:none">Sin resultados</td></tr>`}
     </tbody></table>
     <div class="ct-prox"><h4>🗓️ Próximas alertas</h4>
       ${pr.length ? '<div class="ct-pegrid">' + pr.map(e => `<div class="ct-pe"><div class="d">${String(e.f.getDate()).padStart(2, '0')}/${String(e.f.getMonth() + 1).padStart(2, '0')}<small>${e.f.getFullYear()}</small></div><div><span class="ct-lv ct-lv${e.n}">${e.n}ª alerta</span><b>${esc2(e.x.c.nombre)}</b><small style="display:block;color:var(--g6);font-size:10.5px">vence ${ctFmt(e.x.fin)}</small></div></div>`).join('') + '</div>' : '<div style="font-size:11.5px;color:var(--g4);padding:6px 0">No hay alertas programadas.</div>'}
@@ -2868,7 +2872,7 @@ function ctRenderDrawer(){
   const alRow = (n, f, nivel, dias) => {
     const e = estadoAl(f, nivel);
     return `<div class="ct-al ${e === 'activa' ? 'on' : ''}"><div class="t"><b>${n}ª alerta · ${dias} días antes</b><small>${ctFmt(f)} — ${e === 'pendiente' ? 'todavía no llega' : e === 'atendida' ? '✓ atendida' : 'activa: falta atenderla'}</small></div>
-      ${e !== 'pendiente' ? `<button class="appbtn appbtn-s" data-at="${nivel}" style="font-size:10.5px;padding:5px 11px">${e === 'atendida' ? 'Reabrir' : 'Marcar atendida'}</button>` : ''}</div>`;
+      ${e !== 'pendiente' && window.MI_EDITA_CONTRATOS ? `<button class="appbtn appbtn-s" data-at="${nivel}" style="font-size:10.5px;padding:5px 11px">${e === 'atendida' ? 'Reabrir' : 'Marcar atendida'}</button>` : ''}</div>`;
   };
   const bigTxt = x.est === 'v' ? `<div class="n">−${-x.dias}</div><small>días vencido</small>` : `<div class="n">${x.dias}</div><small>días para el vencimiento (${ctFmt(x.fin)})</small>`;
   const asc = x.ps; // de más antiguo a más reciente
@@ -2879,7 +2883,7 @@ function ctRenderDrawer(){
     <div class="ct-big k-${x.est}">${bigTxt}</div>
     ${c.activo === false ? '' : `<div class="ct-lbl">Alertas de este contrato</div>
     ${alRow(1, a1, '1', CT.cfg.d1)}${alRow(2, a2, '2', CT.cfg.d2)}
-    ${x.est === 'v' ? `<div class="ct-al on"><div class="t"><b>Contrato vencido</b><small>${ctFmt(x.fin)} — sin renovación registrada</small></div><button class="appbtn appbtn-s" data-at="v" style="font-size:10.5px;padding:5px 11px">${CT.atend[x.v.id + '|v'] ? 'Reabrir' : 'Marcar atendida'}</button></div>` : ''}`}
+    ${x.est === 'v' ? `<div class="ct-al on"><div class="t"><b>Contrato vencido</b><small>${ctFmt(x.fin)} — sin renovación registrada</small></div>${window.MI_EDITA_CONTRATOS ? `<button class="appbtn appbtn-s" data-at="v" style="font-size:10.5px;padding:5px 11px">${CT.atend[x.v.id + '|v'] ? 'Reabrir' : 'Marcar atendida'}</button>` : ''}</div>` : ''}`}
     <div class="ct-lbl">Historial de periodos (${asc.length})</div>
     <div class="ct-tl">${asc.slice().reverse().map((p, j) => {
       const orig = asc.length - 1 - j, prev = asc[orig - 1];
@@ -2887,13 +2891,14 @@ function ctRenderDrawer(){
       return `<div class="p ${j === 0 ? 'cur' : ''}"><b>${esc2(p.duracion || '')}</b> ${j === 0 ? '· vigente' : ''}<small>${ctFmtIso(p.inicio)} → ${ctFmtIso(p.fin)}${p.nota ? ' · ' + esc2(p.nota) : ''}</small>${dup ? '<span class="ct-warn">⚠ Empieza el mismo día que el periodo anterior — revisar</span>' : ''}</div>`;
     }).join('')}</div>
     <div class="ct-foot">
-      ${c.activo === false ? `<button class="appbtn appbtn-s" data-react="${c.id}">Reactivar</button>` : `<button class="appbtn appbtn-danger-soft" data-archivar="${c.id}">Archivar (no se renueva)</button><button class="appbtn appbtn-p" data-ren="${c.id}">Registrar renovación</button>`}
+      ${!window.MI_EDITA_CONTRATOS ? '<button class="appbtn appbtn-s" data-cerrar-d="1">Cerrar</button>' : c.activo === false ? `<button class="appbtn appbtn-s" data-react="${c.id}">Reactivar</button>` : `<button class="appbtn appbtn-danger-soft" data-archivar="${c.id}">Archivar (no se renueva)</button><button class="appbtn appbtn-p" data-ren="${c.id}">Registrar renovación</button>`}
     </div>`;
   d.style.display = 'block'; sh.style.display = 'block';
 }
 
 /* ── acciones ── */
 async function ctToggleAtendida(periodoId, nivel){
+  if(!window.MI_EDITA_CONTRATOS) return;
   const key = periodoId + '|' + nivel;
   if(CT.atend[key]){
     const { error } = await sb.from('contratos_atenciones').delete().eq('periodo_id', periodoId).eq('nivel', nivel);
@@ -2907,6 +2912,7 @@ async function ctToggleAtendida(periodoId, nivel){
   ctRenderTodo();
 }
 function ctAbrirRenovar(id){
+  if(!window.MI_EDITA_CONTRATOS) return;
   const c = CT.contratos.find(x => x.id === id); const x = c && ctInfo(c);
   if(!x) return;
   CT.renovando = id;
@@ -2922,6 +2928,7 @@ function ctSyncFin(){
   if(ini) document.getElementById('ct-ren-fin').value = ctIso(ctAddMonths(ctDate(ini), n));
 }
 async function ctGuardarRenovacion(){
+  if(!window.MI_EDITA_CONTRATOS) return;
   const c = CT.contratos.find(x => x.id === CT.renovando); const x = c && ctInfo(c);
   if(!x) return;
   const label = document.getElementById('ct-ren-dur').value.split('|')[1];
@@ -2939,6 +2946,7 @@ async function ctGuardarRenovacion(){
   toast('✅ Renovación guardada: el contrato ya no está en alerta');
 }
 function ctArchivar(id, activo){
+  if(!window.MI_EDITA_CONTRATOS) return;
   const c = CT.contratos.find(x => x.id === id); if(!c) return;
   const aplicar = async () => {
     const { error } = await sb.from('contratos').update({ activo }).eq('id', id);
@@ -4022,6 +4030,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.15-1</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.15-2</div>
 </body>
 </html>
