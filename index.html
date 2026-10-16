@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.15-2"/>
+<meta name="app-version" content="2026.10.16-1"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -536,6 +536,102 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
   .ct-table tr.row{padding:4px 12px}
 }
 @media (max-width:560px){.ct-kpis{grid-template-columns:1fr}.ct-two{grid-template-columns:1fr}}
+/* ══════════ GASTOS + DASHBOARD · estilo Skin Fabric ══════════ */
+.sk-hero{margin:-20px -22px 16px;padding:18px 22px 16px;color:#fff;position:relative;background:radial-gradient(120% 160% at 100% 0%,#2a5fb0 0%,rgba(42,95,176,0) 55%),linear-gradient(135deg,#0B1628 0%,#1B3A6B 100%)}
+.sk-hero-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sk-hero-ico{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#2ABFBF,#1c9a9a);display:grid;place-items:center;font-size:23px;box-shadow:0 6px 16px rgba(42,191,191,.4);flex:none}
+.sk-hero h1{font:800 30px/1 var(--font-d);letter-spacing:-.5px;color:#fff;margin:0}
+.sk-hero p{font-size:12px;color:rgba(255,255,255,.72);margin-top:3px}
+.sk-hero p b{color:#fff}
+.sk-per{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.sk-seg{display:flex;background:rgba(255,255,255,.12);border-radius:10px;padding:3px;gap:2px}
+.sk-seg button{border:0;background:none;color:rgba(255,255,255,.78);font:700 11.5px var(--font-b);padding:7px 13px;border-radius:8px;cursor:pointer}
+.sk-seg button.on{background:#fff;color:var(--navy)}
+.sk-per select,.sk-per input{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;padding:7px 10px;font:600 12px var(--font-b);color-scheme:dark;outline:none}
+.sk-per select option{color:#0B1628;background:#fff}
+.sk-arr{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.1);color:#fff;border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer;line-height:1}
+.sk-per .sk-g{display:none;align-items:center;gap:6px;color:rgba(255,255,255,.75);font-size:12px}
+.sk-per[data-modo="mes"] .sk-g-mes,.sk-per[data-modo="rango"] .sk-g-rango,.sk-per[data-modo="rec"] .sk-g-rec{display:inline-flex}
+.sk-nota{font-size:11px;color:#9A6010;background:#FDF6EC;border:1px solid #EDD49A;border-radius:9px;padding:8px 12px;margin-bottom:10px;line-height:1.5}
+.sk-fin{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.sk-fcard{background:#fff;border:1.5px solid var(--g2);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:10px;min-width:0}
+.sk-fcard .bd{flex:1;min-width:0}
+.sk-fcard .lb{font-size:9px;font-weight:700;letter-spacing:.4px;color:var(--g6);text-transform:uppercase}
+.sk-fcard .vv{font:800 22px/1.15 var(--font-d);white-space:nowrap;font-variant-numeric:tabular-nums;margin-top:2px}
+.sk-fcard .sb{font-size:10.5px;color:var(--g6);margin-top:2px}.sk-fcard .sb b{font-weight:800}
+.sk-fcard .sp{width:92px;height:40px;flex:none}.sk-fcard .sp svg{width:100%;height:100%;display:block;overflow:visible}
+.sk-fcard.i .vv,.sk-fcard.i .sp{color:#3B5B94}
+.sk-fcard.g .vv{color:#B8481F}.sk-fcard.g .sp{color:#E0703F}.sk-fcard.g .sb b{color:#B8481F}
+.sk-fcard.m .vv,.sk-fcard.m .sp{color:#0B1628}.sk-fcard.m.neg .vv{color:#C0392B}
+.sk-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.sk-sec{background:#fff;border-radius:11px;padding:14px 16px 16px;border:1px solid var(--g2);margin-bottom:10px;min-width:0}
+.sk-sh{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+.sk-st{font-family:var(--font-d);font-size:13.5px;font-weight:800;color:var(--navy)}
+.sk-sp{font-size:9.5px;color:var(--g6);background:var(--g1);border-radius:6px;padding:3px 8px;font-weight:700;white-space:nowrap}
+.sk-ss{font-size:10.5px;color:var(--g6);margin:2px 0 12px}
+.sk-segbar{display:flex;height:13px;border-radius:7px;overflow:hidden;margin:10px 0 14px;background:var(--g1)}
+.sk-segbar i{display:block;height:100%}
+.sk-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.sk-tile{border:1.5px solid var(--g2);border-radius:9px;padding:9px 10px;min-width:0}
+.sk-tile .nm{font-size:9.5px;font-weight:700;color:var(--g6);display:flex;align-items:center}
+.sk-tile .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;flex:none}
+.sk-tile .am{font:800 14px var(--font-d);color:var(--navy);margin-top:4px;font-variant-numeric:tabular-nums}
+.sk-tile .pc{font-size:9.5px;color:var(--g6);font-weight:600}
+.sk-gx{display:grid}
+.sk-gxr{display:grid;grid-template-columns:118px minmax(0,1fr) auto 48px;gap:8px;align-items:center;padding:4px 0;font-size:11.5px}
+.sk-gxr .tr{height:10px;border-radius:6px;background:var(--g1);overflow:hidden}.sk-gxr .tr i{display:block;height:100%;border-radius:6px;background:#E0703F}
+.sk-gxr b{font-family:var(--font-d);font-size:12px;color:#B8481F;text-align:right;white-space:nowrap}.sk-gxr small{color:var(--g6);font-size:10px;text-align:right}
+.sk-tog{display:flex;background:var(--g1);border-radius:8px;padding:3px;gap:3px}
+.sk-tog button{font-size:10px;padding:5px 10px;border-radius:6px;border:none;cursor:pointer;font-family:var(--font-b);font-weight:700}
+.sk-tog button.on{background:linear-gradient(135deg,var(--teal),#22a8a8);color:var(--navy)}.sk-tog button.off{background:var(--navy2);color:#fff}
+.sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.sk-grid.wide{grid-template-columns:1.3fr 1fr}
+.sk-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:var(--g6);margin-top:6px}.sk-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+.sk-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.sk-filters input{flex:2;min-width:150px}.sk-filters select{flex:1;min-width:150px}
+.sk-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.sk-pill{border:1px solid var(--g2);background:#fff;color:var(--g6);padding:6px 13px;border-radius:20px;font:600 11.5px var(--font-b);cursor:pointer;user-select:none}
+.sk-pill.act{background:var(--teal-soft);border-color:rgba(42,191,191,.5);color:#0B6E6E;font-weight:700}
+.sk-split{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start;margin-bottom:14px}
+.sk-form{background:#fff;border:1.5px solid var(--g2);border-radius:12px;padding:14px 16px}
+.sk-form h4{font:800 14px var(--font-d);margin-bottom:12px}
+.sk-fg{margin-bottom:11px}.sk-fg label.lb{display:block;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--g6);margin-bottom:4px}
+.sk-fg textarea.app-input{resize:vertical;min-height:54px;font-family:var(--font-b)}
+.sk-hint{display:none;font-size:10.5px;color:var(--g6);background:var(--g1);border-radius:7px;padding:6px 9px;margin-top:5px;line-height:1.45}.sk-hint.show{display:block}
+.sk-fact{display:flex;flex-direction:column;gap:6px}
+.sk-fchip{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;border:1.5px solid var(--g2);background:#fff;font-size:11.5px;font-weight:600;color:var(--g6);cursor:pointer;transition:.15s;position:relative}
+.sk-fchip input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.sk-fchip .rdot{display:inline-block;width:15px;height:15px;border-radius:50%;border:1.5px solid var(--g4);flex:none;position:relative;background:#fff}
+.sk-fchip.on{background:var(--teal-soft);border-color:rgba(42,191,191,.45);color:#0B6E6E}.sk-fchip.on .rdot{border-color:var(--teal)}
+.sk-fchip.on .rdot::after{content:'';position:absolute;top:50%;left:50%;width:7px;height:7px;border-radius:50%;background:var(--teal);transform:translate(-50%,-50%)}
+.sk-donut{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.sk-donut .cv{width:150px;height:150px;position:relative;flex:none}
+.sk-legend{display:grid;gap:5px;font-size:11px;color:var(--navy)}.sk-legend div{display:flex;align-items:center;gap:6px}.sk-legend i{width:9px;height:9px;border-radius:50%;flex:none}
+.sk-catinfo{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.sk-ci{border-radius:10px;padding:11px 12px;border:1px solid var(--g2);min-width:0}.sk-ci .t{font-size:11px;font-weight:800;margin-bottom:3px}.sk-ci .d{font-size:10px;color:var(--g6);line-height:1.45}
+.sk-bdg{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.sk-fb{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.sk-fb.si{background:#EAF7EE;color:#2E7D4F;border:1px solid #A8D8B4}.sk-fb.no{background:var(--g1);color:var(--g6);border:1px solid var(--g2)}
+.sk-tw{overflow-x:auto}
+.sk-table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:11.5px}
+.sk-table th{text-align:left;padding:0 10px 4px;color:var(--g4);font-size:9px;letter-spacing:.6px;text-transform:uppercase;font-weight:800;white-space:nowrap}
+.sk-table td{padding:10px;background:#fff;border-top:1px solid var(--g1);border-bottom:1px solid var(--g1);vertical-align:middle}
+.sk-table td:first-child{border-left:3px solid var(--teal);border-radius:9px 0 0 9px}.sk-table td:last-child{border-right:1px solid var(--g1);border-radius:0 9px 9px 0}
+.sk-table .mo{font:800 12.5px var(--font-d);color:#B8481F;white-space:nowrap}.sk-table .au{color:var(--g6);font-size:10.5px}
+.sk-empty{font-size:12px;color:var(--g4);padding:14px 4px}
+.sk-xh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 8px}
+@media (max-width:860px){
+  .sk-fin{grid-template-columns:1fr}.sk-grid,.sk-grid.wide{grid-template-columns:1fr}.sk-split{grid-template-columns:1fr}.sk-catinfo{grid-template-columns:1fr 1fr}
+  .sk-hero h1{font-size:24px}.sk-gxr{grid-template-columns:96px minmax(0,1fr) auto 42px}
+  .sk-table,.sk-table thead,.sk-table tbody{display:block}.sk-table thead{display:none}
+  .sk-table tr{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;background:#fff;border-radius:10px;border-left:3px solid var(--teal);padding:6px 12px 8px;margin-bottom:8px;box-shadow:0 1px 3px rgba(11,22,40,.08)}
+  .sk-table td,.sk-table td:first-child,.sk-table td:last-child{display:block;border:none;border-radius:0;padding:4px 0;background:none;min-width:0}
+  .sk-table td:nth-child(1){order:1}.sk-table td:nth-child(3){order:2}.sk-table td:nth-child(2){order:3}.sk-table td:nth-child(4){order:4}
+  .sk-table td:nth-child(7){order:5;grid-column:1/-1;border-top:1px solid var(--g1);margin-top:4px;padding-top:6px}
+  .sk-table td:nth-child(5){order:6}.sk-table td:nth-child(6){order:7}
+  .sk-table td:nth-child(8){order:8;grid-column:1/-1;padding:6px 0 0}.sk-table td:empty{display:none}
+  .sk-table td::before{content:attr(data-l);display:block;font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4)}
+  .sk-table td:not([data-l])::before{content:none}
+}
+@media (max-width:560px){.sk-catinfo{grid-template-columns:1fr}.sk-per{gap:6px}.sk-seg button{padding:7px 10px}}
+#dash-kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}
 </style>
 </head>
 <body>
@@ -571,6 +667,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       <button data-screen2="prm"><span>💬</span>PRM / CRM</button>
       <button data-screen2="auditoria" id="nav-auditoria" style="display:none"><span>📋</span>Auditoría</button>
       <button data-screen2="contratos" id="nav-contratos" style="display:none"><span>📑</span>Contratos</button>
+      <button data-screen2="gastos" id="nav-gastos" style="display:none"><span>💸</span>Gastos</button>
     </div>
   </div>
 
@@ -728,43 +825,64 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
 
     <!-- ══ DASHBOARD ══ -->
     <div class="card screen2" id="app-screen-dash">
-      <div class="tab-title">📊 Dashboard de Indicadores</div>
+      <div class="sk-hero">
+        <div class="sk-hero-top">
+          <div class="sk-hero-ico">📊</div>
+          <div><h1>Dashboard</h1><p>Indicadores de la clínica · <b id="dash-hero-per">—</b></p></div>
+        </div>
+        <div class="sk-per" id="dash-per" data-modo="mes">
+          <div class="sk-seg" id="dash-seg" role="tablist" aria-label="Periodo">
+            <button type="button" data-m="rec">Recientes</button><button type="button" data-m="mes" class="on">Mes</button><button type="button" data-m="rango">Rango</button><button type="button" data-m="todo">Todo</button>
+          </div>
+          <span class="sk-g sk-g-rec"><select id="dash-rec" aria-label="Periodo reciente"><option value="30">Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="365">Últimos 12 meses</option></select></span>
+          <span class="sk-g sk-g-mes"><button type="button" class="sk-arr" id="dash-prev" aria-label="Mes anterior">‹</button><input type="month" id="dash-mes" aria-label="Mes"/><button type="button" class="sk-arr" id="dash-next" aria-label="Mes siguiente">›</button></span>
+          <span class="sk-g sk-g-rango"><input type="date" id="dash-desde" aria-label="Desde"/><span>a</span><input type="date" id="dash-hasta" aria-label="Hasta"/></span>
+        </div>
+      </div>
       <div class="filt2">
-        <select class="app-input" id="dash-periodo" style="background:#fff">
-          <option value="30" selected>Últimos 30 días</option>
-          <option value="90">Últimos 90 días</option>
-          <option value="365">Este año</option>
-          <option value="0">Todo</option>
-        </select>
-        <select class="app-input" id="dash-doctor-filtro" style="background:#fff">
-          <option value="">Todos los doctores</option>
-        </select>
+        <select class="app-input" id="dash-doctor-filtro" style="background:#fff"><option value="">Todos los doctores</option></select>
         <select class="app-input" id="dash-motivo-filtro" style="background:#fff">
           <option value="">Todos los motivos</option>
           <option>Consulta</option><option>Procedimientos</option><option>Vacunas</option>
           <option>Producto Farmacia</option><option>Otro</option>
         </select>
-        <select class="app-input" id="dash-tipo-filtro" style="background:#fff">
-          <option value="">Todos los tipos</option>
-        </select>
+        <select class="app-input" id="dash-tipo-filtro" style="background:#fff"><option value="">Todos los tipos</option></select>
       </div>
-      <div class="dash-kpi-row" id="dash-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px"></div>
-      <div class="dash-chart-row1" style="display:grid;grid-template-columns:1.3fr 1fr;gap:10px;margin-bottom:10px">
-        <div class="fac2">
-          <div class="lbl2" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
-            <span>📈 Tendencia de ingresos</span>
-            <span style="display:flex;background:var(--g1);border-radius:8px;padding:3px;gap:3px">
-              <button type="button" class="appbtn appbtn-p" id="btn-dash-tend-dia" style="font-size:10px;padding:5px 10px">Día</button>
-              <button type="button" class="appbtn appbtn-s" id="btn-dash-tend-mes" style="font-size:10px;padding:5px 10px">Mes</button>
-            </span>
-          </div>
-          <div style="height:170px"><canvas id="ch-dash-trend"></canvas></div>
+      <div class="sk-nota" id="dash-fin-nota" style="display:none">💸 El gasto es general de CUIVAN, por eso el gasto y el margen se muestran sin filtros de doctor, motivo o tipo. Quita los filtros para verlos.</div>
+      <div class="sk-fin" id="dash-fin" style="display:none">
+        <div class="sk-fcard i"><div class="bd"><div class="lb">Ingreso total</div><div class="vv" id="fin-ing-v">$0</div><div class="sb" id="fin-ing-s"></div></div><div class="sp" id="fin-ing-sp"></div></div>
+        <div class="sk-fcard g"><div class="bd"><div class="lb">Gasto total</div><div class="vv" id="fin-gas-v">$0</div><div class="sb" id="fin-gas-s"></div></div><div class="sp" id="fin-gas-sp"></div></div>
+        <div class="sk-fcard m" id="fin-mar-card"><div class="bd"><div class="lb">Margen</div><div class="vv" id="fin-mar-v">$0</div><div class="sb" id="fin-mar-s"></div></div><div class="sp" id="fin-mar-sp"></div></div>
+      </div>
+      <div class="sk-kpis" id="dash-kpis"></div>
+      <div class="sk-sec" id="dash-cats">
+        <div class="sk-sh"><div class="sk-st">🧾 Ingresos por categoría</div><div class="sk-sp" id="dash-cats-per">—</div></div>
+        <div class="sk-ss">Todo el ingreso del periodo, según el motivo de la consulta</div>
+        <div class="sk-segbar" id="dash-cats-bar"></div>
+        <div class="sk-tiles" id="dash-cats-tiles"></div>
+      </div>
+      <div class="sk-sec" id="dash-ig-card" style="display:none">
+        <div class="sk-sh"><div class="sk-st">⚖️ Ingreso vs gasto</div>
+          <span class="sk-tog"><button id="dash-ig-dia" class="on" type="button">Día</button><button id="dash-ig-mes" class="off" type="button">Mes</button></span></div>
+        <div style="height:220px;margin-top:8px"><canvas id="ch-dash-ig"></canvas></div>
+        <div class="sk-leg"><span><i style="background:#3B5B94"></i>Ingreso</span><span><i style="background:#E0703F"></i>Gasto</span><span><i style="background:#0B1628"></i>Margen acumulado</span></div>
+      </div>
+      <div class="sk-sec" id="dash-gasto" style="display:none">
+        <div class="sk-sh"><div class="sk-st">💸 Gasto por categoría</div><div class="sk-sp" id="dash-gasto-per">—</div></div>
+        <div class="sk-ss" id="dash-gasto-sub">Gastos generales de CUIVAN</div>
+        <div class="sk-gx" id="dash-gasto-bars"></div>
+      </div>
+      <div class="sk-grid wide">
+        <div class="sk-sec">
+          <div class="sk-sh"><div class="sk-st">📈 Tendencia de ingresos</div>
+            <span class="sk-tog"><button id="dash-tend-dia" class="on" type="button">Día</button><button id="dash-tend-mes" class="off" type="button">Mes</button></span></div>
+          <div style="height:190px;margin-top:8px"><canvas id="ch-dash-trend"></canvas></div>
         </div>
-        <div class="fac2"><div class="lbl2" style="margin-bottom:8px">🩺 Ingreso por doctor</div><div style="height:170px"><canvas id="ch-dash-doc"></canvas></div></div>
+        <div class="sk-sec"><div class="sk-sh"><div class="sk-st">🩺 Ingreso por doctor</div></div><div style="height:190px;margin-top:8px"><canvas id="ch-dash-doc"></canvas></div></div>
       </div>
-      <div class="dash-chart-row2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="fac2"><div class="lbl2" style="margin-bottom:8px">💳 Medios de pago</div><div style="height:190px"><canvas id="ch-dash-pago"></canvas></div></div>
-        <div class="fac2"><div class="lbl2" style="margin-bottom:8px">📋 Ingreso por tipo de consulta</div><div style="height:190px"><canvas id="ch-dash-tipo"></canvas></div></div>
+      <div class="sk-grid">
+        <div class="sk-sec"><div class="sk-sh"><div class="sk-st">💳 Medios de pago</div></div><div style="height:210px;margin-top:8px"><canvas id="ch-dash-pago"></canvas></div></div>
+        <div class="sk-sec"><div class="sk-sh"><div class="sk-st">📋 Ingreso por tipo de consulta</div></div><div style="height:210px;margin-top:8px"><canvas id="ch-dash-tipo"></canvas></div></div>
       </div>
     </div>
 
@@ -809,6 +927,63 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
     </div>
 
     <!-- ══ PERSONAL ══ -->
+    <div class="card screen2" id="app-screen-gastos">
+      <div class="sk-hero">
+        <div class="sk-hero-top">
+          <div class="sk-hero-ico">💸</div>
+          <div><h1>Gastos</h1><p>Egresos de CUIVAN · <b id="gasto-hero-per">—</b></p></div>
+        </div>
+        <div class="sk-per" id="gasto-per" data-modo="mes">
+          <div class="sk-seg" id="gasto-seg" role="tablist" aria-label="Periodo">
+            <button type="button" data-m="mes" class="on">Mes</button><button type="button" data-m="rango">Rango</button><button type="button" data-m="todo">Todo</button>
+          </div>
+          <span class="sk-g sk-g-mes"><button type="button" class="sk-arr" id="gasto-prev" aria-label="Mes anterior">‹</button><input type="month" id="gasto-mes" aria-label="Mes"/><button type="button" class="sk-arr" id="gasto-next" aria-label="Mes siguiente">›</button></span>
+          <span class="sk-g sk-g-rango"><input type="date" id="gasto-desde" aria-label="Desde"/><span>a</span><input type="date" id="gasto-hasta" aria-label="Hasta"/></span>
+        </div>
+      </div>
+      <div class="sk-filters">
+        <input class="app-input" type="text" id="gasto-buscar" placeholder="Buscar en descripciones…"/>
+        <select class="app-input" id="gasto-fact-filtro" style="background:#fff">
+          <option value="">Facturado y no facturado</option><option value="si">Facturado</option><option value="no">No facturado</option>
+        </select>
+      </div>
+      <div class="sk-pills" id="gasto-pills"></div>
+      <div class="sk-split">
+        <div class="sk-form" id="gasto-form">
+          <h4>➕ Registrar gasto</h4>
+          <div class="sk-fg"><label class="lb" for="gasto-fecha">Fecha del gasto</label><input class="app-input" type="date" id="gasto-fecha"/></div>
+          <div class="sk-fg"><label class="lb" for="gasto-categoria">Categoría</label><select class="app-input" id="gasto-categoria" style="background:#fff"><option value="">Seleccionar…</option></select><div id="gasto-hints"></div></div>
+          <div class="sk-fg"><label class="lb" for="gasto-monto">Monto ($)</label><input class="app-input" type="number" id="gasto-monto" min="0.01" step="0.01" placeholder="0.00" inputmode="decimal"/></div>
+          <div class="sk-fg"><label class="lb" for="gasto-descripcion">Descripción del gasto</label><textarea class="app-input" id="gasto-descripcion" rows="2" placeholder="¿En qué se gastó?"></textarea></div>
+          <div class="sk-fg"><label class="lb">Facturación</label>
+            <div class="sk-fact" id="gasto-fact">
+              <label class="sk-fchip on"><input type="radio" name="gasto-fact" value="no" checked/><span class="rdot"></span><span>No facturado</span></label>
+              <label class="sk-fchip"><input type="radio" name="gasto-fact" value="si"/><span class="rdot"></span><span>Facturado</span></label>
+            </div>
+          </div>
+          <button class="appbtn appbtn-p" id="gasto-btn-guardar" type="button" style="width:100%;justify-content:center">✓ Guardar gasto</button>
+        </div>
+        <div style="min-width:0">
+          <div class="sk-kpis" id="gasto-kpis"></div>
+          <div class="sk-grid">
+            <div class="sk-sec"><div class="sk-sh"><div class="sk-st">🍩 Por categoría</div></div>
+              <div class="sk-donut"><div class="cv"><canvas id="ch-gasto-cat"></canvas></div><div class="sk-legend" id="gasto-legend"></div></div></div>
+            <div class="sk-sec"><div class="sk-sh"><div class="sk-st" id="gasto-serie-t">📅 Por día</div></div><div style="height:160px;margin-top:8px"><canvas id="ch-gasto-serie"></canvas></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sk-xh"><div class="sk-st">Todos los gastos</div><button class="appbtn appbtn-s" id="gasto-btn-exportar" type="button" style="font-size:11px;padding:6px 12px">↓ Exportar Excel</button></div>
+      <div class="sk-tw">
+        <table class="sk-table">
+          <thead><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Facturación</th><th>Agregado por</th><th>Registrado el</th><th>Descripción</th><th></th></tr></thead>
+          <tbody id="gasto-tbody"></tbody>
+        </table>
+        <div class="sk-empty" id="gasto-empty" style="display:none">Sin gastos para este filtro.</div>
+      </div>
+      <div class="sk-st" style="margin:16px 0 8px">¿Qué incluye cada categoría?</div>
+      <div class="sk-catinfo" id="gasto-cat-info"></div>
+    </div>
+
     <div class="card screen2" id="app-screen-contratos">
       <div class="tab-title">📑 Contratos</div>
       <div id="ct-body"><div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div></div>
@@ -889,6 +1064,25 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
 
   <div class="ct-shade" id="ct-shade"></div>
   <div class="ct-drawer" id="ct-drawer"></div>
+  <div class="modal-overlay2" id="modal-editar-gasto">
+    <div class="modal2" style="max-width:440px">
+      <h3>✏️ Editar gasto</h3>
+      <div class="sk-fg" style="margin-top:12px"><label class="lb">Fecha del gasto</label><input class="app-input" type="date" id="editg-fecha"/></div>
+      <div class="sk-fg"><label class="lb">Categoría</label><select class="app-input" id="editg-categoria" style="background:#fff"></select></div>
+      <div class="sk-fg"><label class="lb">Monto ($)</label><input class="app-input" type="number" id="editg-monto" min="0.01" step="0.01" inputmode="decimal"/></div>
+      <div class="sk-fg"><label class="lb">Descripción del gasto</label><textarea class="app-input" id="editg-descripcion" rows="2"></textarea></div>
+      <div class="sk-fg"><label class="lb">Facturación</label>
+        <div class="sk-fact" id="editg-fact">
+          <label class="sk-fchip"><input type="radio" name="editg-fact" value="no"/><span class="rdot"></span><span>No facturado</span></label>
+          <label class="sk-fchip"><input type="radio" name="editg-fact" value="si"/><span class="rdot"></span><span>Facturado</span></label>
+        </div>
+      </div>
+      <div class="modal-footer2" style="gap:8px">
+        <button class="appbtn appbtn-s" id="editg-btn-cancelar" type="button">Cancelar</button>
+        <button class="appbtn appbtn-p" id="editg-btn-guardar" type="button">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
   <div class="modal-overlay2" id="modal-ct-renovar">
     <div class="modal2" style="max-width:420px">
       <h3>Registrar renovación</h3>
@@ -1442,6 +1636,9 @@ function entrarAlShell(perfil){
   document.getElementById('nav-contratos').style.display = window.MI_VE_CONTRATOS ? '' : 'none';
   document.getElementById('btn-contratos-bell').style.display = window.MI_VE_CONTRATOS ? 'inline-flex' : 'none';
   if(window.MI_VE_CONTRATOS) cargarContratos(); else ctLimpiar();
+  // Gastos: admin + quien tenga permisos.puede_ver_gastos (registrar/ver); editar y eliminar: admin o quien lo registró
+  window.MI_VE_GASTOS = perfil.rol === 'admin' || perfil.permisos?.puede_ver_gastos === true;
+  document.getElementById('nav-gastos').style.display = window.MI_VE_GASTOS ? '' : 'none';
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
   document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
@@ -1548,6 +1745,7 @@ document.getElementById('app-nav').addEventListener('click',(e)=>{
   if(b.dataset.screen2 === 'prm') cargarPRM();
   if(b.dataset.screen2 === 'auditoria') cargarAuditoria();
   if(b.dataset.screen2 === 'contratos') cargarContratos();
+  if(b.dataset.screen2 === 'gastos') cargarGastos();
 });
 
 document.getElementById('btn-logout').addEventListener('click', async ()=>{
@@ -2427,6 +2625,7 @@ async function cargarPersonal(){
     </div>
     <div class="p-permiso-row" data-permiso-id="${p.id}" style="padding:4px 0 10px;margin-top:-4px;border-bottom:1px solid var(--g1);display:flex;gap:16px;flex-wrap:wrap">
       <label class="cbrow2" style="font-size:11px"><input type="checkbox" class="p-permiso-exportar" ${p.permisos?.puede_exportar !== false ? 'checked':''}/><span style="font-weight:600;color:var(--g6)">⬇️ Puede exportar/descargar el Historial</span></label>
+      ${p.rol !== 'admin' ? `<label class="cbrow2" style="font-size:11px"><input type="checkbox" class="p-permiso-gastos" ${p.permisos?.puede_ver_gastos === true ? 'checked':''}/><span style="font-weight:600;color:var(--g6)">💸 Puede ver y registrar Gastos</span></label>` : ''}
       ${p.rol === 'admin' ? `<label class="cbrow2" style="font-size:11px"><input type="checkbox" class="p-permiso-papelera" ${p.permisos?.puede_eliminar_papelera !== false ? 'checked':''}/><span style="font-weight:600;color:var(--g6)">🗑️ Puede vaciar/eliminar registros de la Papelera</span></label>` : ''}
     </div>
   `).join('') || '<div style="color:var(--g4);font-size:12px;padding:8px 0">Sin usuarios con acceso todavía.</div>';
@@ -2456,6 +2655,12 @@ async function cargarPersonal(){
     if(error){ console.error('[CUIVAN] Error actualizando permiso:', error); toast('⚠️ No se pudo guardar el permiso'); checkboxEl.checked = !checkboxEl.checked; return; }
     toast('✅ Permiso actualizado');
   }
+  contAcceso.querySelectorAll('.p-permiso-gastos').forEach(cb=>{
+    cb.addEventListener('change', (e)=>{
+      const id = e.target.closest('.p-permiso-row').dataset.permisoId;
+      actualizarPermiso(id, 'puede_ver_gastos', e.target.checked, e.target);
+    });
+  });
   contAcceso.querySelectorAll('.p-permiso-papelera').forEach(cb=>{
     cb.addEventListener('change', (e)=>{
       const id = e.target.closest('.p-permiso-row').dataset.permisoId;
@@ -3332,7 +3537,10 @@ const AUDIT_LABEL = {
   eliminar_personal_auth_fallo: '⚠️ Eliminó de personal (falló borrar acceso) a',
   auditoria_actualizar: '📋 Actualizó el seguimiento de auditoría',
   contrato_renovar: '📑 Renovó un contrato:',
-  contratos_config: '🔔 Cambió los días de alerta de contratos'
+  contratos_config: '🔔 Cambió los días de alerta de contratos',
+  gasto_registrar: '💸 Registró un gasto',
+  gasto_editar: '✏️ Editó un gasto',
+  gasto_eliminar: '🗑️ Eliminó un gasto'
 };
 async function cargarAuditLog(){
   const cont = document.getElementById('audit-lista');
@@ -3566,142 +3774,540 @@ document.getElementById('cierre-month-picker').addEventListener('change', (e)=>{
 document.getElementById('cierre-doctor-filtro').addEventListener('change', cargarCierre);
 
 // ═══════════════════════════════════════════════════════════
-// DASHBOARD
+// GASTOS — egresos generales de CUIVAN (sin doctor asociado).
+// Ven y registran: admin + quien tenga permisos.puede_ver_gastos. Editan/eliminan: admin o quien lo registró.
+// El RLS de la base exige exactamente las mismas reglas.
+// ═══════════════════════════════════════════════════════════
+// Etiquetas con montos/porcentajes en las gráficas: el plugin hay que REGISTRARLO (igual que en Skin Fabric); sin esto Chart.js ignora sus opciones.
+try { if(window.Chart && window.ChartDataLabels) Chart.register(ChartDataLabels); } catch(e){ console.error('[CUIVAN] Error registrando chartjs-plugin-datalabels:', e); }
+const SK_MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const skMoney = v => '$' + Number(v || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const skMoney0 = v => '$' + Math.round(Number(v || 0)).toLocaleString('es-MX');
+const skMoneyS = v => (v < 0 ? '−' : '') + skMoney0(Math.abs(v));
+const skPct = v => (v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + '%';
+const skK = v => (v < 0 ? '−' : '') + '$' + Math.abs(Number(v) / 1000).toLocaleString('es-MX') + 'k';
+function skFechaHora(ts){
+  if(!ts) return '—';
+  const d = new Date(ts);
+  return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+// Mini-gráfica (SVG, usa el color del contenedor)
+function skSpark(vals){
+  if(vals.length < 2) return '';
+  const W = 92, H = 40, p = 3;
+  const mn = Math.min(...vals), mx = Math.max(...vals), r = (mx - mn) || 1;
+  const pts = vals.map((v, i) => [p + i * (W - 2*p) / (vals.length - 1), H - p - (v - mn) / r * (H - 2*p)]);
+  const d = pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+  const l = pts[pts.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}"><path d="${d} L${l[0].toFixed(1)} ${H} L${p} ${H}Z" fill="currentColor" opacity=".10"/><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${l[0].toFixed(1)}" cy="${l[1].toFixed(1)}" r="2.4" fill="currentColor"/></svg>`;
+}
+
+const GST_CATS = [
+  { id:'locativos',        label:'🏢 Locativos',        color:'#1B5C9E', desc:'Renta, agua, luz, internet, mantenimiento y limpieza del local.' },
+  { id:'nominas',          label:'👥 Nóminas',          color:'#6A3691', desc:'Sueldos, comisiones y prestaciones del personal.' },
+  { id:'insumos_medicos',  label:'🧴 Insumos médicos',  color:'#2E7D4F', desc:'Material clínico usado en consultas y procedimientos (guantes, jeringas, material de curación, etc.).' },
+  { id:'farmacia',         label:'💊 Farmacia',         color:'#9A6010', desc:'Medicamentos y productos recetados o entregados al paciente.' },
+  { id:'papeleria',        label:'📎 Papelería',        color:'#0E7C74', desc:'Papel, tóner, insumos de oficina y material impreso.' },
+  { id:'otros',            label:'📦 Otros',            color:'#A3376B', desc:'Marketing, mensajería y gastos imprevistos.' },
+];
+const gstCat = id => GST_CATS.find(c => c.id === id) || { id, label: id, color: '#64748b', desc: '' };
+const gstNombreCat = id => gstCat(id).label.replace(/^\S+\s/, '');
+let GST_ROWS = [], GST_CAT = 'todos', GST_EDIT = null, GST_PID = null, gstCharts = {};
+const gstPuedeTocar = g => window.MI_ROL_ADMIN || (GST_PID && g.creado_por === GST_PID);
+
+function gstAviso(id, msg){
+  toast('⚠️ ' + msg);
+  const el = document.getElementById(id);
+  if(el){ el.focus(); el.style.borderColor = '#E5484D'; setTimeout(() => { el.style.borderColor = ''; }, 2200); }
+}
+function gstSyncChips(grupoId){
+  document.querySelectorAll('#' + grupoId + ' .sk-fchip').forEach(c => c.classList.toggle('on', c.querySelector('input').checked));
+}
+['gasto-fact', 'editg-fact'].forEach(id => document.getElementById(id).addEventListener('change', () => gstSyncChips(id)));
+
+function gstPoblarCategorias(){
+  const opts = GST_CATS.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+  document.getElementById('gasto-categoria').innerHTML = '<option value="">Seleccionar…</option>' + opts;
+  document.getElementById('editg-categoria').innerHTML = opts;
+  document.getElementById('gasto-hints').innerHTML = GST_CATS.map(c => `<div class="sk-hint" id="gasto-hint-${c.id}">${esc2(c.desc)}</div>`).join('');
+  document.getElementById('gasto-cat-info').innerHTML = GST_CATS.map(c => `<div class="sk-ci" style="background:${c.color}12;border-color:${c.color}33"><div class="t" style="color:${c.color}">${c.label}</div><div class="d">${esc2(c.desc)}</div></div>`).join('');
+}
+document.getElementById('gasto-categoria').addEventListener('change', function(){
+  document.querySelectorAll('#gasto-hints .sk-hint').forEach(h => h.classList.remove('show'));
+  if(this.value) document.getElementById('gasto-hint-' + this.value)?.classList.add('show');
+});
+
+/* ── periodo: Mes (con flechas) · Rango · Todo ── */
+function gastoPeriodo(){
+  const modo = document.getElementById('gasto-per').dataset.modo;
+  const f = iso => { const x = iso.split('-'); return `${x[2]}/${x[1]}/${x[0]}`; };
+  if(modo === 'mes'){
+    const mes = document.getElementById('gasto-mes').value;
+    if(/^\d{4}-\d{2}$/.test(mes)){
+      const [y, m] = mes.split('-').map(Number);
+      return { desde: mes + '-01', hasta: mes + '-' + String(new Date(y, m, 0).getDate()).padStart(2, '0'), texto: SK_MESES[m - 1] + ' ' + y };
+    }
+  }
+  if(modo === 'rango'){
+    let d = document.getElementById('gasto-desde').value || null, h = document.getElementById('gasto-hasta').value || null;
+    if(d && h && d > h){ const t = d; d = h; h = t; }
+    return { desde: d, hasta: h, texto: (d ? f(d) : 'inicio') + ' – ' + (h ? f(h) : 'hoy') };
+  }
+  return { desde: null, hasta: null, texto: 'Todo el historial' };
+}
+function gastoSetModo(m){
+  document.getElementById('gasto-per').dataset.modo = m;
+  document.querySelectorAll('#gasto-seg button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  const mes = document.getElementById('gasto-mes');
+  if(m === 'mes' && !mes.value) mes.value = isoLocal(new Date()).slice(0, 7);
+  gstRefrescar();
+}
+function gstMoverMes(delta){
+  const mes = document.getElementById('gasto-mes');
+  const base = /^\d{4}-\d{2}$/.test(mes.value) ? mes.value : isoLocal(new Date()).slice(0, 7);
+  const [y, m] = base.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  mes.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  gstRefrescar();
+}
+document.querySelectorAll('#gasto-seg button').forEach(b => b.addEventListener('click', () => gastoSetModo(b.dataset.m)));
+document.getElementById('gasto-prev').addEventListener('click', () => gstMoverMes(-1));
+document.getElementById('gasto-next').addEventListener('click', () => gstMoverMes(1));
+['gasto-mes', 'gasto-desde', 'gasto-hasta'].forEach(id => document.getElementById(id).addEventListener('change', gstRefrescar));
+document.getElementById('gasto-mes').value = isoLocal(new Date()).slice(0, 7);
+
+/* ── carga y filtrado ── */
+async function cargarGastos(){
+  if(!window.MI_VE_GASTOS) return;
+  GST_PID = await miPersonalId();
+  const f = document.getElementById('gasto-fecha'); if(!f.value) f.value = isoLocal(new Date());
+  if(!GST_ROWS.length) document.getElementById('gasto-tbody').innerHTML = '<tr><td colspan="8" class="sk-empty">Cargando…</td></tr>';
+  const { data, error } = await traerTodo(() => sb.from('gastos').select('id, fecha, categoria, monto, descripcion, facturado, creado_por, created_at, autor:creado_por(nombre)').order('id'));
+  if(error){ console.error('[CUIVAN] Error cargando gastos:', error); document.getElementById('gasto-tbody').innerHTML = '<tr><td colspan="8" class="sk-empty">No se pudieron cargar los gastos.</td></tr>'; return; }
+  GST_ROWS = data || [];
+  gstRefrescar();
+}
+function gstFiltradas(){
+  const texto = document.getElementById('gasto-buscar').value.trim().toLowerCase();
+  const fact = document.getElementById('gasto-fact-filtro').value;
+  const { desde, hasta } = gastoPeriodo();
+  return GST_ROWS.filter(g => {
+    if(GST_CAT !== 'todos' && g.categoria !== GST_CAT) return false;
+    if(fact === 'si' && !g.facturado) return false;
+    if(fact === 'no' && g.facturado) return false;
+    if(desde && g.fecha < desde) return false;
+    if(hasta && g.fecha > hasta) return false;
+    if(texto && !(g.descripcion || '').toLowerCase().includes(texto)) return false;
+    return true;
+  }).sort((a, b) => a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : (a.created_at < b.created_at ? 1 : -1));
+}
+function gstRefrescar(){
+  document.getElementById('gasto-hero-per').textContent = gastoPeriodo().texto;
+  const filas = gstFiltradas();
+  gstRenderPills(); gstRenderKpis(filas); gstRenderCharts(filas); gstRenderTabla(filas);
+}
+document.getElementById('gasto-buscar').addEventListener('input', gstRefrescar);
+document.getElementById('gasto-fact-filtro').addEventListener('change', gstRefrescar);
+
+function gstRenderPills(){
+  const cont = document.getElementById('gasto-pills');
+  cont.innerHTML = `<div class="sk-pill ${GST_CAT === 'todos' ? 'act' : ''}" data-cat="todos">Todas</div>` +
+    GST_CATS.map(c => `<div class="sk-pill ${GST_CAT === c.id ? 'act' : ''}" data-cat="${c.id}">${c.label}</div>`).join('');
+}
+document.getElementById('gasto-pills').addEventListener('click', e => {
+  const p = e.target.closest('.sk-pill'); if(!p) return;
+  GST_CAT = p.dataset.cat; gstRefrescar();
+});
+
+function gstRenderKpis(filas){
+  const total = filas.reduce((a, g) => a + Number(g.monto || 0), 0);
+  const fact = filas.filter(g => g.facturado).reduce((a, g) => a + Number(g.monto || 0), 0);
+  document.getElementById('gasto-kpis').innerHTML = `
+    <div class="kpi-tile"><div class="ico">💸</div><div class="lbl3">Gasto total</div><div class="val">${skMoney(total)}</div></div>
+    <div class="kpi-tile"><div class="ico">🧾</div><div class="lbl3">Gastos registrados</div><div class="val">${filas.length}</div></div>
+    <div class="kpi-tile"><div class="ico">✅</div><div class="lbl3">Facturado</div><div class="val">${skMoney(fact)}</div></div>
+    <div class="kpi-tile"><div class="ico">📭</div><div class="lbl3">No facturado</div><div class="val">${skMoney(total - fact)}</div></div>`;
+}
+function gstRenderCharts(filas){
+  if(typeof Chart === 'undefined') return;
+  Object.values(gstCharts).forEach(c => c && c.destroy()); gstCharts = {};
+  const porCat = GST_CATS.map(c => filas.filter(g => g.categoria === c.id).reduce((a, g) => a + Number(g.monto || 0), 0));
+  const totalCat = porCat.reduce((a, b) => a + b, 0);
+  gstCharts.cat = new Chart(document.getElementById('ch-gasto-cat').getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: GST_CATS.map(c => c.label), datasets: [{ data: totalCat ? porCat : [1], backgroundColor: totalCat ? GST_CATS.map(c => c.color) : ['#e2e8f4'], borderWidth: 2, borderColor: '#fff' }] },
+    options: { maintainAspectRatio: false, cutout: '62%', plugins: { legend: { display: false }, tooltip: { enabled: !!totalCat },
+      datalabels: { color: '#fff', font: { size: 9, weight: '700' }, formatter: (v, ctx) => { if(!totalCat || !v) return ''; const pct = Math.round(v / totalCat * 100); return pct >= 6 ? pct + '%' : ''; } } } }
+  });
+  document.getElementById('gasto-legend').innerHTML = GST_CATS.map((c, i) => `<div><i style="background:${c.color}"></i>${esc2(gstNombreCat(c.id))} <b style="margin-left:auto;padding-left:8px;font-size:10.5px">${porCat[i] ? skMoney0(porCat[i]) : '—'}</b></div>`).join('');
+  // serie: por día si el periodo es corto, por mes si es largo
+  const fechas = filas.map(g => g.fecha).sort();
+  const span = fechas.length ? (new Date(fechas[fechas.length - 1]) - new Date(fechas[0])) / 86400000 : 0;
+  const porMes = span > 62;
+  document.getElementById('gasto-serie-t').textContent = porMes ? '📅 Por mes' : '📅 Por día';
+  const m = {};
+  filas.forEach(g => { const k = porMes ? g.fecha.slice(0, 7) : g.fecha; m[k] = (m[k] || 0) + Number(g.monto || 0); });
+  const keys = Object.keys(m).sort();
+  gstCharts.serie = new Chart(document.getElementById('ch-gasto-serie').getContext('2d'), {
+    type: 'bar',
+    data: { labels: keys.map(k => porMes ? SK_MESES[parseInt(k.slice(5, 7)) - 1].slice(0, 3) + ' ' + k.slice(2, 4) : k.slice(8, 10) + '/' + k.slice(5, 7)), datasets: [{ data: keys.map(k => m[k]), backgroundColor: '#E0703F', borderRadius: 4, maxBarThickness: 28 }] },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { callback: skK, font: { size: 9 } }, grid: { color: '#f0f0f0' } }, x: { ticks: { font: { size: 9 }, maxTicksLimit: 10 }, grid: { display: false } } } }
+  });
+}
+function gstRenderTabla(filas){
+  const tbody = document.getElementById('gasto-tbody'), empty = document.getElementById('gasto-empty');
+  if(!filas.length){ tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = filas.map(g => {
+    const c = gstCat(g.categoria);
+    return `<tr data-id="${g.id}">
+      <td data-l="Fecha" class="ct-nw">${fmtFechaISO(g.fecha)}</td>
+      <td data-l="Categoría"><span class="sk-bdg" style="background:${c.color}1a;color:${c.color}">${c.label}</span></td>
+      <td data-l="Monto"><span class="mo">${skMoney(g.monto)}</span></td>
+      <td data-l="Facturación"><span class="sk-fb ${g.facturado ? 'si' : 'no'}">${g.facturado ? 'Facturado' : 'No facturado'}</span></td>
+      <td data-l="Agregado por" class="au"><b>${esc2(g.autor?.nombre || '—')}</b></td>
+      <td data-l="Registrado el" class="au">${skFechaHora(g.created_at)}</td>
+      <td data-l="Descripción">${esc2(g.descripcion)}</td>
+      <td>${gstPuedeTocar(g) ? `<div style="display:flex;gap:6px"><button class="appbtn appbtn-s gst-ed" type="button" title="Editar" style="padding:5px 9px;font-size:11px">✏️</button><button class="appbtn appbtn-danger-soft gst-del" type="button" title="Eliminar" style="padding:5px 9px;font-size:11px">🗑️</button></div>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+document.getElementById('gasto-tbody').addEventListener('click', async e => {
+  const tr = e.target.closest('tr[data-id]'); if(!tr) return;
+  const id = tr.dataset.id;
+  if(e.target.closest('.gst-ed')){ gstAbrirEditar(id); return; }
+  if(e.target.closest('.gst-del')){
+    const g = GST_ROWS.find(x => x.id === id); if(!g || !gstPuedeTocar(g)) return;
+    const ok = await confirmarAsync({ titulo: '¿Eliminar este gasto?', mensaje: `<b>${esc2(gstNombreCat(g.categoria))}</b> · ${skMoney(g.monto)} · ${fmtFechaISO(g.fecha)}<br>Esta acción no se puede deshacer, pero queda anotada en la actividad reciente.`, textoConfirmar: 'Eliminar', danger: true, icono: '🗑️' });
+    if(!ok) return;
+    const { error } = await sb.from('gastos').delete().eq('id', id);
+    if(error){ console.error('[CUIVAN] Error eliminando gasto:', error); toast('⚠️ No se pudo eliminar el gasto'); return; }
+    toast('✓ Gasto eliminado'); cargarGastos();
+  }
+});
+
+/* ── registrar ── */
+document.getElementById('gasto-btn-guardar').addEventListener('click', async () => {
+  if(!window.MI_VE_GASTOS) return;
+  const fecha = document.getElementById('gasto-fecha').value, categoria = document.getElementById('gasto-categoria').value;
+  const monto = Number(document.getElementById('gasto-monto').value || 0), descripcion = document.getElementById('gasto-descripcion').value.trim();
+  const facturado = document.querySelector('#gasto-fact input:checked')?.value === 'si';
+  if(!fecha) return gstAviso('gasto-fecha', 'Selecciona la fecha del gasto.');
+  if(!categoria) return gstAviso('gasto-categoria', 'Selecciona la categoría.');
+  if(!(monto > 0)) return gstAviso('gasto-monto', 'El monto debe ser mayor a $0.');
+  if(!descripcion) return gstAviso('gasto-descripcion', 'La descripción del gasto es obligatoria.');
+  const btn = document.getElementById('gasto-btn-guardar'); btn.disabled = true; btn.textContent = 'Guardando…';
+  const pid = GST_PID || await miPersonalId();
+  const { error } = await sb.from('gastos').insert({ fecha, categoria, monto, descripcion, facturado, creado_por: pid });
+  btn.disabled = false; btn.textContent = '✓ Guardar gasto';
+  if(error){ console.error('[CUIVAN] Error guardando gasto:', error); toast('⚠️ No se pudo guardar el gasto'); return; }
+  toast('✓ Gasto guardado');
+  document.getElementById('gasto-monto').value = ''; document.getElementById('gasto-descripcion').value = ''; document.getElementById('gasto-categoria').value = '';
+  document.querySelectorAll('#gasto-hints .sk-hint').forEach(h => h.classList.remove('show'));
+  const no = document.querySelector('#gasto-fact input[value="no"]'); if(no){ no.checked = true; gstSyncChips('gasto-fact'); }
+  cargarGastos();
+});
+
+/* ── editar ── */
+function gstAbrirEditar(id){
+  const g = GST_ROWS.find(x => x.id === id); if(!g || !gstPuedeTocar(g)) return;
+  GST_EDIT = id;
+  document.getElementById('editg-fecha').value = g.fecha;
+  document.getElementById('editg-categoria').value = g.categoria;
+  document.getElementById('editg-monto').value = g.monto;
+  document.getElementById('editg-descripcion').value = g.descripcion || '';
+  document.querySelectorAll('#editg-fact input').forEach(i => { i.checked = (i.value === 'si') === !!g.facturado; });
+  gstSyncChips('editg-fact');
+  document.getElementById('modal-editar-gasto').classList.add('show');
+}
+function gstCerrarEditar(){ document.getElementById('modal-editar-gasto').classList.remove('show'); GST_EDIT = null; }
+document.getElementById('editg-btn-cancelar').addEventListener('click', gstCerrarEditar);
+document.getElementById('editg-btn-guardar').addEventListener('click', async () => {
+  if(!GST_EDIT) return;
+  const fecha = document.getElementById('editg-fecha').value, categoria = document.getElementById('editg-categoria').value;
+  const monto = Number(document.getElementById('editg-monto').value || 0), descripcion = document.getElementById('editg-descripcion').value.trim();
+  const facturado = document.querySelector('#editg-fact input:checked')?.value === 'si';
+  if(!fecha) return gstAviso('editg-fecha', 'Selecciona la fecha del gasto.');
+  if(!categoria) return gstAviso('editg-categoria', 'Selecciona la categoría.');
+  if(!(monto > 0)) return gstAviso('editg-monto', 'El monto debe ser mayor a $0.');
+  if(!descripcion) return gstAviso('editg-descripcion', 'La descripción del gasto es obligatoria.');
+  const btn = document.getElementById('editg-btn-guardar'); btn.disabled = true; btn.textContent = 'Guardando…';
+  const { error } = await sb.from('gastos').update({ fecha, categoria, monto, descripcion, facturado }).eq('id', GST_EDIT);
+  btn.disabled = false; btn.textContent = 'Guardar cambios';
+  if(error){ console.error('[CUIVAN] Error editando gasto:', error); toast('⚠️ No se pudo guardar el cambio'); return; }
+  toast('✓ Gasto actualizado'); gstCerrarEditar(); cargarGastos();
+});
+
+/* ── exportar lo que se ve (respeta periodo y filtros) ── */
+document.getElementById('gasto-btn-exportar').addEventListener('click', async () => {
+  const filas = gstFiltradas();
+  if(!filas.length){ toast('No hay gastos para exportar con este filtro.'); return; }
+  try { await cargarXLSX(); } catch(_) { toast('⚠️ No se pudo preparar la exportación'); return; }
+  const out = filas.map(g => ({ 'Fecha del gasto': fmtFechaISO(g.fecha), 'Categoría': gstNombreCat(g.categoria), 'Monto': Number(g.monto || 0), 'Facturación': g.facturado ? 'Facturado' : 'No facturado', 'Agregado por': g.autor?.nombre || '', 'Registrado el': skFechaHora(g.created_at), 'Descripción': g.descripcion || '' }));
+  out.push({ 'Fecha del gasto': '', 'Categoría': 'TOTAL', 'Monto': out.reduce((a, r) => a + r['Monto'], 0), 'Facturación': '', 'Agregado por': '', 'Registrado el': '', 'Descripción': '' });
+  const ws = XLSX.utils.json_to_sheet(out); ws['!cols'] = [{wch:14},{wch:18},{wch:13},{wch:14},{wch:22},{wch:17},{wch:46}];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Gastos');
+  XLSX.writeFile(wb, `CUIVAN_Gastos_${isoLocal(new Date())}.xlsx`);
+});
+gstPoblarCategorias();
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD — rediseñado al estilo de Skin Fabric: periodo por Mes/Rango/Recientes/Todo,
+// bloque financiero (Ingreso · Gasto · Margen) solo para quien ve Gastos, ingresos por categoría.
+// El ingreso SIEMPRE suma monto + monto_2 (segundo pago) y los medios de pago cuentan ambos.
 // ═══════════════════════════════════════════════════════════
 let dashCharts = {};
 let DASH_MODO_TENDENCIA = 'dia';
 let DASH_DATA_CACHE = [];
+let DASH_GASTOS = [];
+let DASH_FIN_OK = false;
+let DASH_SERIE = null;      // { 'YYYY-MM-DD': [ingreso, gasto] }
+let dashReqId = 0;
+let DASH_TIPOS = new Set();
+const dEl = id => document.getElementById(id);
+const dashIngreso = r => Number(r.monto || 0) + Number(r.monto_2 || 0);
+
+function dashPeriodo(){
+  const modo = dEl('dash-per').dataset.modo;
+  const f = iso => { const x = iso.split('-'); return `${x[2]}/${x[1]}/${x[0]}`; };
+  if(modo === 'mes'){
+    const mes = dEl('dash-mes').value;
+    if(/^\d{4}-\d{2}$/.test(mes)){
+      const [y, m] = mes.split('-').map(Number);
+      return { desde: mes + '-01', hasta: mes + '-' + String(new Date(y, m, 0).getDate()).padStart(2, '0'), texto: SK_MESES[m - 1] + ' ' + y };
+    }
+  }
+  if(modo === 'rango'){
+    let d = dEl('dash-desde').value || null, h = dEl('dash-hasta').value || null;
+    if(d && h && d > h){ const t = d; d = h; h = t; }
+    return { desde: d, hasta: h, texto: (d ? f(d) : 'inicio') + ' – ' + (h ? f(h) : 'hoy') };
+  }
+  if(modo === 'rec'){
+    const n = parseInt(dEl('dash-rec').value) || 30;
+    return { desde: isoDesdeHace(n), hasta: null, texto: n === 365 ? 'Últimos 12 meses' : 'Últimos ' + n + ' días' };
+  }
+  return { desde: null, hasta: null, texto: 'Todo el historial' };
+}
+function dashActualizarControles(){
+  const m = dEl('dash-per').dataset.modo;
+  document.querySelectorAll('#dash-seg button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  if(m === 'mes' && !dEl('dash-mes').value) dEl('dash-mes').value = isoLocal(new Date()).slice(0, 7);
+}
+function dashSetModoPeriodo(m){ dEl('dash-per').dataset.modo = m; cargarDashboard(); }
+function dashMoverMes(delta){
+  const base = /^\d{4}-\d{2}$/.test(dEl('dash-mes').value) ? dEl('dash-mes').value : isoLocal(new Date()).slice(0, 7);
+  const [y, m] = base.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  dEl('dash-mes').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  cargarDashboard();
+}
 
 async function cargarDashboard(){
-  const periodo = parseInt(document.getElementById('dash-periodo').value) || 0;
-  const doctorFiltro = document.getElementById('dash-doctor-filtro').value;
-  const motivoFiltro = document.getElementById('dash-motivo-filtro').value;
-  const tipoFiltro = document.getElementById('dash-tipo-filtro').value;
+  dashActualizarControles();
+  const miReq = ++dashReqId;
+  const { desde, hasta, texto } = dashPeriodo();
+  const doctorFiltro = dEl('dash-doctor-filtro').value, motivoFiltro = dEl('dash-motivo-filtro').value, tipoFiltro = dEl('dash-tipo-filtro').value;
 
-  const construirDash = () => {
-    let q = sb
-      .from('consultas')
-      .select('fecha, monto, medio_pago, motivo, tipo_consulta, paciente_id, pacientes(id), personal!consultas_doctor_id_fkey(id, nombre)')
-      .eq('deleted', false)
-      .eq('no_vino', false)
-      .order('id');
-    if(periodo > 0) q = q.gte('fecha', isoDesdeHace(periodo));
+  const construir = () => {
+    let q = sb.from('consultas')
+      .select('fecha, monto, monto_2, medio_pago, medio_pago_2, motivo, tipo_consulta, paciente_id, pacientes(id), personal!consultas_doctor_id_fkey(id, nombre)')
+      .eq('deleted', false).eq('no_vino', false).order('id');
+    if(desde) q = q.gte('fecha', desde);
+    if(hasta) q = q.lte('fecha', hasta);
     if(doctorFiltro) q = q.eq('doctor_id', doctorFiltro);
     if(motivoFiltro) q = q.eq('motivo', motivoFiltro);
     if(tipoFiltro) q = q.eq('tipo_consulta', tipoFiltro);
     return q;
   };
+  const construirGastos = () => {
+    let q = sb.from('gastos').select('fecha, categoria, monto').order('id');
+    if(desde) q = q.gte('fecha', desde);
+    if(hasta) q = q.lte('fecha', hasta);
+    return q;
+  };
+  const [res, resG] = await Promise.all([
+    traerTodo(construir),
+    window.MI_VE_GASTOS ? traerTodo(construirGastos) : Promise.resolve({ data: [], error: null })
+  ]);
+  if(miReq !== dashReqId) return;   // el usuario cambió los filtros mientras cargaba: se descarta el resultado viejo
+  if(res.error){ console.error('[CUIVAN] Error cargando dashboard:', res.error); dEl('dash-kpis').innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+  DASH_DATA_CACHE = res.data || [];
+  DASH_FIN_OK = !!window.MI_VE_GASTOS && !resG.error;
+  DASH_GASTOS = resG.error ? [] : (resG.data || []);
+  if(resG.error) console.error('[CUIVAN] Error cargando gastos del dashboard:', resG.error);
+  actualizarFiltroTipoDash(DASH_DATA_CACHE);
+  renderDashboard(texto);
+}
 
-  const { data, error } = await traerTodo(construirDash);
-  const kpisEl = document.getElementById('dash-kpis');
-  if(error){ console.error('[CUIVAN] Error cargando dashboard:', error); kpisEl.innerHTML = '<div style="color:var(--red);font-size:12px">Error al cargar</div>'; return; }
+function renderDashboard(textoPeriodo){
+  const data = DASH_DATA_CACHE;
+  const filtrosActivos = !!(dEl('dash-doctor-filtro').value || dEl('dash-motivo-filtro').value || dEl('dash-tipo-filtro').value);
+  const finOn = DASH_FIN_OK && !filtrosActivos;
+  dEl('dash-hero-per').textContent = textoPeriodo;
+  dEl('dash-cats-per').textContent = textoPeriodo; dEl('dash-gasto-per').textContent = textoPeriodo;
+  dEl('dash-fin').style.display = finOn ? '' : 'none';
+  dEl('dash-ig-card').style.display = finOn ? '' : 'none';
+  dEl('dash-gasto').style.display = finOn ? '' : 'none';
+  dEl('dash-fin-nota').style.display = (DASH_FIN_OK && filtrosActivos) ? '' : 'none';
 
-  DASH_DATA_CACHE = data;
-  actualizarFiltroTipoDash(data);
-
-  const totalIngreso = data.reduce((a,r)=>a+Number(r.monto||0)+Number(r.monto_2||0),0);
-  const pacientesUnicos = new Set(data.map(r=>r.pacientes?.id)).size;
-  const ticketProm = data.length ? totalIngreso/data.length : 0;
+  const totalIngreso = data.reduce((a, r) => a + dashIngreso(r), 0);
+  const pacientesUnicos = new Set(data.map(r => r.paciente_id)).size;
+  const ticketProm = data.length ? totalIngreso / data.length : 0;
   const porDoc = {};
-  data.forEach(r=>{ const n = r.personal?.nombre || '—'; porDoc[n] = (porDoc[n]||0) + Number(r.monto||0) + Number(r.monto_2||0); });
-  const docTop = Object.entries(porDoc).sort((a,b)=>b[1]-a[1])[0];
+  data.forEach(r => { const n = r.personal?.nombre || '—'; porDoc[n] = (porDoc[n] || 0) + dashIngreso(r); });
+  const docTop = Object.entries(porDoc).sort((a, b) => b[1] - a[1])[0];
 
-  kpisEl.innerHTML = `
-    <div class="kpi-tile"><div class="ico">💰</div><div class="lbl3">Ingreso total</div><div class="val">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
-    <div class="kpi-tile"><div class="ico">👥</div><div class="lbl3">Pacientes</div><div class="val">${pacientesUnicos}</div></div>
-    <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket prom.</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
-    <div class="kpi-tile"><div class="ico">🏆</div><div class="lbl3">Doctor top</div><div class="val" style="font-size:13px">${docTop ? esc2(docTop[0]) : '—'}</div></div>
-  `;
+  dEl('dash-kpis').innerHTML =
+    (finOn ? '' : `<div class="kpi-tile"><div class="ico">💰</div><div class="lbl3">Ingreso total</div><div class="val">${skMoney(totalIngreso)}</div></div>`) +
+    `<div class="kpi-tile"><div class="ico">👥</div><div class="lbl3">Pacientes</div><div class="val">${pacientesUnicos}</div></div>
+     <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket prom.</div><div class="val">${skMoney(ticketProm)}</div></div>
+     <div class="kpi-tile"><div class="ico">🏆</div><div class="lbl3">Doctor top</div><div class="val" style="font-size:13px">${docTop ? esc2(docTop[0]) : '—'}</div></div>`;
 
-  const TEAL='#2ABFBF', NAVY2='#1B3A6B', NAVY3='#22488a', TEAL_L='#9FE1CB', SLATE='#94a3b8', NAVY='#0B1628';
-  const fmtMoney = v => '$' + Number(v).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
-  Object.values(dashCharts).forEach(c=>c.destroy());
+  // ── bloque financiero ──
+  DASH_SERIE = null;
+  if(finOn){
+    const gasto = DASH_GASTOS.reduce((a, g) => a + Number(g.monto || 0), 0), margen = totalIngreso - gasto;
+    const porFecha = {};
+    const add = (f, i, g) => { const m = porFecha[f] || (porFecha[f] = [0, 0]); m[0] += i; m[1] += g; };
+    data.forEach(r => add(r.fecha, dashIngreso(r), 0));
+    DASH_GASTOS.forEach(g => add(g.fecha, 0, Number(g.monto || 0)));
+    DASH_SERIE = porFecha;
+    dEl('fin-ing-v').textContent = skMoney0(totalIngreso);
+    dEl('fin-ing-s').textContent = ctPl(data.length, 'consulta', 'consultas');
+    dEl('fin-gas-v').textContent = skMoney0(gasto);
+    dEl('fin-gas-s').innerHTML = totalIngreso > 0 ? `<b>${(gasto / totalIngreso * 100).toFixed(1)}%</b> del ingreso` : 'sin ingreso en el periodo';
+    dEl('fin-mar-v').textContent = skMoneyS(margen);
+    dEl('fin-mar-s').innerHTML = totalIngreso > 0 ? `<b>${skPct(margen / totalIngreso * 100)}</b> de margen` : '—';
+    dEl('fin-mar-card').classList.toggle('neg', margen < 0);
+    const fechas = Object.keys(porFecha).sort(); let acc = 0;
+    dEl('fin-ing-sp').innerHTML = skSpark(fechas.map(f => porFecha[f][0]));
+    dEl('fin-gas-sp').innerHTML = skSpark(fechas.map(f => porFecha[f][1]));
+    dEl('fin-mar-sp').innerHTML = skSpark(fechas.map(f => (acc += porFecha[f][0] - porFecha[f][1])));
+    // gasto por categoría
+    const porCat = {}; DASH_GASTOS.forEach(g => { porCat[g.categoria] = (porCat[g.categoria] || 0) + Number(g.monto || 0); });
+    const cats = Object.keys(porCat).filter(c => porCat[c] > 0).sort((a, b) => porCat[b] - porCat[a]);
+    const mx = Math.max(...cats.map(c => porCat[c]), 1);
+    dEl('dash-gasto-sub').textContent = 'Gastos generales de CUIVAN · total ' + skMoney0(gasto);
+    dEl('dash-gasto-bars').innerHTML = cats.length
+      ? cats.map(c => `<div class="sk-gxr"><span>${esc2(gstNombreCat(c))}</span><div class="tr"><i style="width:${porCat[c] / mx * 100}%"></i></div><b>${skMoney0(porCat[c])}</b><small>${(porCat[c] / gasto * 100).toFixed(1)}%</small></div>`).join('')
+      : '<div class="sk-empty">Sin gastos en este periodo.</div>';
+  }
 
+  renderCategoriasDash(data, totalIngreso);
+  Object.values(dashCharts).forEach(c => c && c.destroy()); dashCharts = {};
   renderTendenciaDash();
+  renderIngGasDash();
 
+  const TEAL = '#2ABFBF', NAVY2 = '#1B3A6B', NAVY3 = '#22488a', TEAL_L = '#9FE1CB', SLATE = '#94a3b8', NAVY = '#0B1628';
   const docLabels = Object.keys(porDoc);
-  dashCharts.doc = new Chart(document.getElementById('ch-dash-doc'), {
-    type:'bar',
-    data:{ labels: docLabels, datasets:[{ data: docLabels.map(l=>porDoc[l]), backgroundColor:[TEAL,NAVY2,NAVY3,SLATE,'#5DCAA5'], borderRadius:6 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false},
-      datalabels:{ display:true, color:NAVY, anchor:'end', align:'top', offset:4, font:{size:8.5,weight:'700'}, formatter: fmtMoney } },
-      scales:{ y:{ grace:'20%', ticks:{ callback: fmtMoney, font:{size:8} }, grid:{color:'#f0f0f0'} }, x:{ ticks:{font:{size:9}}, grid:{display:false} } } }
+  dashCharts.doc = new Chart(dEl('ch-dash-doc'), {
+    type: 'bar',
+    data: { labels: docLabels, datasets: [{ data: docLabels.map(l => porDoc[l]), backgroundColor: [TEAL, NAVY2, NAVY3, SLATE, '#5DCAA5'], borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false },
+      datalabels: { display: true, color: NAVY, anchor: 'end', align: 'top', offset: 4, font: { size: 8.5, weight: '700' }, formatter: skMoney } },
+      scales: { y: { grace: '20%', ticks: { callback: skMoney, font: { size: 8 } }, grid: { color: '#f0f0f0' } }, x: { ticks: { font: { size: 9 } }, grid: { display: false } } } }
   });
-
+  // medios de pago: cuenta el 1er pago y también el 2º (monto_2 / medio_pago_2)
   const porPago = {};
-  data.forEach(r=>{ porPago[r.medio_pago] = (porPago[r.medio_pago]||0) + Number(r.monto||0); });
-  dashCharts.pago = new Chart(document.getElementById('ch-dash-pago'), {
-    type:'doughnut',
-    data:{ labels: Object.keys(porPago), datasets:[{ data: Object.values(porPago), backgroundColor:[TEAL,NAVY2,TEAL_L,SLATE], borderWidth:3, borderColor:'#fff' }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, font:{size:10} } },
-      datalabels:{ display:true, color:'#fff', font:{size:9,weight:'700'}, formatter:(v,ctx)=>{
-        const total = ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
-        return total ? Math.round(v/total*100)+'%' : '';
-      } } }, cutout:'55%' }
+  data.forEach(r => {
+    if(Number(r.monto || 0) > 0 || r.medio_pago) porPago[r.medio_pago || 'Sin dato'] = (porPago[r.medio_pago || 'Sin dato'] || 0) + Number(r.monto || 0);
+    if(r.medio_pago_2 && Number(r.monto_2 || 0) > 0) porPago[r.medio_pago_2] = (porPago[r.medio_pago_2] || 0) + Number(r.monto_2 || 0);
   });
-
+  dashCharts.pago = new Chart(dEl('ch-dash-pago'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(porPago), datasets: [{ data: Object.values(porPago), backgroundColor: [TEAL, NAVY2, TEAL_L, SLATE], borderWidth: 3, borderColor: '#fff' }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 10 } } },
+      datalabels: { display: true, color: '#fff', font: { size: 9, weight: '700' }, formatter: (v, ctx) => { const t = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); return t ? Math.round(v / t * 100) + '%' : ''; } } } }
+  });
   const porTipo = {};
-  data.forEach(r=>{ const t = r.tipo_consulta || r.motivo; porTipo[t] = (porTipo[t]||0) + Number(r.monto||0) + Number(r.monto_2||0); });
-  const tipoOrdenado = Object.entries(porTipo).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  dashCharts.tipo = new Chart(document.getElementById('ch-dash-tipo'), {
-    type:'bar',
-    data:{ labels: tipoOrdenado.map(([k])=>k), datasets:[{ data: tipoOrdenado.map(([,v])=>v), backgroundColor:TEAL, borderRadius:6 }] },
-    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{display:false},
-      datalabels:{ display:true, color:NAVY, anchor:'end', align:'right', offset:4, font:{size:8.5,weight:'700'}, formatter: fmtMoney } },
-      scales:{ x:{ grace:'25%', ticks:{ callback: fmtMoney, font:{size:8} }, grid:{color:'#f0f0f0'} }, y:{ ticks:{font:{size:9}}, grid:{display:false} } } }
+  data.forEach(r => { const t = r.tipo_consulta || r.motivo; porTipo[t] = (porTipo[t] || 0) + dashIngreso(r); });
+  const tipoOrdenado = Object.entries(porTipo).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  dashCharts.tipo = new Chart(dEl('ch-dash-tipo'), {
+    type: 'bar',
+    data: { labels: tipoOrdenado.map(([k]) => k), datasets: [{ data: tipoOrdenado.map(([, v]) => v), backgroundColor: TEAL, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false },
+      datalabels: { display: true, color: NAVY, anchor: 'end', align: 'right', offset: 4, font: { size: 8.5, weight: '700' }, formatter: skMoney } },
+      scales: { x: { grace: '25%', ticks: { callback: skMoney, font: { size: 8 } }, grid: { color: '#f0f0f0' } }, y: { ticks: { font: { size: 9 } }, grid: { display: false } } } }
   });
+}
+
+const DASH_COLOR_MOTIVO = { 'Consulta':'#22a8a8', 'Procedimientos':'#1B3A6B', 'Vacunas':'#7D3C98', 'Producto Farmacia':'#38a169', 'Otro':'#94a3b8' };
+function renderCategoriasDash(data, total){
+  const porMot = {};
+  data.forEach(r => { porMot[r.motivo || 'Otro'] = (porMot[r.motivo || 'Otro'] || 0) + dashIngreso(r); });
+  const mots = Object.keys(porMot).sort((a, b) => porMot[b] - porMot[a]);
+  const col = m => DASH_COLOR_MOTIVO[m] || '#94a3b8';
+  dEl('dash-cats-bar').innerHTML = mots.map(m => `<i style="width:${total ? porMot[m] / total * 100 : 0}%;background:${col(m)}"></i>`).join('');
+  dEl('dash-cats-tiles').innerHTML = mots.length
+    ? mots.map(m => `<div class="sk-tile"><div class="nm"><span class="dot" style="background:${col(m)}"></span>${esc2(m)}</div><div class="am">${skMoney0(porMot[m])}</div><div class="pc">${total ? (porMot[m] / total * 100).toFixed(1) : '0.0'}% del ingreso</div></div>`).join('')
+    : '<div class="sk-empty">Sin ingresos en este periodo.</div>';
 }
 
 function renderTendenciaDash(){
-  const data = DASH_DATA_CACHE;
-  const TEAL='#2ABFBF';
+  const data = DASH_DATA_CACHE, TEAL = '#2ABFBF';
   if(dashCharts.trend) dashCharts.trend.destroy();
-
   let labels, valores;
-  if(DASH_MODO_TENDENCIA === 'dia'){
-    const porDia = {};
-    data.forEach(r=>{ porDia[r.fecha] = (porDia[r.fecha]||0) + Number(r.monto||0) + Number(r.monto_2||0); });
-    const diasOrdenados = Object.keys(porDia).sort();
-    labels = diasOrdenados.map(d=>d.slice(8,10)+'/'+d.slice(5,7));
-    valores = diasOrdenados.map(d=>porDia[d]);
-  } else {
-    const porMes = {};
-    data.forEach(r=>{ const m = r.fecha.slice(0,7); porMes[m] = (porMes[m]||0) + Number(r.monto||0) + Number(r.monto_2||0); });
-    const mesesOrdenados = Object.keys(porMes).sort();
-    const NOMBRES_MES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    labels = mesesOrdenados.map(m=>{ const [y,mm] = m.split('-'); return NOMBRES_MES[parseInt(mm)-1] + ' ' + y; });
-    valores = mesesOrdenados.map(m=>porMes[m]);
-  }
-
-  dashCharts.trend = new Chart(document.getElementById('ch-dash-trend'), {
-    type:'line',
-    data:{ labels, datasets:[{ data: valores, borderColor:TEAL, backgroundColor:'rgba(42,191,191,.12)', fill:true, tension:.4, pointRadius:0, borderWidth:2.5 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
-      scales:{ y:{ ticks:{ callback:v=>'$'+v.toLocaleString('es-MX'), font:{size:9} }, grid:{color:'#f0f0f0'} }, x:{ ticks:{ maxTicksLimit:8, font:{size:9} }, grid:{display:false} } } }
+  const agr = {};
+  data.forEach(r => { const k = DASH_MODO_TENDENCIA === 'dia' ? r.fecha : r.fecha.slice(0, 7); agr[k] = (agr[k] || 0) + dashIngreso(r); });
+  const keys = Object.keys(agr).sort();
+  if(DASH_MODO_TENDENCIA === 'dia'){ labels = keys.map(d => d.slice(8, 10) + '/' + d.slice(5, 7)); }
+  else { labels = keys.map(m => SK_MESES[parseInt(m.slice(5, 7)) - 1].slice(0, 3) + ' ' + m.slice(0, 4)); }
+  valores = keys.map(k => agr[k]);
+  dashCharts.trend = new Chart(dEl('ch-dash-trend'), {
+    type: 'line',
+    data: { labels, datasets: [{ data: valores, borderColor: TEAL, backgroundColor: 'rgba(42,191,191,.12)', fill: true, tension: .4, pointRadius: 0, borderWidth: 2.5 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } },
+      scales: { y: { ticks: { callback: v => '$' + v.toLocaleString('es-MX'), font: { size: 9 } }, grid: { color: '#f0f0f0' } }, x: { ticks: { maxTicksLimit: 8, font: { size: 9 } }, grid: { display: false } } } }
   });
 }
-document.getElementById('btn-dash-tend-dia').addEventListener('click', ()=>{
-  DASH_MODO_TENDENCIA = 'dia';
-  document.getElementById('btn-dash-tend-dia').className = 'appbtn appbtn-p';
-  document.getElementById('btn-dash-tend-mes').className = 'appbtn appbtn-s';
-  renderTendenciaDash();
-});
-document.getElementById('btn-dash-tend-mes').addEventListener('click', ()=>{
-  DASH_MODO_TENDENCIA = 'mes';
-  document.getElementById('btn-dash-tend-mes').className = 'appbtn appbtn-p';
-  document.getElementById('btn-dash-tend-dia').className = 'appbtn appbtn-s';
-  renderTendenciaDash();
-});
-function actualizarFiltroTipoDash(data){
-  const sel = document.getElementById('dash-tipo-filtro');
-  const valorActual = sel.value;
-  const tipos = [...new Set(data.map(r=>r.tipo_consulta).filter(Boolean))].sort();
-  sel.innerHTML = '<option value="">Todos los tipos</option>' + tipos.map(t=>`<option value="${esc2(t)}" ${t===valorActual?'selected':''}>${esc2(t)}</option>`).join('');
+// Ingreso vs gasto: barras por día/mes + línea de margen acumulado
+function renderIngGasDash(){
+  if(dashCharts.ig){ dashCharts.ig.destroy(); dashCharts.ig = null; }
+  if(!DASH_SERIE) return;
+  const modo = DASH_MODO_TENDENCIA, m = {};
+  Object.keys(DASH_SERIE).forEach(f => { const k = modo === 'dia' ? f : f.slice(0, 7); const x = m[k] || (m[k] = [0, 0]); x[0] += DASH_SERIE[f][0]; x[1] += DASH_SERIE[f][1]; });
+  const keys = Object.keys(m).sort(); let acc = 0;
+  dashCharts.ig = new Chart(dEl('ch-dash-ig').getContext('2d'), {
+    data: {
+      labels: keys.map(k => modo === 'dia' ? k.slice(8, 10) + '/' + k.slice(5, 7) : SK_MESES[parseInt(k.slice(5, 7)) - 1].slice(0, 3) + ' ' + k.slice(2, 4)),
+      datasets: [
+        { type: 'bar', label: 'Ingreso', data: keys.map(k => Math.round(m[k][0])), backgroundColor: '#3B5B94', borderRadius: 3, order: 2 },
+        { type: 'bar', label: 'Gasto', data: keys.map(k => Math.round(m[k][1])), backgroundColor: '#E0703F', borderRadius: 3, order: 2 },
+        { type: 'line', label: 'Margen acumulado', data: keys.map(k => { acc += m[k][0] - m[k][1]; return Math.round(acc); }), borderColor: '#0B1628', backgroundColor: '#0B1628', borderWidth: 2, borderDash: [5, 3], pointRadius: 0, tension: .25, yAxisID: 'y2', order: 1 }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + skMoneyS(c.parsed.y) } } },
+      scales: { y: { ticks: { callback: skK } }, y2: { position: 'right', grid: { display: false }, ticks: { color: '#0B1628', callback: skK } },
+        x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: modo === 'dia' ? 12 : 6 } } } }
+  });
 }
-document.getElementById('dash-periodo').addEventListener('change', cargarDashboard);
-document.getElementById('dash-doctor-filtro').addEventListener('change', cargarDashboard);
-document.getElementById('dash-motivo-filtro').addEventListener('change', cargarDashboard);
-document.getElementById('dash-tipo-filtro').addEventListener('change', cargarDashboard);
+function dashSetModoTend(m){
+  DASH_MODO_TENDENCIA = m;
+  [['dash-tend-dia', 'dash-ig-dia', 'dia'], ['dash-tend-mes', 'dash-ig-mes', 'mes']].forEach(([a, b, k]) => [a, b].forEach(id => {
+    dEl(id).classList.toggle('on', m === k); dEl(id).classList.toggle('off', m !== k);
+  }));
+  renderTendenciaDash(); renderIngGasDash();
+}
+['dash-tend-dia', 'dash-ig-dia'].forEach(id => dEl(id).addEventListener('click', () => dashSetModoTend('dia')));
+['dash-tend-mes', 'dash-ig-mes'].forEach(id => dEl(id).addEventListener('click', () => dashSetModoTend('mes')));
+
+// el filtro de tipo recuerda los tipos ya vistos, para no quedarse solo con el elegido
+function actualizarFiltroTipoDash(data){
+  const sel = dEl('dash-tipo-filtro'), valorActual = sel.value;
+  data.forEach(r => { if(r.tipo_consulta) DASH_TIPOS.add(r.tipo_consulta); });
+  if(valorActual) DASH_TIPOS.add(valorActual);
+  const tipos = [...DASH_TIPOS].sort();
+  sel.innerHTML = '<option value="">Todos los tipos</option>' + tipos.map(t => `<option value="${esc2(t)}" ${t === valorActual ? 'selected' : ''}>${esc2(t)}</option>`).join('');
+}
+
+/* ── controles de periodo y filtros ── */
+document.querySelectorAll('#dash-seg button').forEach(b => b.addEventListener('click', () => dashSetModoPeriodo(b.dataset.m)));
+dEl('dash-prev').addEventListener('click', () => dashMoverMes(-1));
+dEl('dash-next').addEventListener('click', () => dashMoverMes(1));
+['dash-rec', 'dash-mes', 'dash-desde', 'dash-hasta', 'dash-doctor-filtro', 'dash-motivo-filtro', 'dash-tipo-filtro'].forEach(id => dEl(id).addEventListener('change', cargarDashboard));
+dEl('dash-mes').value = isoLocal(new Date()).slice(0, 7);
 
 // ═══════════════════════════════════════════════════════════
 // PRM — Pacientes inactivos
@@ -4030,6 +4636,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.15-2</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.16-1</div>
 </body>
 </html>
