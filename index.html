@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.22-5"/>
+<meta name="app-version" content="2026.10.22-6"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -179,10 +179,19 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .h2-chip .ico{font-size:13px}
 .h2-chip .v{font-family:var(--font-d);font-weight:800;font-size:13px;color:var(--navy)}
 .h2-chip .l{font-size:8.5px;color:var(--g4);font-weight:700;text-transform:uppercase}
-.h2-filt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;padding:9px 10px;background:var(--g1);border-radius:9px}
-.h2-filt input,.h2-filt select{width:auto;flex:0 0 auto}
-.h2-filt input#h-buscar{min-width:160px}
-.h2-filt input,.h2-filt select{font-size:11px;padding:6px 9px}
+#app-screen-historial{container-type:inline-size;container-name:hist}
+.h2-filt{display:grid;grid-template-columns:minmax(150px,1.3fr) repeat(4,minmax(150px,1fr)) auto;gap:8px;align-items:center;margin-bottom:12px;padding:9px 10px;background:var(--g1);border-radius:9px}
+.h2-filt>*{min-width:0}
+.h2-filt .app-input{width:100%;font-size:11px;padding:0 9px;height:32px;box-sizing:border-box}
+.h2-acts{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.h2-acts .appbtn,.h2-fgrp .appbtn{height:32px;padding:0 13px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.h2-fechas{grid-column:1/-1;display:none;align-items:center;gap:10px;flex-wrap:wrap;padding-top:9px;margin-top:1px;border-top:1px dashed var(--g2)}.h2-fechas.on{display:flex}
+.h2-fl{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--g6)}
+.h2-fgrp{display:none;align-items:center;gap:7px;flex-wrap:wrap}.h2-fgrp.on{display:inline-flex}
+.h2-fgrp .app-input{width:auto;min-width:132px}.h2-fgrp .appbtn{padding:0 11px;font-size:14px}
+.h2-qk{border:1px solid var(--g2);background:#fff;color:var(--g6);padding:6px 12px;border-radius:20px;font-size:10.5px;font-weight:700;cursor:pointer;user-select:none;line-height:1.2}.h2-qk:hover{border-color:var(--teal);color:#0B6E6E}.h2-qk.act{background:var(--teal-soft);border-color:rgba(42,191,191,.5);color:#0B6E6E}
+@container hist (max-width:1130px){.h2-filt{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@container hist (max-width:640px){.h2-filt{grid-template-columns:1fr 1fr}.h2-filt #h-buscar,.h2-filt #h-pago,.h2-filt #h-tipopaciente,.h2-acts{grid-column:1/-1}.h2-acts .appbtn{flex:1}.h2-fgrp{width:100%}.h2-fgrp .app-input{flex:1;min-width:0}.h2-fechas{gap:8px}}
 .h2-table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:12px}
 .h2-table thead th{text-align:left;padding:0 10px 4px;color:var(--g4);font-size:9px;letter-spacing:.6px;text-transform:uppercase;font-weight:800}
 .h2-table tbody tr{background:#fff;box-shadow:0 1px 3px rgba(11,22,40,.06)}
@@ -797,7 +806,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
         <div class="h2-chips" id="h-kpis"></div>
       </div>
       <div class="h2-filt">
-        <input class="app-input" type="text" id="h-buscar" placeholder="Buscar paciente..." style="min-width:170px;background:#fff"/>
+        <input class="app-input" type="text" id="h-buscar" placeholder="Buscar paciente..." style="background:#fff"/>
         <select class="app-input" id="h-periodo" style="background:#fff">
           <option value="hoy">Hoy</option>
           <option value="7">Últimos 7 días</option>
@@ -805,6 +814,8 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
           <option value="90">Últimos 90 días</option>
           <option value="365">Último año</option>
           <option value="0">Todo</option>
+          <option value="dia">📅 Un día específico…</option>
+          <option value="rango">📆 Rango de fechas…</option>
         </select>
         <select class="app-input" id="h-motivo" style="background:#fff">
           <option value="">Todos los motivos</option>
@@ -820,9 +831,24 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
           <option>Particular</option><option>Broker</option><option>VRIM</option>
           <option>Integra Salud</option><option>Vitalife</option>
         </select>
-        <button class="appbtn appbtn-s" id="btn-refrescar-historial" style="font-size:11px;padding:6px 12px">↻</button>
-        <button class="appbtn appbtn-s" id="btn-papelera-toggle" style="font-size:11px;padding:6px 12px;display:none">🗑 Papelera</button>
-        <button class="appbtn appbtn-p" id="btn-export-historial" style="font-size:11px;padding:6px 12px;margin-left:auto">⬇ Exportar</button>
+        <div class="h2-acts">
+          <button class="appbtn appbtn-s" id="btn-refrescar-historial" type="button" title="Actualizar">↻</button>
+          <button class="appbtn appbtn-s" id="btn-papelera-toggle" type="button" style="display:none">🗑 Papelera</button>
+          <button class="appbtn appbtn-p" id="btn-export-historial" type="button">⬇ Exportar</button>
+        </div>
+        <div class="h2-fechas" id="h-fechas">
+          <span class="h2-fl">Fechas</span>
+          <div class="h2-fgrp" id="h-f-dia">
+            <button class="appbtn appbtn-s" id="h-dia-prev" type="button" title="Día anterior">‹</button>
+            <input class="app-input" type="date" id="h-fecha" style="background:#fff"/>
+            <button class="appbtn appbtn-s" id="h-dia-next" type="button" title="Día siguiente">›</button>
+            <span class="h2-qk" data-grp="dia" data-q="hoy">Hoy</span><span class="h2-qk" data-grp="dia" data-q="ayer">Ayer</span>
+          </div>
+          <div class="h2-fgrp" id="h-f-rng">
+            <input class="app-input" type="date" id="h-desde" style="background:#fff" aria-label="Desde"/><span class="h2-fl" style="text-transform:none;letter-spacing:0">a</span><input class="app-input" type="date" id="h-hasta" style="background:#fff" aria-label="Hasta"/>
+            <span class="h2-qk" data-grp="rng" data-q="semana">Esta semana</span><span class="h2-qk" data-grp="rng" data-q="mes">Este mes</span><span class="h2-qk" data-grp="rng" data-q="mespasado">Mes pasado</span>
+          </div>
+        </div>
       </div>
       <div class="hist-filtros-exclusivos">
         <label class="hist-filtro-link"><input type="checkbox" id="h-solo-facturado"/> 🧾 Solo facturado</label>
@@ -2253,15 +2279,57 @@ function limpiarRegistro(){
 document.getElementById('btn-guardar-registro').addEventListener('click', guardarRegistro);
 document.getElementById('btn-limpiar-registro').addEventListener('click', limpiarRegistro);
 
+// ── Segmentador de fechas del Historial: un día específico (con ‹ ›) o un rango desde–hasta ──
+const hEl = id => document.getElementById(id);
+const hAddDias = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return isoLocal(d); };
+function hDiaLargo(iso){ const s = new Date(iso + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long' }); return s.charAt(0).toUpperCase() + s.slice(1) + ' ' + fmtFechaISO(iso); }
+// Periodo vigente del Historial: { modo, desde, hasta, texto }
+function histPeriodoInfo(){
+  const raw = hEl('h-periodo').value, hoy = isoLocal(new Date());
+  if(raw === 'hoy') return { modo: 'hoy', desde: hoy, hasta: hoy, texto: 'Hoy' };
+  if(raw === 'dia'){ const f = hEl('h-fecha').value || hoy; return { modo: 'dia', desde: f, hasta: f, texto: hDiaLargo(f) }; }
+  if(raw === 'rango'){
+    let d = hEl('h-desde').value || null, h = hEl('h-hasta').value || null;
+    if(d && h && d > h){ const t = d; d = h; h = t; }          // fechas invertidas: se acomodan solas
+    return { modo: 'rango', desde: d, hasta: h, texto: (d ? fmtFechaISO(d) : 'inicio') + ' – ' + (h ? fmtFechaISO(h) : 'hoy') };
+  }
+  const n = parseInt(raw) || 0;
+  return { modo: 'rel', desde: n > 0 ? isoDesdeHace(n) : null, hasta: null, texto: hEl('h-periodo').selectedOptions[0].text };
+}
+function histRangoRapido(q){
+  const hoy = isoLocal(new Date()), d = new Date(hoy + 'T12:00:00');
+  if(q === 'hoy') return [hoy, hoy];
+  if(q === 'ayer'){ const a = hAddDias(hoy, -1); return [a, a]; }
+  if(q === 'semana'){ const dow = d.getDay() === 0 ? 7 : d.getDay(); return [hAddDias(hoy, -(dow - 1)), hoy]; }
+  if(q === 'mes') return [hoy.slice(0, 8) + '01', hoy];
+  if(q === 'mespasado'){ const u = new Date(hoy.slice(0, 8) + '01T12:00:00'); u.setDate(0); const fin = isoLocal(u); return [fin.slice(0, 8) + '01', fin]; }
+  return null;
+}
+function histMarcarAtajos(){
+  const modo = hEl('h-periodo').value;
+  document.querySelectorAll('.h2-qk').forEach(b => {
+    const r = histRangoRapido(b.dataset.q); let on = false;
+    if(modo === 'dia') on = !!r && b.dataset.grp === 'dia' && hEl('h-fecha').value === r[0];
+    if(modo === 'rango') on = !!r && b.dataset.grp === 'rng' && hEl('h-desde').value === r[0] && hEl('h-hasta').value === r[1];
+    b.classList.toggle('act', on);
+  });
+}
+function histActualizarFechas(){
+  const modo = hEl('h-periodo').value, hoy = isoLocal(new Date());
+  hEl('h-fechas').classList.toggle('on', modo === 'dia' || modo === 'rango');
+  hEl('h-f-dia').classList.toggle('on', modo === 'dia'); hEl('h-f-rng').classList.toggle('on', modo === 'rango');
+  if(modo === 'dia' && !hEl('h-fecha').value) hEl('h-fecha').value = hoy;
+  if(modo === 'rango'){ if(!hEl('h-hasta').value) hEl('h-hasta').value = hoy; if(!hEl('h-desde').value) hEl('h-desde').value = hAddDias(hoy, -6); }
+  histMarcarAtajos();
+}
+
 // ── Historial (lectura real) ──
 async function cargarHistorial(){
   const tbody = document.getElementById('h-tbody');
   const kpisEl = document.getElementById('h-kpis');
   tbody.innerHTML = '<tr><td colspan="11" style="padding:20px;text-align:center;color:var(--g4)">Cargando...</td></tr>';
-  const periodoRaw = document.getElementById('h-periodo').value;
   const soloNoVino = document.getElementById('h-solo-novino').checked;
-  const hoyIso = isoLocal(new Date());
-  const periodo = parseInt(periodoRaw) || 0;
+  const per = histPeriodoInfo();
   const construir = () => {
     let q = sb
       .from('consultas')
@@ -2272,8 +2340,8 @@ async function cargarHistorial(){
     // por defecto el historial NUNCA muestra "no vino" (no son visitas reales);
     // solo se muestran cuando ese filtro específico está activo — mismo patrón que CANOPY
     q = soloNoVino ? q.eq('no_vino', true) : q.eq('no_vino', false);
-    if(periodoRaw === 'hoy') q = q.gte('fecha', hoyIso).lte('fecha', hoyIso);
-    else if(periodo > 0) q = q.gte('fecha', isoDesdeHace(periodo));
+    if(per.desde) q = q.gte('fecha', per.desde);
+    if(per.hasta) q = q.lte('fecha', per.hasta);
     return q;
   };
   const { data, error } = await traerTodo(construir);
@@ -2305,7 +2373,7 @@ function aplicarFiltrosHistorial(){
   if(soloNoFacturado) rows = rows.filter(r => !r.factura);
 
   const kpisEl = document.getElementById('h-kpis');
-  const periodoTxt = document.getElementById('h-periodo').selectedOptions[0].text;
+  const periodoTxt = histPeriodoInfo().texto;
   if(rows.length === 0){
     document.getElementById('h-tbody').innerHTML = '<tr><td colspan="11" style="padding:20px;text-align:center;color:var(--g4)">Sin registros para este filtro</td></tr>';
     kpisEl.innerHTML = '';
@@ -2315,7 +2383,7 @@ function aplicarFiltrosHistorial(){
   const totalIngreso = rows.reduce((a,r)=>a+Number(r.monto||0)+Number(r.monto_2||0),0);
   const pacientesUnicos = new Set(rows.map(r=>r.pacientes?.id)).size;
   const ticketProm = rows.length ? totalIngreso/rows.length : 0;
-  document.getElementById('h2-subt').textContent = periodoTxt + ' · ' + rows.length + ' registros';
+  document.getElementById('h2-subt').textContent = periodoTxt + ' · ' + rows.length + (rows.length === 1 ? ' registro' : ' registros');
   kpisEl.innerHTML = `
     <div class="h2-chip"><span class="ico">💰</span><div><div class="v">$${totalIngreso.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="l">Total</div></div></div>
     <div class="h2-chip"><span class="ico">👥</span><div><div class="v">${pacientesUnicos}</div><div class="l">Pacientes</div></div></div>
@@ -2384,7 +2452,15 @@ function fmtFechaISO(iso){
   return `${d}/${m}/${y}`;
 }
 document.getElementById('btn-refrescar-historial').addEventListener('click', cargarHistorial);
-document.getElementById('h-periodo').addEventListener('change', cargarHistorial);
+document.getElementById('h-periodo').addEventListener('change', () => { histActualizarFechas(); cargarHistorial(); });
+['h-fecha', 'h-desde', 'h-hasta'].forEach(id => hEl(id).addEventListener('change', () => { histMarcarAtajos(); cargarHistorial(); }));
+hEl('h-dia-prev').addEventListener('click', () => { hEl('h-fecha').value = hAddDias(hEl('h-fecha').value || isoLocal(new Date()), -1); histMarcarAtajos(); cargarHistorial(); });
+hEl('h-dia-next').addEventListener('click', () => { hEl('h-fecha').value = hAddDias(hEl('h-fecha').value || isoLocal(new Date()), 1); histMarcarAtajos(); cargarHistorial(); });
+document.querySelectorAll('.h2-qk').forEach(b => b.addEventListener('click', () => {
+  const r = histRangoRapido(b.dataset.q); if(!r) return;
+  if(b.dataset.grp === 'dia') hEl('h-fecha').value = r[0]; else { hEl('h-desde').value = r[0]; hEl('h-hasta').value = r[1]; }
+  histMarcarAtajos(); cargarHistorial();
+}));
 document.getElementById('h-buscar').addEventListener('input', aplicarFiltrosHistorial);
 document.getElementById('h-motivo').addEventListener('change', aplicarFiltrosHistorial);
 document.getElementById('h-pago').addEventListener('change', aplicarFiltrosHistorial);
@@ -2423,6 +2499,13 @@ function cargarJSPDF(){
 
 // ── Modal de exportar: formato + rango de fecha + qué incluir ──
 document.getElementById('btn-export-historial').addEventListener('click', ()=>{
+  // si el Historial está viendo un día o un rango específico, la exportación arranca con esas mismas fechas
+  const per = histPeriodoInfo();
+  if(per.modo === 'dia' || per.modo === 'rango'){
+    document.querySelector('.exp-quick-btn[data-q="custom"]').click();
+    document.getElementById('exp-fecha-desde').value = per.desde || '';
+    document.getElementById('exp-fecha-hasta').value = per.hasta || isoLocal(new Date());
+  }
   document.getElementById('modal-exportar').classList.add('show');
 });
 document.getElementById('btn-exp-cancelar').addEventListener('click', ()=>{
@@ -5356,6 +5439,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-5</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-6</div>
 </body>
 </html>
