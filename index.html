@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.22-4"/>
+<meta name="app-version" content="2026.10.22-5"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -668,6 +668,9 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
   .ent-g2{grid-template-columns:1fr 1fr}
 }
 .cj-solo{font-size:10px;color:var(--g6);margin:-4px 0 10px}
+#upd-banner{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#0B1628;color:#fff;padding:11px 14px 11px 18px;border-radius:12px;font-size:13px;z-index:10001;display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(11,22,40,.35);transition:opacity .25s,transform .25s;max-width:92vw}
+#upd-banner.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
+#upd-banner button{background:#2ABFBF;color:#0B1628;border:0;border-radius:8px;padding:7px 14px;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1232,6 +1235,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
 </div>
 
 <div class="toast2" id="toast2"></div>
+<div id="upd-banner" role="status"><span id="upd-msg">Hay una versión nueva de CUIVAN.</span><button id="upd-btn" type="button">Actualizar ahora</button></div>
 
 <!-- Modal genérico de confirmación (reemplaza confirm() nativo) -->
 <div class="modal-overlay2" id="confirm-modal-overlay">
@@ -1485,6 +1489,64 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
 <script>
 const APP_VERSION = (document.querySelector('meta[name="app-version"]') || {}).content || 'dev';
 try { (console.info || console.log).call(console, '[CUIVAN] Versión ' + APP_VERSION); } catch(_) {}  // la vista previa de Claude no trae console.info
+// ── Auto-actualización (igual que Skin Fabric, SIN cuenta regresiva): detecta una versión nueva publicada y recarga de inmediato.
+//    Solo espera si hay una ventana abierta o una captura a medias (para no perder lo que se está escribiendo). ──
+(function(){
+  const CADA_MS = 2 * 60 * 1000;          // revisa cada 2 min, y al volver a la pestaña
+  const CAMPOS = ['r-paciente', 'r-telefono', 'r-monto', 'r-monto2', 'r-notas', 'r-numfactura', 'r-tipoconsulta-libre', 'gasto-monto', 'gasto-descripcion'];
+  let nuevaVer = null, revisando = false, ultima = 0, ultimaTecla = 0, vigila = null;
+  const ban = () => document.getElementById('upd-banner');
+  const urlLimpia = () => { const u = new URL(location.href); u.searchParams.delete('_v'); u.searchParams.delete('_chk'); u.hash = ''; return u; };
+  document.addEventListener('keydown', () => { ultimaTecla = Date.now(); }, true);
+  function ocupado(){
+    if(document.querySelector('.modal-overlay2.show')) return true;                       // ventana abierta (editar, confirmar, entrega…)
+    const a = document.activeElement;
+    if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && (a.value || '').length && Date.now() - ultimaTecla < 20000) return true;   // escribiendo ahora
+    return CAMPOS.some(id => { const el = document.getElementById(id); if(!el) return false; const v = String(el.value || '').trim(); return v !== '' && !(el.type === 'number' && Number(v) === 0); });   // registro o gasto a medias (un monto en 0 cuenta como vacío)
+  }
+  function recargar(){
+    try { sessionStorage.setItem('cv_upd_try', nuevaVer + '|' + Date.now()); } catch(e) {}
+    const u = urlLimpia(); u.searchParams.set('_v', nuevaVer);
+    location.replace(u.toString() + location.hash);
+  }
+  function aplicar(){
+    if(!ocupado()){ recargar(); return; }                                                  // libre: se actualiza de una
+    const b = ban(); if(!b) return;
+    document.getElementById('upd-msg').textContent = 'Hay una versión nueva. Se actualizará en cuanto termines lo que estás haciendo.';
+    document.getElementById('upd-btn').onclick = recargar; b.classList.add('show');
+    if(vigila) return;
+    vigila = setInterval(() => { if(!ocupado()){ clearInterval(vigila); recargar(); } }, 1500);
+  }
+  async function revisar(){
+    if(revisando || nuevaVer || !navigator.onLine) return;
+    if(Date.now() - ultima < 20000) return;
+    ultima = Date.now(); revisando = true;
+    try {
+      const u = urlLimpia(); u.searchParams.set('_chk', Date.now());
+      const r = await fetch(u.toString(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+      if(!r.ok) return;
+      const m = (await r.text()).match(/<meta name="app-version" content="([^"]+)"/);
+      if(!m || m[1] === APP_VERSION) return;
+      nuevaVer = m[1];
+      let prev = null; try { prev = sessionStorage.getItem('cv_upd_try'); } catch(e) {}
+      if(prev && prev.split('|')[0] === nuevaVer && Date.now() - Number(prev.split('|')[1]) < 10 * 60 * 1000){
+        // ya se intentó cargar esa versión y el servidor sigue entregando la vieja: no se cicla, solo avisa
+        const b = ban(); if(!b) return;
+        document.getElementById('upd-msg').textContent = 'Hay una versión nueva. Cierra y vuelve a abrir la pestaña.';
+        const btn = document.getElementById('upd-btn'); btn.textContent = 'Recargar'; btn.onclick = () => location.reload(); b.classList.add('show'); return;
+      }
+      try { (console.info || console.log).call(console, '[CUIVAN] versión nueva ' + nuevaVer + ' (actual ' + APP_VERSION + ')'); } catch(_) {}
+      aplicar();
+    } catch(e) { /* sin red: se reintenta luego */ }
+    finally { revisando = false; }
+  }
+  window.cuivanRevisarVersion = revisar;
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') revisar(); });
+  window.addEventListener('focus', revisar);
+  window.addEventListener('online', revisar);
+  setInterval(revisar, CADA_MS);
+  setTimeout(revisar, 4000);
+})();
 const SUPABASE_URL = 'https://ekuaqcmlkjywagrgjooe.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrdWFxY21sa2p5d2Fncmdqb29lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNjUzNTgsImV4cCI6MjEwMTY0MTM1OH0.1xnf1NbyhP2JqC9UKhjX6rppyWs4POy2YnqdLnnlGmI';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -5294,6 +5356,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-4</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-5</div>
 </body>
 </html>
