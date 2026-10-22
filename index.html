@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.16-1"/>
+<meta name="app-version" content="2026.10.22-1"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -98,7 +98,7 @@ main.appmain{padding:22px 26px 40px;max-width:1080px;margin:0 auto}
 .prm-tab-btn.act{background:var(--navy);border-color:var(--navy);color:#fff}
 .prm-tab-btn.act[data-tab="novino"]{background:#7D3C98;border-color:#7D3C98}
 .prm-row-novino{border-left:4px solid #7D3C98}
-.pago-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.pago-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-items:start}
 .pago-card{border-radius:12px;padding:16px;position:relative;overflow:hidden}
 .pago-card.efectivo{background:#EAF7EE;border:1.5px solid #A8D8B4}
 .pago-card.tarjeta{background:#EEF5FC;border:1.5px solid #BDD5F0}
@@ -624,14 +624,38 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
   .sk-table tr{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;background:#fff;border-radius:10px;border-left:3px solid var(--teal);padding:6px 12px 8px;margin-bottom:8px;box-shadow:0 1px 3px rgba(11,22,40,.08)}
   .sk-table td,.sk-table td:first-child,.sk-table td:last-child{display:block;border:none;border-radius:0;padding:4px 0;background:none;min-width:0}
   .sk-table td:nth-child(1){order:1}.sk-table td:nth-child(3){order:2}.sk-table td:nth-child(2){order:3}.sk-table td:nth-child(4){order:4}
-  .sk-table td:nth-child(7){order:5;grid-column:1/-1;border-top:1px solid var(--g1);margin-top:4px;padding-top:6px}
-  .sk-table td:nth-child(5){order:6}.sk-table td:nth-child(6){order:7}
-  .sk-table td:nth-child(8){order:8;grid-column:1/-1;padding:6px 0 0}.sk-table td:empty{display:none}
+  .sk-table td:nth-child(8){order:5;grid-column:1/-1;border-top:1px solid var(--g1);margin-top:4px;padding-top:6px}
+  .sk-table td:nth-child(5){order:6}.sk-table td:nth-child(7){order:7}.sk-table td:nth-child(6){order:8;grid-column:1/-1}
+  .sk-table td:nth-child(9){order:9;grid-column:1/-1;padding:6px 0 0}.sk-table td:empty{display:none}
   .sk-table td::before{content:attr(data-l);display:block;font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4)}
   .sk-table td:not([data-l])::before{content:none}
 }
 @media (max-width:560px){.sk-catinfo{grid-template-columns:1fr}.sk-per{gap:6px}.sk-seg button{padding:7px 10px}}
 #dash-kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}
+/* ══════════ GASTOS: medio de pago · CORTE DE CAJA ══════════ */
+.kpi-tile .sk-ks{font-size:10px;color:var(--g6);margin-top:1px}
+.kpi-tile.sk-k-ef{border-color:#A8D8B4;background:linear-gradient(180deg,#fff,#F3FBF5)}.kpi-tile.sk-k-ef .val{color:#2E7D4F}
+.kpi-tile.sk-k-tr{border-color:#EDD49A;background:linear-gradient(180deg,#fff,#FFFBF2)}.kpi-tile.sk-k-tr .val{color:#9A6010}
+.kpi-tile.sk-k-dp{border-color:#BDD5F0;background:linear-gradient(180deg,#fff,#F4F8FD)}.kpi-tile.sk-k-dp .val{color:#1B5C9E}
+.sk-factline{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--g6);margin-bottom:10px}.sk-factline span{background:var(--g1);border-radius:20px;padding:4px 11px;font-weight:600}.sk-factline .warn{background:#FDF6EC;color:#9A6010}
+.sk-nd{background:#fff;color:#C0392B;border:1px dashed #E5A39B}
+.sk-table tr.legacy td{background:#FFFBF8}.sk-table tr.legacy td:first-child{border-left-color:#E5A39B}
+.sk-fchip small{margin-left:auto;font-size:9.5px;color:var(--g4);font-weight:600}
+.sk-ci{padding:7px 10px}.sk-ci .t{font-size:10.5px;margin-bottom:1px}
+.cj-corte{background:linear-gradient(135deg,#F3FBF5,#fff);border:1.5px solid #A8D8B4;border-radius:13px;padding:14px 16px;margin-bottom:14px}
+.cj-corte h4{font:800 13.5px var(--font-d);margin-bottom:10px}
+.cj-eq{display:grid;grid-template-columns:1fr auto 1fr auto 1.2fr;gap:8px;align-items:center}
+.cj-it{background:#fff;border:1px solid var(--g2);border-radius:10px;padding:9px 12px}.cj-it .l{font-size:9px;font-weight:700;letter-spacing:.4px;color:var(--g6);text-transform:uppercase}.cj-it .v{font:800 18px var(--font-d);margin-top:2px}
+.cj-op{font:800 20px var(--font-d);color:var(--g4);text-align:center}
+.cj-it.net{border:2px solid #2E7D4F;background:#EAF7EE}.cj-it.net .v{color:#2E7D4F;font-size:22px}.cj-it.net.bad{border-color:#C0392B;background:#FEF0EF}.cj-it.net.bad .v{color:#C0392B}
+.cj-rem{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.cj-rem div{flex:1;min-width:150px;background:#fff;border:1px solid var(--g2);border-radius:9px;padding:7px 11px;display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--g6)}.cj-rem b{font-family:var(--font-d);color:var(--navy)}
+.cj-sal{margin-top:12px;border-top:1px solid #d6eadb;padding-top:8px}.cj-sal .h{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g6);margin-bottom:4px}
+.cj-salrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid #eef3ef;font-size:11.5px}.cj-salrow:last-child{border-bottom:none}.cj-salrow .m{font:800 12.5px var(--font-d);color:#B8481F;white-space:nowrap}.cj-salrow small{color:var(--g4);display:block;font-size:10px}
+.cj-vacio{font-size:12px;color:#2E7D4F;font-weight:600;padding:4px 0}
+.cj-nota{font-size:11px;line-height:1.5;border-radius:9px;padding:9px 12px;margin-bottom:10px}.cj-nota.warn{background:#FDF6EC;border:1px solid #EDD49A;color:#9A6010}.cj-nota.info{background:var(--teal-soft);border:1px solid rgba(42,191,191,.35);color:#0B6E6E}.cj-nota.red{background:#FEF0EF;border:1px solid #FBBFBB;color:#C0392B}.cj-nota.muted{background:var(--g1);color:var(--g6)}
+.cj-neg{color:#C0392B}
+.cj-netbox{margin-top:12px;border-top:1px dashed rgba(46,125,79,.45);padding-top:10px;font-size:11.5px}.cj-netbox .r{display:flex;justify-content:space-between;gap:8px;padding:2px 0}.cj-netbox .r.net{font-weight:800;font-size:13px;border-top:1px solid rgba(46,125,79,.3);margin-top:4px;padding-top:6px}
+@media (max-width:860px){.cj-eq{grid-template-columns:1fr}.cj-op{display:none}}
 </style>
 </head>
 <body>
@@ -815,6 +839,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
         </select>
       </div>
       <div class="dash-kpi-row" id="cierre-kpis" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+      <div id="cierre-corte"></div>
       <div class="prm-tabs">
         <button type="button" class="prm-tab-btn act" id="cierre-subtab-doctor" data-sub="doctor">👥 Por Doctor</button>
         <button type="button" class="prm-tab-btn" id="cierre-subtab-pago" data-sub="pago">💳 Por Medio de Pago</button>
@@ -946,6 +971,9 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
         <select class="app-input" id="gasto-fact-filtro" style="background:#fff">
           <option value="">Facturado y no facturado</option><option value="si">Facturado</option><option value="no">No facturado</option>
         </select>
+        <select class="app-input" id="gasto-pago-filtro" style="background:#fff">
+          <option value="">💳 Todos los medios de pago</option><option value="efectivo">💵 Efectivo</option><option value="transferencia">🏦 Transferencia</option><option value="deposito">📥 Depósito</option><option value="__nd">⚠️ Sin definir</option>
+        </select>
       </div>
       <div class="sk-pills" id="gasto-pills"></div>
       <div class="sk-split">
@@ -955,6 +983,14 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
           <div class="sk-fg"><label class="lb" for="gasto-categoria">Categoría</label><select class="app-input" id="gasto-categoria" style="background:#fff"><option value="">Seleccionar…</option></select><div id="gasto-hints"></div></div>
           <div class="sk-fg"><label class="lb" for="gasto-monto">Monto ($)</label><input class="app-input" type="number" id="gasto-monto" min="0.01" step="0.01" placeholder="0.00" inputmode="decimal"/></div>
           <div class="sk-fg"><label class="lb" for="gasto-descripcion">Descripción del gasto</label><textarea class="app-input" id="gasto-descripcion" rows="2" placeholder="¿En qué se gastó?"></textarea></div>
+          <div class="sk-fg"><label class="lb">Medio de pago <span style="color:#E5484D">*</span></label>
+            <div class="sk-fact" id="gasto-pago">
+              <label class="sk-fchip"><input type="radio" name="gasto-pago" value="efectivo"/><span class="rdot"></span><span>💵 Efectivo</span><small>descuenta caja</small></label>
+              <label class="sk-fchip"><input type="radio" name="gasto-pago" value="transferencia"/><span class="rdot"></span><span>🏦 Transferencia</span></label>
+              <label class="sk-fchip"><input type="radio" name="gasto-pago" value="deposito"/><span class="rdot"></span><span>📥 Depósito</span></label>
+            </div>
+            <div class="sk-hint show" id="gasto-pago-hint">Elige cómo se pagó: si es efectivo, se descuenta del efectivo del día en el Cierre.</div>
+          </div>
           <div class="sk-fg"><label class="lb">Facturación</label>
             <div class="sk-fact" id="gasto-fact">
               <label class="sk-fchip on"><input type="radio" name="gasto-fact" value="no" checked/><span class="rdot"></span><span>No facturado</span></label>
@@ -965,23 +1001,27 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
         </div>
         <div style="min-width:0">
           <div class="sk-kpis" id="gasto-kpis"></div>
+          <div class="sk-factline" id="gasto-factline"></div>
+          <div class="sk-nota" id="gasto-nd-nota" style="display:none"></div>
           <div class="sk-grid">
             <div class="sk-sec"><div class="sk-sh"><div class="sk-st">🍩 Por categoría</div></div>
               <div class="sk-donut"><div class="cv"><canvas id="ch-gasto-cat"></canvas></div><div class="sk-legend" id="gasto-legend"></div></div></div>
-            <div class="sk-sec"><div class="sk-sh"><div class="sk-st" id="gasto-serie-t">📅 Por día</div></div><div style="height:160px;margin-top:8px"><canvas id="ch-gasto-serie"></canvas></div></div>
+            <div class="sk-sec"><div class="sk-sh"><div class="sk-st">💳 Por medio de pago</div></div>
+              <div class="sk-donut"><div class="cv"><canvas id="ch-gasto-pago"></canvas></div><div class="sk-legend" id="gasto-legend-pago"></div></div></div>
           </div>
+          <div class="sk-st" style="margin:10px 0 6px">ℹ️ ¿Qué incluye cada categoría?</div>
+          <div class="sk-catinfo" id="gasto-cat-info"></div>
         </div>
       </div>
+      <div class="sk-sec" style="margin-bottom:14px"><div class="sk-sh"><div class="sk-st" id="gasto-serie-t">📅 Por día</div></div><div style="height:130px;margin-top:6px"><canvas id="ch-gasto-serie"></canvas></div></div>
       <div class="sk-xh"><div class="sk-st">Todos los gastos</div><button class="appbtn appbtn-s" id="gasto-btn-exportar" type="button" style="font-size:11px;padding:6px 12px">↓ Exportar Excel</button></div>
       <div class="sk-tw">
         <table class="sk-table">
-          <thead><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Facturación</th><th>Agregado por</th><th>Registrado el</th><th>Descripción</th><th></th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Medio de pago</th><th>Facturación</th><th>Agregado por</th><th>Registrado el</th><th>Descripción</th><th></th></tr></thead>
           <tbody id="gasto-tbody"></tbody>
         </table>
         <div class="sk-empty" id="gasto-empty" style="display:none">Sin gastos para este filtro.</div>
       </div>
-      <div class="sk-st" style="margin:16px 0 8px">¿Qué incluye cada categoría?</div>
-      <div class="sk-catinfo" id="gasto-cat-info"></div>
     </div>
 
     <div class="card screen2" id="app-screen-contratos">
@@ -1057,6 +1097,14 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
         <button class="appbtn appbtn-p" id="btn-ct-cfg-guardar">Guardar</button>
       </div>
 
+      <div class="tab-title" style="margin-top:6px">💵 Control de caja</div>
+      <div class="fac2" style="margin-bottom:14px">
+        <p style="font-size:11px;color:var(--g6);line-height:1.5;margin-bottom:12px">El <b>remanente de efectivo</b> es lo que sobra de días anteriores (efectivo cobrado menos salidas de efectivo) y cubre los días en que el efectivo no alcanza. Se lleva desde esta fecha; antes de ella no se arrastra nada.</p>
+        <div class="fi2" style="max-width:260px"><label class="lbl2">Llevar el remanente desde</label><input class="app-input" type="date" id="caja-inicio"/></div>
+        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin:8px 0 10px">Si el efectivo se entrega o se deposita y quieres empezar de cero, elige la fecha de hoy.</p>
+        <button class="appbtn appbtn-p" id="btn-caja-guardar">Guardar</button>
+      </div>
+
       <div class="tab-title" style="margin-top:6px">📜 Actividad reciente</div>
       <div id="audit-lista"></div>
     </div>
@@ -1071,6 +1119,13 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       <div class="sk-fg"><label class="lb">Categoría</label><select class="app-input" id="editg-categoria" style="background:#fff"></select></div>
       <div class="sk-fg"><label class="lb">Monto ($)</label><input class="app-input" type="number" id="editg-monto" min="0.01" step="0.01" inputmode="decimal"/></div>
       <div class="sk-fg"><label class="lb">Descripción del gasto</label><textarea class="app-input" id="editg-descripcion" rows="2"></textarea></div>
+      <div class="sk-fg"><label class="lb">Medio de pago <span style="color:#E5484D">*</span></label>
+        <div class="sk-fact" id="editg-pago">
+          <label class="sk-fchip"><input type="radio" name="editg-pago" value="efectivo"/><span class="rdot"></span><span>💵 Efectivo</span><small>descuenta caja</small></label>
+          <label class="sk-fchip"><input type="radio" name="editg-pago" value="transferencia"/><span class="rdot"></span><span>🏦 Transferencia</span></label>
+          <label class="sk-fchip"><input type="radio" name="editg-pago" value="deposito"/><span class="rdot"></span><span>📥 Depósito</span></label>
+        </div>
+      </div>
       <div class="sk-fg"><label class="lb">Facturación</label>
         <div class="sk-fact" id="editg-fact">
           <label class="sk-fchip"><input type="radio" name="editg-fact" value="no"/><span class="rdot"></span><span>No facturado</span></label>
@@ -1639,6 +1694,8 @@ function entrarAlShell(perfil){
   // Gastos: admin + quien tenga permisos.puede_ver_gastos (registrar/ver); editar y eliminar: admin o quien lo registró
   window.MI_VE_GASTOS = perfil.rol === 'admin' || perfil.permisos?.puede_ver_gastos === true;
   document.getElementById('nav-gastos').style.display = window.MI_VE_GASTOS ? '' : 'none';
+  // Corte de caja en el Cierre: admin, Recepción y quien tenga permiso de Gastos (la base de datos lo exige igual)
+  window.MI_VE_CORTE = perfil.rol === 'admin' || perfil.rol === 'recepcion' || perfil.permisos?.puede_ver_gastos === true;
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
   document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
@@ -2896,6 +2953,7 @@ document.getElementById('btn-personal-header').addEventListener('click', ()=>{
   cargarAuditLog();
   cargarHorarioAcceso();
   ctCfgCargar();
+  cajaCfgCargar();
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -3235,6 +3293,23 @@ document.getElementById('btn-ct-cfg-guardar').addEventListener('click', ctCfgGua
 // si la app queda abierta de un día a otro, al volver a la pestaña se recalculan los días
 document.addEventListener('visibilitychange', () => { if(!document.hidden && CT.cargado) ctRenderTodo(); });
 
+// ── Control de caja: fecha desde la que se lleva el remanente (solo admin) ──
+async function cajaCfgCargar(){
+  if(!window.MI_ROL_ADMIN) return;
+  const { data, error } = await sb.from('caja_config').select('inicio_control').eq('id', true).maybeSingle();
+  if(error){ console.error('[CUIVAN] Error leyendo control de caja:', error); return; }
+  if(data) document.getElementById('caja-inicio').value = data.inicio_control;
+}
+document.getElementById('btn-caja-guardar').addEventListener('click', async () => {
+  const v = document.getElementById('caja-inicio').value;
+  if(!v){ toast('⚠️ Elige la fecha desde la que se lleva el remanente'); return; }
+  const btn = document.getElementById('btn-caja-guardar'); btn.disabled = true;
+  const { error } = await sb.from('caja_config').update({ inicio_control: v }).eq('id', true);
+  btn.disabled = false;
+  if(error){ console.error('[CUIVAN] Error guardando control de caja:', error); toast('⚠️ No se pudo guardar: ' + error.message); return; }
+  toast('✅ Control de caja actualizado: el remanente se lleva desde el ' + fmtFechaISO(v));
+});
+
 // ── Horario de acceso (solo Recepción se restringe) ──
 async function cargarHorarioAcceso(){
   const { data, error } = await sb.from('horario_acceso').select('hora_inicio, hora_fin, activo, bloquear_domingo').order('updated_at', { ascending:false }).limit(1).maybeSingle();
@@ -3540,7 +3615,8 @@ const AUDIT_LABEL = {
   contratos_config: '🔔 Cambió los días de alerta de contratos',
   gasto_registrar: '💸 Registró un gasto',
   gasto_editar: '✏️ Editó un gasto',
-  gasto_eliminar: '🗑️ Eliminó un gasto'
+  gasto_eliminar: '🗑️ Eliminó un gasto',
+  caja_config: '💵 Cambió la fecha de inicio del control de caja'
 };
 async function cargarAuditLog(){
   const cont = document.getElementById('audit-lista');
@@ -3598,6 +3674,46 @@ function actualizarLabelCierre(){
     document.getElementById('cierre-month-picker').value = isoLocal(CIERRE_FECHA).slice(0,7);
   }
 }
+// ═══ CORTE DE CAJA (Cierre): efectivo cobrado − salidas de efectivo = efectivo neto. Si el efectivo del día no alcanza se toma remanente de días anteriores. ═══
+let CIERRE_CORTE = null, CIERRE_CJ = null;
+const cjMoney = v => (v < 0 ? '−' : '') + skMoney(Math.abs(v));
+const cjEfectivoCobrado = data => data.reduce((a, r) => a + (r.medio_pago === 'Efectivo' ? Number(r.monto || 0) : 0) + (r.medio_pago_2 === 'Efectivo' ? Number(r.monto_2 || 0) : 0), 0);
+function cjNetbox(c){
+  return `<div class="cj-netbox"><div class="r"><span>Efectivo cobrado</span><b>${skMoney(c.ef)}</b></div><div class="r"><span>− Salidas de efectivo</span><b style="color:#B8481F">${skMoney(c.totSal)}</b></div><div class="r net"><span>= Efectivo neto</span><span class="${c.neto < 0 ? 'cj-neg' : ''}">${cjMoney(c.neto)}</span></div>${c.caja && c.caja.aplica ? `<div class="r"><span>Remanente al cierre</span><b>${skMoney(c.caja.remanente_final)}</b></div>` : ''}</div>`;
+}
+function renderCorteCaja(data, doctorFiltro){
+  const el = document.getElementById('cierre-corte');
+  CIERRE_CJ = null;
+  if(!CIERRE_CORTE){ el.innerHTML = ''; return; }
+  if(doctorFiltro){ el.innerHTML = '<div class="cj-nota info">💵 Las salidas de efectivo son generales de la clínica, no de un doctor. Quita el filtro de doctor para ver el corte de caja y el efectivo neto.</div>'; return; }
+  const c = CIERRE_CORTE, salidas = c.salidas || [], caja = c.caja || {};
+  const ef = cjEfectivoCobrado(data), totSal = salidas.reduce((a, s) => a + Number(s.monto || 0), 0), neto = ef - totSal;
+  const dia = CIERRE_MODO === 'dia', per = dia ? 'del día' : 'del periodo';
+  CIERRE_CJ = { ef, totSal, neto, caja };
+  const sm = c.sin_medio || { n: 0, total: 0 };
+  const aviso = sm.n > 0 ? `<div class="cj-nota warn">⚠️ <b>${sm.n} gasto(s) sin medio de pago</b> en ${dia ? 'este día' : 'el periodo'} (${skMoney(sm.total)}): no se descuentan del efectivo hasta que se les asigne uno.${window.MI_VE_GASTOS ? '' : ' Avisa a quien administra los gastos.'}</div>` : '';
+  let rem = '';
+  if(caja.aplica){
+    const rI = Number(caja.remanente_inicial || 0), cub = Number(caja.cubierto || 0), fal = Number(caja.faltante || 0), rF = Number(caja.remanente_final || 0);
+    if(rI > 0 || cub > 0 || fal > 0 || rF > 0){
+      rem = `<div class="cj-rem"><div><span>${dia ? 'Remanente de días anteriores' : 'Remanente previo al periodo'}</span><b>${skMoney(rI)}</b></div>`
+        + (cub > 0 ? `<div><span>Cubierto con remanente</span><b class="cj-neg">−${skMoney(cub)}</b></div>` : '')
+        + `<div><span>Remanente al cierre</span><b style="color:#2E7D4F">${skMoney(rF)}</b></div></div>`;
+    }
+    if(cub > 0) rem += `<div class="cj-nota info" style="margin:10px 0 0">El efectivo ${per} no alcanzó: se tomaron <b>${skMoney(cub)}</b> del remanente de días anteriores.</div>`;
+    if(fal > 0) rem += `<div class="cj-nota red" style="margin:10px 0 0">⚠️ <b>Faltan ${skMoney(fal)}</b>: el efectivo ${per} y el remanente no alcanzaron para cubrir las salidas.</div>`;
+  } else {
+    rem = `<div class="cj-nota muted" style="margin:10px 0 0">El remanente se lleva desde el ${fmtFechaISO(caja.inicio)}${window.MI_ROL_ADMIN ? ' (se cambia en ⚙️ Configuración → Control de caja)' : ''}.</div>`;
+    if(neto < 0) rem += `<div class="cj-nota red" style="margin:10px 0 0">Las salidas ${per} superan el efectivo cobrado.</div>`;
+  }
+  const lista = salidas.length ? salidas.map(sa => { const k = gstCat(sa.categoria); return `<div class="cj-salrow"><span class="sk-bdg" style="background:${k.color}1a;color:${k.color}">${k.label}</span><div>${esc2(sa.descripcion)}<small>${dia ? '' : fmtFechaISO(sa.fecha) + ' · '}${sa.registro ? 'Registró: ' + esc2(sa.registro) : 'Salida de efectivo'}</small></div><span class="m">−${skMoney(sa.monto)}</span></div>`; }).join('')
+    : `<div class="cj-vacio">✓ Sin salidas de efectivo ${dia ? 'este día' : 'en el periodo'}</div>`;
+  el.innerHTML = aviso + `<div class="cj-corte"><h4>💵 Corte de caja · ${per}</h4>
+    <div class="cj-eq"><div class="cj-it"><div class="l">Efectivo cobrado</div><div class="v" style="color:#2E7D4F">${skMoney(ef)}</div></div><div class="cj-op">−</div>
+      <div class="cj-it"><div class="l">Salidas de efectivo (${salidas.length})</div><div class="v" style="color:#B8481F">${skMoney(totSal)}</div></div><div class="cj-op">=</div>
+      <div class="cj-it net ${neto < 0 ? 'bad' : ''}"><div class="l">Efectivo neto ${per}</div><div class="v">${cjMoney(neto)}</div></div></div>
+    ${rem}<div class="cj-sal"><div class="h">Salidas de efectivo ${per}</div>${lista}</div></div>`;
+}
 async function cargarCierre(){
   actualizarLabelCierre();
   const { desde, hasta } = rangoCierreActual();
@@ -3609,7 +3725,13 @@ async function cargarCierre(){
     if(doctorFiltro) q = q.eq('doctor_id', doctorFiltro);
     return q;
   };
-  const { data, error } = await traerTodo(construirCierre);
+  const [resCierre, resCorte] = await Promise.all([
+    traerTodo(construirCierre),
+    window.MI_VE_CORTE ? sb.rpc('cierre_gastos_info', { p_desde: desde, p_hasta: hasta }) : Promise.resolve({ data: null, error: null })
+  ]);
+  const { data, error } = resCierre;
+  CIERRE_CORTE = (resCorte && !resCorte.error && resCorte.data && resCorte.data.permitido) ? resCorte.data : null;
+  if(resCorte && resCorte.error) console.error('[CUIVAN] Error cargando el corte de caja:', resCorte.error);
   const kpisEl = document.getElementById('cierre-kpis');
   const listaEl = document.getElementById('cierre-lista');
   if(error){
@@ -3625,6 +3747,7 @@ async function cargarCierre(){
     <div class="kpi-tile"><div class="ico">🧾</div><div class="lbl3">Consultas</div><div class="val">${totalConsultas}</div></div>
     <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket promedio</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
   `;
+  renderCorteCaja(data, doctorFiltro);
   const MEDIOS_INFO = {
     Efectivo:{cls:'efectivo', icon:'💵'},
     Tarjeta:{cls:'tarjeta', icon:'💳'},
@@ -3711,6 +3834,7 @@ async function cargarCierre(){
         <div class="pago-desglose">
           ${Object.entries(v.doctores).sort((a,b)=>b[1]-a[1]).map(([doc,monto]) => `<div><span>${esc2(doc)}</span><span>$${monto.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`).join('')}
         </div>
+        ${medio === 'Efectivo' && CIERRE_CJ ? cjNetbox(CIERRE_CJ) : ''}
       </div>
     `).join('') + `</div>`;
   }
@@ -3812,18 +3936,29 @@ const GST_CATS = [
 ];
 const gstCat = id => GST_CATS.find(c => c.id === id) || { id, label: id, color: '#64748b', desc: '' };
 const gstNombreCat = id => gstCat(id).label.replace(/^\S+\s/, '');
+const GST_PAGOS = {
+  efectivo:      { l:'Efectivo',      ic:'💵', fg:'#2E7D4F', bg:'#EAF7EE', bd:'#A8D8B4', color:'#2E7D4F' },
+  transferencia: { l:'Transferencia', ic:'🏦', fg:'#9A6010', bg:'#FDF6EC', bd:'#EDD49A', color:'#C98A1B' },
+  deposito:      { l:'Depósito',      ic:'📥', fg:'#1B5C9E', bg:'#EEF5FC', bd:'#BDD5F0', color:'#1B5C9E' },
+};
+const gstBadgePago = k => { const p = GST_PAGOS[k]; return p ? `<span class="sk-bdg" style="background:${p.bg};color:${p.fg};border:1px solid ${p.bd}">${p.ic} ${p.l}</span>` : '<span class="sk-bdg sk-nd">⚠️ Sin definir</span>'; };
 let GST_ROWS = [], GST_CAT = 'todos', GST_EDIT = null, GST_PID = null, gstCharts = {};
 const gstPuedeTocar = g => window.MI_ROL_ADMIN || (GST_PID && g.creado_por === GST_PID);
 
 function gstAviso(id, msg){
   toast('⚠️ ' + msg);
   const el = document.getElementById(id);
-  if(el){ el.focus(); el.style.borderColor = '#E5484D'; setTimeout(() => { el.style.borderColor = ''; }, 2200); }
+  if(el){ if(el.focus && /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) el.focus(); el.style.outline = '2px solid #E5484D'; el.style.outlineOffset = '2px'; setTimeout(() => { el.style.outline = ''; }, 2200); }
 }
 function gstSyncChips(grupoId){
   document.querySelectorAll('#' + grupoId + ' .sk-fchip').forEach(c => c.classList.toggle('on', c.querySelector('input').checked));
 }
-['gasto-fact', 'editg-fact'].forEach(id => document.getElementById(id).addEventListener('change', () => gstSyncChips(id)));
+['gasto-fact', 'editg-fact', 'gasto-pago', 'editg-pago'].forEach(id => document.getElementById(id).addEventListener('change', () => gstSyncChips(id)));
+function gstHintPago(){
+  const v = document.querySelector('#gasto-pago input:checked')?.value;
+  document.getElementById('gasto-pago-hint').textContent = v === 'efectivo' ? '💵 Se restará del efectivo del día en el Cierre.' : v ? 'Este pago no afecta el efectivo del Cierre.' : 'Elige cómo se pagó: si es efectivo, se descuenta del efectivo del día en el Cierre.';
+}
+document.getElementById('gasto-pago').addEventListener('change', gstHintPago);
 
 function gstPoblarCategorias(){
   const opts = GST_CATS.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
@@ -3881,20 +4016,22 @@ async function cargarGastos(){
   if(!window.MI_VE_GASTOS) return;
   GST_PID = await miPersonalId();
   const f = document.getElementById('gasto-fecha'); if(!f.value) f.value = isoLocal(new Date());
-  if(!GST_ROWS.length) document.getElementById('gasto-tbody').innerHTML = '<tr><td colspan="8" class="sk-empty">Cargando…</td></tr>';
-  const { data, error } = await traerTodo(() => sb.from('gastos').select('id, fecha, categoria, monto, descripcion, facturado, creado_por, created_at, autor:creado_por(nombre)').order('id'));
-  if(error){ console.error('[CUIVAN] Error cargando gastos:', error); document.getElementById('gasto-tbody').innerHTML = '<tr><td colspan="8" class="sk-empty">No se pudieron cargar los gastos.</td></tr>'; return; }
+  if(!GST_ROWS.length) document.getElementById('gasto-tbody').innerHTML = '<tr><td colspan="9" class="sk-empty">Cargando…</td></tr>';
+  const { data, error } = await traerTodo(() => sb.from('gastos').select('id, fecha, categoria, monto, descripcion, facturado, medio_pago, creado_por, created_at, autor:creado_por(nombre)').order('id'));
+  if(error){ console.error('[CUIVAN] Error cargando gastos:', error); document.getElementById('gasto-tbody').innerHTML = '<tr><td colspan="9" class="sk-empty">No se pudieron cargar los gastos.</td></tr>'; return; }
   GST_ROWS = data || [];
   gstRefrescar();
 }
 function gstFiltradas(){
   const texto = document.getElementById('gasto-buscar').value.trim().toLowerCase();
   const fact = document.getElementById('gasto-fact-filtro').value;
+  const pago = document.getElementById('gasto-pago-filtro').value;
   const { desde, hasta } = gastoPeriodo();
   return GST_ROWS.filter(g => {
     if(GST_CAT !== 'todos' && g.categoria !== GST_CAT) return false;
     if(fact === 'si' && !g.facturado) return false;
     if(fact === 'no' && g.facturado) return false;
+    if(pago === '__nd' ? !!g.medio_pago : (pago && g.medio_pago !== pago)) return false;
     if(desde && g.fecha < desde) return false;
     if(hasta && g.fecha > hasta) return false;
     if(texto && !(g.descripcion || '').toLowerCase().includes(texto)) return false;
@@ -3908,6 +4045,7 @@ function gstRefrescar(){
 }
 document.getElementById('gasto-buscar').addEventListener('input', gstRefrescar);
 document.getElementById('gasto-fact-filtro').addEventListener('change', gstRefrescar);
+document.getElementById('gasto-pago-filtro').addEventListener('change', gstRefrescar);
 
 function gstRenderPills(){
   const cont = document.getElementById('gasto-pills');
@@ -3920,13 +4058,20 @@ document.getElementById('gasto-pills').addEventListener('click', e => {
 });
 
 function gstRenderKpis(filas){
-  const total = filas.reduce((a, g) => a + Number(g.monto || 0), 0);
+  const tot = filas.reduce((a, g) => a + Number(g.monto || 0), 0);
+  const por = k => filas.filter(g => g.medio_pago === k).reduce((a, g) => a + Number(g.monto || 0), 0);
+  const nd = filas.filter(g => !g.medio_pago), ndT = nd.reduce((a, g) => a + Number(g.monto || 0), 0);
   const fact = filas.filter(g => g.facturado).reduce((a, g) => a + Number(g.monto || 0), 0);
+  const pc = v => tot ? Math.round(v / tot * 100) + '% del total' : '—';
   document.getElementById('gasto-kpis').innerHTML = `
-    <div class="kpi-tile"><div class="ico">💸</div><div class="lbl3">Gasto total</div><div class="val">${skMoney(total)}</div></div>
-    <div class="kpi-tile"><div class="ico">🧾</div><div class="lbl3">Gastos registrados</div><div class="val">${filas.length}</div></div>
-    <div class="kpi-tile"><div class="ico">✅</div><div class="lbl3">Facturado</div><div class="val">${skMoney(fact)}</div></div>
-    <div class="kpi-tile"><div class="ico">📭</div><div class="lbl3">No facturado</div><div class="val">${skMoney(total - fact)}</div></div>`;
+    <div class="kpi-tile"><div class="ico">💸</div><div class="lbl3">Gasto total</div><div class="val">${skMoney(tot)}</div><div class="sk-ks">${filas.length} gasto(s)</div></div>
+    <div class="kpi-tile sk-k-ef"><div class="ico">💵</div><div class="lbl3">Efectivo</div><div class="val">${skMoney(por('efectivo'))}</div><div class="sk-ks">${pc(por('efectivo'))}</div></div>
+    <div class="kpi-tile sk-k-tr"><div class="ico">🏦</div><div class="lbl3">Transferencia</div><div class="val">${skMoney(por('transferencia'))}</div><div class="sk-ks">${pc(por('transferencia'))}</div></div>
+    <div class="kpi-tile sk-k-dp"><div class="ico">📥</div><div class="lbl3">Depósito</div><div class="val">${skMoney(por('deposito'))}</div><div class="sk-ks">${pc(por('deposito'))}</div></div>`;
+  document.getElementById('gasto-factline').innerHTML = `<span>✅ Facturado ${skMoney(fact)}</span><span>📭 No facturado ${skMoney(tot - fact)}</span>` + (nd.length ? `<span class="warn">⚠️ ${nd.length} sin medio de pago · ${skMoney(ndT)}</span>` : '');
+  const nota = document.getElementById('gasto-nd-nota');
+  nota.style.display = nd.length ? '' : 'none';
+  nota.innerHTML = nd.length ? `⚠️ <b>${nd.length} gasto(s) no tienen medio de pago.</b> Mientras no se les asigne uno, <b>no se descuentan del efectivo</b> en el Cierre. Edítalos (✏️) para asignarlo.` : '';
 }
 function gstRenderCharts(filas){
   if(typeof Chart === 'undefined') return;
@@ -3940,6 +4085,20 @@ function gstRenderCharts(filas){
       datalabels: { color: '#fff', font: { size: 9, weight: '700' }, formatter: (v, ctx) => { if(!totalCat || !v) return ''; const pct = Math.round(v / totalCat * 100); return pct >= 6 ? pct + '%' : ''; } } } }
   });
   document.getElementById('gasto-legend').innerHTML = GST_CATS.map((c, i) => `<div><i style="background:${c.color}"></i>${esc2(gstNombreCat(c.id))} <b style="margin-left:auto;padding-left:8px;font-size:10.5px">${porCat[i] ? skMoney0(porCat[i]) : '—'}</b></div>`).join('');
+  // por medio de pago (+ los que aún no tienen medio asignado)
+  const llaves = Object.keys(GST_PAGOS);
+  const porPago = llaves.map(k => filas.filter(g => g.medio_pago === k).reduce((a, g) => a + Number(g.monto || 0), 0));
+  const ndTot = filas.filter(g => !g.medio_pago).reduce((a, g) => a + Number(g.monto || 0), 0);
+  const datosP = [...porPago, ndTot], totalP = datosP.reduce((a, b) => a + b, 0);
+  const coloresP = [...llaves.map(k => GST_PAGOS[k].color), '#cbd5e1'];
+  gstCharts.pago = new Chart(document.getElementById('ch-gasto-pago').getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: [...llaves.map(k => GST_PAGOS[k].l), 'Sin definir'], datasets: [{ data: totalP ? datosP : [1], backgroundColor: totalP ? coloresP : ['#e2e8f4'], borderWidth: 2, borderColor: '#fff' }] },
+    options: { maintainAspectRatio: false, cutout: '62%', plugins: { legend: { display: false }, tooltip: { enabled: !!totalP },
+      datalabels: { color: '#fff', font: { size: 9, weight: '700' }, formatter: (v) => { if(!totalP || !v) return ''; const pct = Math.round(v / totalP * 100); return pct >= 6 ? pct + '%' : ''; } } } }
+  });
+  document.getElementById('gasto-legend-pago').innerHTML = [...llaves.map((k, i) => [GST_PAGOS[k].l, GST_PAGOS[k].color, porPago[i]]), ...(ndTot ? [['Sin definir', '#cbd5e1', ndTot]] : [])]
+    .map(([l, c, v]) => `<div><i style="background:${c}"></i>${esc2(l)} <b style="margin-left:auto;padding-left:8px;font-size:10.5px">${v ? skMoney0(v) : '—'}</b></div>`).join('');
   // serie: por día si el periodo es corto, por mes si es largo
   const fechas = filas.map(g => g.fecha).sort();
   const span = fechas.length ? (new Date(fechas[fechas.length - 1]) - new Date(fechas[0])) / 86400000 : 0;
@@ -3961,10 +4120,11 @@ function gstRenderTabla(filas){
   empty.style.display = 'none';
   tbody.innerHTML = filas.map(g => {
     const c = gstCat(g.categoria);
-    return `<tr data-id="${g.id}">
+    return `<tr data-id="${g.id}" class="${g.medio_pago ? '' : 'legacy'}">
       <td data-l="Fecha" class="ct-nw">${fmtFechaISO(g.fecha)}</td>
       <td data-l="Categoría"><span class="sk-bdg" style="background:${c.color}1a;color:${c.color}">${c.label}</span></td>
       <td data-l="Monto"><span class="mo">${skMoney(g.monto)}</span></td>
+      <td data-l="Medio de pago">${gstBadgePago(g.medio_pago)}</td>
       <td data-l="Facturación"><span class="sk-fb ${g.facturado ? 'si' : 'no'}">${g.facturado ? 'Facturado' : 'No facturado'}</span></td>
       <td data-l="Agregado por" class="au"><b>${esc2(g.autor?.nombre || '—')}</b></td>
       <td data-l="Registrado el" class="au">${skFechaHora(g.created_at)}</td>
@@ -3993,19 +4153,22 @@ document.getElementById('gasto-btn-guardar').addEventListener('click', async () 
   const fecha = document.getElementById('gasto-fecha').value, categoria = document.getElementById('gasto-categoria').value;
   const monto = Number(document.getElementById('gasto-monto').value || 0), descripcion = document.getElementById('gasto-descripcion').value.trim();
   const facturado = document.querySelector('#gasto-fact input:checked')?.value === 'si';
+  const medio_pago = document.querySelector('#gasto-pago input:checked')?.value || '';
   if(!fecha) return gstAviso('gasto-fecha', 'Selecciona la fecha del gasto.');
   if(!categoria) return gstAviso('gasto-categoria', 'Selecciona la categoría.');
   if(!(monto > 0)) return gstAviso('gasto-monto', 'El monto debe ser mayor a $0.');
   if(!descripcion) return gstAviso('gasto-descripcion', 'La descripción del gasto es obligatoria.');
+  if(!medio_pago) return gstAviso('gasto-pago', 'Selecciona el medio de pago (efectivo, transferencia o depósito).');
   const btn = document.getElementById('gasto-btn-guardar'); btn.disabled = true; btn.textContent = 'Guardando…';
   const pid = GST_PID || await miPersonalId();
-  const { error } = await sb.from('gastos').insert({ fecha, categoria, monto, descripcion, facturado, creado_por: pid });
+  const { error } = await sb.from('gastos').insert({ fecha, categoria, monto, descripcion, facturado, medio_pago, creado_por: pid });
   btn.disabled = false; btn.textContent = '✓ Guardar gasto';
   if(error){ console.error('[CUIVAN] Error guardando gasto:', error); toast('⚠️ No se pudo guardar el gasto'); return; }
   toast('✓ Gasto guardado');
   document.getElementById('gasto-monto').value = ''; document.getElementById('gasto-descripcion').value = ''; document.getElementById('gasto-categoria').value = '';
   document.querySelectorAll('#gasto-hints .sk-hint').forEach(h => h.classList.remove('show'));
   const no = document.querySelector('#gasto-fact input[value="no"]'); if(no){ no.checked = true; gstSyncChips('gasto-fact'); }
+  document.querySelectorAll('#gasto-pago input').forEach(i => { i.checked = false; }); gstSyncChips('gasto-pago'); gstHintPago();
   cargarGastos();
 });
 
@@ -4019,6 +4182,7 @@ function gstAbrirEditar(id){
   document.getElementById('editg-descripcion').value = g.descripcion || '';
   document.querySelectorAll('#editg-fact input').forEach(i => { i.checked = (i.value === 'si') === !!g.facturado; });
   gstSyncChips('editg-fact');
+  document.querySelectorAll('#editg-pago input').forEach(i => { i.checked = (i.value === g.medio_pago); }); gstSyncChips('editg-pago');
   document.getElementById('modal-editar-gasto').classList.add('show');
 }
 function gstCerrarEditar(){ document.getElementById('modal-editar-gasto').classList.remove('show'); GST_EDIT = null; }
@@ -4028,12 +4192,14 @@ document.getElementById('editg-btn-guardar').addEventListener('click', async () 
   const fecha = document.getElementById('editg-fecha').value, categoria = document.getElementById('editg-categoria').value;
   const monto = Number(document.getElementById('editg-monto').value || 0), descripcion = document.getElementById('editg-descripcion').value.trim();
   const facturado = document.querySelector('#editg-fact input:checked')?.value === 'si';
+  const medio_pago = document.querySelector('#editg-pago input:checked')?.value || '';
   if(!fecha) return gstAviso('editg-fecha', 'Selecciona la fecha del gasto.');
   if(!categoria) return gstAviso('editg-categoria', 'Selecciona la categoría.');
   if(!(monto > 0)) return gstAviso('editg-monto', 'El monto debe ser mayor a $0.');
   if(!descripcion) return gstAviso('editg-descripcion', 'La descripción del gasto es obligatoria.');
+  if(!medio_pago) return gstAviso('editg-pago', 'Asigna el medio de pago para guardar los cambios.');
   const btn = document.getElementById('editg-btn-guardar'); btn.disabled = true; btn.textContent = 'Guardando…';
-  const { error } = await sb.from('gastos').update({ fecha, categoria, monto, descripcion, facturado }).eq('id', GST_EDIT);
+  const { error } = await sb.from('gastos').update({ fecha, categoria, monto, descripcion, facturado, medio_pago }).eq('id', GST_EDIT);
   btn.disabled = false; btn.textContent = 'Guardar cambios';
   if(error){ console.error('[CUIVAN] Error editando gasto:', error); toast('⚠️ No se pudo guardar el cambio'); return; }
   toast('✓ Gasto actualizado'); gstCerrarEditar(); cargarGastos();
@@ -4044,9 +4210,9 @@ document.getElementById('gasto-btn-exportar').addEventListener('click', async ()
   const filas = gstFiltradas();
   if(!filas.length){ toast('No hay gastos para exportar con este filtro.'); return; }
   try { await cargarXLSX(); } catch(_) { toast('⚠️ No se pudo preparar la exportación'); return; }
-  const out = filas.map(g => ({ 'Fecha del gasto': fmtFechaISO(g.fecha), 'Categoría': gstNombreCat(g.categoria), 'Monto': Number(g.monto || 0), 'Facturación': g.facturado ? 'Facturado' : 'No facturado', 'Agregado por': g.autor?.nombre || '', 'Registrado el': skFechaHora(g.created_at), 'Descripción': g.descripcion || '' }));
-  out.push({ 'Fecha del gasto': '', 'Categoría': 'TOTAL', 'Monto': out.reduce((a, r) => a + r['Monto'], 0), 'Facturación': '', 'Agregado por': '', 'Registrado el': '', 'Descripción': '' });
-  const ws = XLSX.utils.json_to_sheet(out); ws['!cols'] = [{wch:14},{wch:18},{wch:13},{wch:14},{wch:22},{wch:17},{wch:46}];
+  const out = filas.map(g => ({ 'Fecha del gasto': fmtFechaISO(g.fecha), 'Categoría': gstNombreCat(g.categoria), 'Monto': Number(g.monto || 0), 'Medio de pago': GST_PAGOS[g.medio_pago]?.l || 'Sin definir', 'Facturación': g.facturado ? 'Facturado' : 'No facturado', 'Agregado por': g.autor?.nombre || '', 'Registrado el': skFechaHora(g.created_at), 'Descripción': g.descripcion || '' }));
+  out.push({ 'Fecha del gasto': '', 'Categoría': 'TOTAL', 'Monto': out.reduce((a, r) => a + r['Monto'], 0), 'Medio de pago': '', 'Facturación': '', 'Agregado por': '', 'Registrado el': '', 'Descripción': '' });
+  const ws = XLSX.utils.json_to_sheet(out); ws['!cols'] = [{wch:14},{wch:18},{wch:13},{wch:16},{wch:14},{wch:22},{wch:17},{wch:46}];
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Gastos');
   XLSX.writeFile(wb, `CUIVAN_Gastos_${isoLocal(new Date())}.xlsx`);
 });
@@ -4636,6 +4802,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.16-1</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-1</div>
 </body>
 </html>
