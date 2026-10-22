@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.22-1"/>
+<meta name="app-version" content="2026.10.22-3"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -623,10 +623,10 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
   .sk-table,.sk-table thead,.sk-table tbody{display:block}.sk-table thead{display:none}
   .sk-table tr{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;background:#fff;border-radius:10px;border-left:3px solid var(--teal);padding:6px 12px 8px;margin-bottom:8px;box-shadow:0 1px 3px rgba(11,22,40,.08)}
   .sk-table td,.sk-table td:first-child,.sk-table td:last-child{display:block;border:none;border-radius:0;padding:4px 0;background:none;min-width:0}
-  .sk-table td:nth-child(1){order:1}.sk-table td:nth-child(3){order:2}.sk-table td:nth-child(2){order:3}.sk-table td:nth-child(4){order:4}
-  .sk-table td:nth-child(8){order:5;grid-column:1/-1;border-top:1px solid var(--g1);margin-top:4px;padding-top:6px}
-  .sk-table td:nth-child(5){order:6}.sk-table td:nth-child(7){order:7}.sk-table td:nth-child(6){order:8;grid-column:1/-1}
-  .sk-table td:nth-child(9){order:9;grid-column:1/-1;padding:6px 0 0}.sk-table td:empty{display:none}
+  .sk-table:not(.ef-table) td:nth-child(1){order:1}.sk-table:not(.ef-table) td:nth-child(3){order:2}.sk-table:not(.ef-table) td:nth-child(2){order:3}.sk-table:not(.ef-table) td:nth-child(4){order:4}
+  .sk-table:not(.ef-table) td:nth-child(8){order:5;grid-column:1/-1;border-top:1px solid var(--g1);margin-top:4px;padding-top:6px}
+  .sk-table:not(.ef-table) td:nth-child(5){order:6}.sk-table:not(.ef-table) td:nth-child(7){order:7}.sk-table:not(.ef-table) td:nth-child(6){order:8;grid-column:1/-1}
+  .sk-table:not(.ef-table) td:nth-child(9){order:9;grid-column:1/-1;padding:6px 0 0}.sk-table td:empty{display:none}
   .sk-table td::before{content:attr(data-l);display:block;font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--g4)}
   .sk-table td:not([data-l])::before{content:none}
 }
@@ -655,7 +655,18 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
 .cj-nota{font-size:11px;line-height:1.5;border-radius:9px;padding:9px 12px;margin-bottom:10px}.cj-nota.warn{background:#FDF6EC;border:1px solid #EDD49A;color:#9A6010}.cj-nota.info{background:var(--teal-soft);border:1px solid rgba(42,191,191,.35);color:#0B6E6E}.cj-nota.red{background:#FEF0EF;border:1px solid #FBBFBB;color:#C0392B}.cj-nota.muted{background:var(--g1);color:var(--g6)}
 .cj-neg{color:#C0392B}
 .cj-netbox{margin-top:12px;border-top:1px dashed rgba(46,125,79,.45);padding-top:10px;font-size:11.5px}.cj-netbox .r{display:flex;justify-content:space-between;gap:8px;padding:2px 0}.cj-netbox .r.net{font-weight:800;font-size:13px;border-top:1px solid rgba(46,125,79,.3);margin-top:4px;padding-top:6px}
-@media (max-width:860px){.cj-eq{grid-template-columns:1fr}.cj-op{display:none}}
+@media (max-width:860px){.cj-eq{grid-template-columns:1fr!important}.cj-op{display:none}}
+/* ══════════ EFECTIVO: entregas ══════════ */
+.ent-g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cj-estado{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;background:#fff;border:1px solid var(--g2);border-radius:10px;padding:9px 12px;font-size:11.5px}.cj-estado .sp{flex:1;min-width:150px;line-height:1.5}
+.ef-table td{vertical-align:top}.ef-table .au{display:block;margin-top:1px}
+@media (min-width:861px){.ef-table td.r,.ef-table th.r{text-align:right}}
+@media (max-width:860px){
+  .ef-table td:nth-child(1){order:1}.ef-table td:nth-child(8){order:2}.ef-table td:nth-child(2){order:3;grid-column:1/-1}
+  .ef-table td:nth-child(3){order:4}.ef-table td:nth-child(4){order:5}.ef-table td:nth-child(5){order:6}.ef-table td:nth-child(6){order:7}.ef-table td:nth-child(7){order:8}
+  .ef-table td:nth-child(9){order:9;grid-column:1/-1;padding:6px 0 0}
+  .ent-g2{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -692,6 +703,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       <button data-screen2="auditoria" id="nav-auditoria" style="display:none"><span>📋</span>Auditoría</button>
       <button data-screen2="contratos" id="nav-contratos" style="display:none"><span>📑</span>Contratos</button>
       <button data-screen2="gastos" id="nav-gastos" style="display:none"><span>💸</span>Gastos</button>
+      <button data-screen2="efectivo" id="nav-efectivo" style="display:none"><span>💵</span>Efectivo</button>
     </div>
   </div>
 
@@ -1024,6 +1036,39 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       </div>
     </div>
 
+    <div class="card screen2" id="app-screen-efectivo">
+      <div class="sk-hero">
+        <div class="sk-hero-top">
+          <div class="sk-hero-ico">💵</div>
+          <div><h1>Efectivo</h1><p>Entregas al administrador y estado de caja · control desde <b id="ef-hero-ini">—</b></p></div>
+        </div>
+      </div>
+      <div class="sk-kpis" id="ef-kpis"></div>
+      <div class="cj-estado" id="ef-pend" style="margin:0 0 14px"></div>
+      <div class="sk-xh"><div class="sk-st">Entregas registradas</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="appbtn appbtn-s" id="ef-btn-informe" type="button" style="font-size:11px;padding:6px 12px">📄 Informe PDF</button><button class="appbtn appbtn-p" id="ef-btn-nueva" type="button" style="font-size:11px;padding:6px 12px">💵 Registrar entrega</button></div></div>
+      <div class="sk-sec" id="ef-informe" style="display:none">
+        <div class="sk-sh"><div class="sk-st">📄 Informe de efectivo entregado</div><div class="sk-sp">PDF</div></div>
+        <div class="sk-ss">Elige el rango de fechas y qué incluir. El informe resume el efectivo cobrado, las salidas, las entregas y la caja, con la conciliación del periodo.</div>
+        <div class="sk-pills" id="ef-presets"></div>
+        <div class="ent-g2" style="max-width:420px;margin-bottom:10px"><div class="sk-fg" style="margin:0"><label class="lb" for="ef-r-desde">Desde</label><input class="app-input" type="date" id="ef-r-desde"/></div><div class="sk-fg" style="margin:0"><label class="lb" for="ef-r-hasta">Hasta</label><input class="app-input" type="date" id="ef-r-hasta"/></div></div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 12px;font-size:11.5px">
+          <label class="cbrow2"><input type="checkbox" id="ef-o-salidas" checked/><span>Detalle de salidas de efectivo</span></label>
+          <label class="cbrow2"><input type="checkbox" id="ef-o-doctores" checked/><span>Efectivo cobrado por doctor</span></label>
+          <label class="cbrow2"><input type="checkbox" id="ef-o-firmas" checked/><span>Firmas de quien entrega y recibe</span></label>
+        </div>
+        <div class="cj-nota muted" id="ef-r-resumen" style="margin-bottom:12px"></div>
+        <button class="appbtn appbtn-p" id="ef-btn-pdf" type="button">⬇️ Descargar PDF</button>
+      </div>
+      <div class="sk-tw">
+        <table class="sk-table ef-table">
+          <thead><tr><th>Entrega</th><th>Periodo que cubre</th><th class="r">Cobrado</th><th class="r">Salidas</th><th class="r">Por entregar</th><th class="r">Entregado</th><th class="r">Queda en caja</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="ef-tbody"></tbody>
+        </table>
+        <div class="sk-empty" id="ef-empty" style="display:none">Aún no hay entregas registradas. Cuando recibas el efectivo, usa “Registrar entrega”.</div>
+      </div>
+    </div>
+
     <div class="card screen2" id="app-screen-contratos">
       <div class="tab-title">📑 Contratos</div>
       <div id="ct-body"><div style="padding:14px;color:var(--g4);font-size:12px">Cargando...</div></div>
@@ -1099,9 +1144,9 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
 
       <div class="tab-title" style="margin-top:6px">💵 Control de caja</div>
       <div class="fac2" style="margin-bottom:14px">
-        <p style="font-size:11px;color:var(--g6);line-height:1.5;margin-bottom:12px">El <b>remanente de efectivo</b> es lo que sobra de días anteriores (efectivo cobrado menos salidas de efectivo) y cubre los días en que el efectivo no alcanza. Se lleva desde esta fecha; antes de ella no se arrastra nada.</p>
-        <div class="fi2" style="max-width:260px"><label class="lbl2">Llevar el remanente desde</label><input class="app-input" type="date" id="caja-inicio"/></div>
-        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin:8px 0 10px">Si el efectivo se entrega o se deposita y quieres empezar de cero, elige la fecha de hoy.</p>
+        <p style="font-size:11px;color:var(--g6);line-height:1.5;margin-bottom:12px">El <b>efectivo en caja</b> se cuenta desde esta fecha: cada día suma lo cobrado en efectivo, resta las salidas de efectivo y baja con cada entrega que registres en la pestaña 💵 Efectivo. Antes de esta fecha no se arrastra nada.</p>
+        <div class="fi2" style="max-width:260px"><label class="lbl2">Llevar el control de caja desde</label><input class="app-input" type="date" id="caja-inicio"/></div>
+        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin:8px 0 10px">Normalmente no hace falta cambiarla: cada entrega baja la caja. Cámbiala solo si quieres empezar el control en otra fecha.</p>
         <button class="appbtn appbtn-p" id="btn-caja-guardar">Guardar</button>
       </div>
 
@@ -1135,6 +1180,31 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       <div class="modal-footer2" style="gap:8px">
         <button class="appbtn appbtn-s" id="editg-btn-cancelar" type="button">Cancelar</button>
         <button class="appbtn appbtn-p" id="editg-btn-guardar" type="button">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay2" id="modal-entrega">
+    <div class="modal2" style="max-width:480px">
+      <h3 id="ent-titulo">💵 Registrar entrega de efectivo</h3>
+      <div class="ent-g2" style="margin-top:12px">
+        <div class="sk-fg"><label class="lb" for="ent-fecha">Fecha de entrega</label><input class="app-input" type="date" id="ent-fecha"/></div>
+        <div class="sk-fg"><label class="lb">Por entregar a esa fecha</label><div class="app-input" id="ent-disp" style="background:#F3FBF5;border-color:#A8D8B4;font-weight:800;color:#2E7D4F">—</div></div>
+      </div>
+      <div class="ent-g2">
+        <div class="sk-fg"><label class="lb" for="ent-desde">Efectivo desde</label><input class="app-input" type="date" id="ent-desde"/></div>
+        <div class="sk-fg"><label class="lb" for="ent-hasta">Efectivo hasta</label><input class="app-input" type="date" id="ent-hasta"/></div>
+      </div>
+      <div class="cj-nota muted" id="ent-periodo" style="margin-bottom:11px"></div>
+      <div class="sk-fg"><label class="lb" for="ent-monto">Monto entregado ($)</label><input class="app-input" type="number" id="ent-monto" min="0.01" step="0.01" inputmode="decimal"/></div>
+      <div class="cj-nota info" id="ent-dif"></div>
+      <div class="ent-g2">
+        <div class="sk-fg"><label class="lb" for="ent-entrego">Entregó</label><input class="app-input" type="text" id="ent-entrego" value="Recepción CUIVAN"/></div>
+        <div class="sk-fg"><label class="lb" for="ent-recibio">Recibió</label><input class="app-input" type="text" id="ent-recibio"/></div>
+      </div>
+      <div class="sk-fg"><label class="lb" for="ent-notas">Notas <span id="ent-notas-req" style="color:#E5484D"></span></label><textarea class="app-input" id="ent-notas" rows="2" placeholder="Ej. entrega semanal"></textarea></div>
+      <div class="modal-footer2" style="gap:8px">
+        <button class="appbtn appbtn-s" id="ent-btn-cancelar" type="button">Cancelar</button>
+        <button class="appbtn appbtn-p" id="ent-btn-guardar" type="button">Guardar entrega</button>
       </div>
     </div>
   </div>
@@ -1696,6 +1766,7 @@ function entrarAlShell(perfil){
   document.getElementById('nav-gastos').style.display = window.MI_VE_GASTOS ? '' : 'none';
   // Corte de caja en el Cierre: admin, Recepción y quien tenga permiso de Gastos (la base de datos lo exige igual)
   window.MI_VE_CORTE = perfil.rol === 'admin' || perfil.rol === 'recepcion' || perfil.permisos?.puede_ver_gastos === true;
+  document.getElementById('nav-efectivo').style.display = perfil.rol === 'admin' ? '' : 'none';
   window.MI_PUEDE_ELIMINAR_PAPELERA = perfil.rol === 'admin' && perfil.permisos?.puede_eliminar_papelera !== false;
   window.MI_PUEDE_EXPORTAR = perfil.permisos?.puede_exportar !== false;
   document.getElementById('btn-export-historial').style.display = window.MI_PUEDE_EXPORTAR ? '' : 'none';
@@ -1803,6 +1874,7 @@ document.getElementById('app-nav').addEventListener('click',(e)=>{
   if(b.dataset.screen2 === 'auditoria') cargarAuditoria();
   if(b.dataset.screen2 === 'contratos') cargarContratos();
   if(b.dataset.screen2 === 'gastos') cargarGastos();
+  if(b.dataset.screen2 === 'efectivo') cargarEfectivo();
 });
 
 document.getElementById('btn-logout').addEventListener('click', async ()=>{
@@ -3616,7 +3688,10 @@ const AUDIT_LABEL = {
   gasto_registrar: '💸 Registró un gasto',
   gasto_editar: '✏️ Editó un gasto',
   gasto_eliminar: '🗑️ Eliminó un gasto',
-  caja_config: '💵 Cambió la fecha de inicio del control de caja'
+  caja_config: '💵 Cambió la fecha de inicio del control de caja',
+  entrega_registrar: '💵 Registró una entrega de efectivo',
+  entrega_editar: '✏️ Editó una entrega de efectivo',
+  entrega_eliminar: '🗑️ Eliminó una entrega de efectivo'
 };
 async function cargarAuditLog(){
   const cont = document.getElementById('audit-lista');
@@ -3679,40 +3754,51 @@ let CIERRE_CORTE = null, CIERRE_CJ = null;
 const cjMoney = v => (v < 0 ? '−' : '') + skMoney(Math.abs(v));
 const cjEfectivoCobrado = data => data.reduce((a, r) => a + (r.medio_pago === 'Efectivo' ? Number(r.monto || 0) : 0) + (r.medio_pago_2 === 'Efectivo' ? Number(r.monto_2 || 0) : 0), 0);
 function cjNetbox(c){
-  return `<div class="cj-netbox"><div class="r"><span>Efectivo cobrado</span><b>${skMoney(c.ef)}</b></div><div class="r"><span>− Salidas de efectivo</span><b style="color:#B8481F">${skMoney(c.totSal)}</b></div><div class="r net"><span>= Efectivo neto</span><span class="${c.neto < 0 ? 'cj-neg' : ''}">${cjMoney(c.neto)}</span></div>${c.caja && c.caja.aplica ? `<div class="r"><span>Remanente al cierre</span><b>${skMoney(c.caja.remanente_final)}</b></div>` : ''}</div>`;
+  const l = (t, v, extra) => `<div class="r"><span>${t}</span><b ${extra || ''}>${v}</b></div>`;
+  if(!c.aplica) return `<div class="cj-netbox">${l('Efectivo cobrado', skMoney(c.ef))}${l('− Salidas de efectivo', skMoney(c.totSal), 'style="color:#B8481F"')}<div class="r net"><span>= Efectivo neto</span><span class="${c.ef - c.totSal < 0 ? 'cj-neg' : ''}">${cjMoney(c.ef - c.totSal)}</span></div></div>`;
+  return `<div class="cj-netbox">${l('En caja al inicio', skMoney(c.antes))}${c.entregado > 0.004 ? l('− Entregado', skMoney(c.entregado), 'style="color:#2E7D4F"') : ''}${l('+ Efectivo cobrado', skMoney(c.ef))}${l('− Salidas de efectivo', skMoney(c.totSal), 'style="color:#B8481F"')}<div class="r net"><span>= En caja al cierre</span><span>${skMoney(c.fin)}</span></div></div>`;
 }
 function renderCorteCaja(data, doctorFiltro){
   const el = document.getElementById('cierre-corte');
   CIERRE_CJ = null;
   if(!CIERRE_CORTE){ el.innerHTML = ''; return; }
-  if(doctorFiltro){ el.innerHTML = '<div class="cj-nota info">💵 Las salidas de efectivo son generales de la clínica, no de un doctor. Quita el filtro de doctor para ver el corte de caja y el efectivo neto.</div>'; return; }
-  const c = CIERRE_CORTE, salidas = c.salidas || [], caja = c.caja || {};
-  const ef = cjEfectivoCobrado(data), totSal = salidas.reduce((a, s) => a + Number(s.monto || 0), 0), neto = ef - totSal;
-  const dia = CIERRE_MODO === 'dia', per = dia ? 'del día' : 'del periodo';
-  CIERRE_CJ = { ef, totSal, neto, caja };
+  if(doctorFiltro){ el.innerHTML = '<div class="cj-nota info">💵 Las salidas de efectivo y la caja son generales de la clínica, no de un doctor. Quita el filtro de doctor para ver el corte de caja.</div>'; return; }
+  const c = CIERRE_CORTE, salidas = c.salidas || [], caja = c.caja || {}, entregas = c.entregas || [], ult = c.ultima;
+  const ef = cjEfectivoCobrado(data), totSal = salidas.reduce((a, s) => a + Number(s.monto || 0), 0);
+  const dia = CIERRE_MODO === 'dia', per = dia ? 'del día' : 'del periodo', aplica = !!caja.aplica;
+  const antes = Number(caja.caja_antes || 0), entregado = Number(caja.entregado || 0), fin = Number(caja.caja_fin || 0), falt = Number(caja.faltante || 0);
+  CIERRE_CJ = { ef, totSal, antes, entregado, fin, aplica };
   const sm = c.sin_medio || { n: 0, total: 0 };
   const aviso = sm.n > 0 ? `<div class="cj-nota warn">⚠️ <b>${sm.n} gasto(s) sin medio de pago</b> en ${dia ? 'este día' : 'el periodo'} (${skMoney(sm.total)}): no se descuentan del efectivo hasta que se les asigne uno.${window.MI_VE_GASTOS ? '' : ' Avisa a quien administra los gastos.'}</div>` : '';
-  let rem = '';
-  if(caja.aplica){
-    const rI = Number(caja.remanente_inicial || 0), cub = Number(caja.cubierto || 0), fal = Number(caja.faltante || 0), rF = Number(caja.remanente_final || 0);
-    if(rI > 0 || cub > 0 || fal > 0 || rF > 0){
-      rem = `<div class="cj-rem"><div><span>${dia ? 'Remanente de días anteriores' : 'Remanente previo al periodo'}</span><b>${skMoney(rI)}</b></div>`
-        + (cub > 0 ? `<div><span>Cubierto con remanente</span><b class="cj-neg">−${skMoney(cub)}</b></div>` : '')
-        + `<div><span>Remanente al cierre</span><b style="color:#2E7D4F">${skMoney(rF)}</b></div></div>`;
-    }
-    if(cub > 0) rem += `<div class="cj-nota info" style="margin:10px 0 0">El efectivo ${per} no alcanzó: se tomaron <b>${skMoney(cub)}</b> del remanente de días anteriores.</div>`;
-    if(fal > 0) rem += `<div class="cj-nota red" style="margin:10px 0 0">⚠️ <b>Faltan ${skMoney(fal)}</b>: el efectivo ${per} y el remanente no alcanzaron para cubrir las salidas.</div>`;
+  // ecuación: en caja al inicio − entregado + cobrado − salidas = en caja al cierre
+  const it = [];
+  if(aplica){
+    it.push({ l: 'En caja al inicio', v: antes, c: 'var(--navy)' });
+    if(entregado > 0.004) it.push({ op: '−', l: 'Entregado', v: entregado, c: '#2E7D4F' });
+    it.push({ op: '+', l: 'Efectivo cobrado', v: ef, c: '#2E7D4F' });
+    it.push({ op: '−', l: 'Salidas de efectivo (' + salidas.length + ')', v: totSal, c: '#B8481F' });
   } else {
-    rem = `<div class="cj-nota muted" style="margin:10px 0 0">El remanente se lleva desde el ${fmtFechaISO(caja.inicio)}${window.MI_ROL_ADMIN ? ' (se cambia en ⚙️ Configuración → Control de caja)' : ''}.</div>`;
-    if(neto < 0) rem += `<div class="cj-nota red" style="margin:10px 0 0">Las salidas ${per} superan el efectivo cobrado.</div>`;
+    it.push({ l: 'Efectivo cobrado', v: ef, c: '#2E7D4F' });
+    it.push({ op: '−', l: 'Salidas de efectivo (' + salidas.length + ')', v: totSal, c: '#B8481F' });
   }
+  const res = aplica ? { l: 'En caja al cierre', v: fin, bad: false } : { l: 'Efectivo neto ' + per, v: ef - totSal, bad: ef - totSal < 0 };
+  const cols = it.map((_, i) => (i ? 'auto ' : '') + '1fr').join(' ') + ' auto 1.2fr';
+  const eq = `<div class="cj-eq" style="grid-template-columns:${cols}">` + it.map((x, i) => (i ? `<div class="cj-op">${x.op}</div>` : '') + `<div class="cj-it"><div class="l">${x.l}</div><div class="v" style="color:${x.c}">${skMoney(x.v)}</div></div>`).join('')
+    + `<div class="cj-op">=</div><div class="cj-it net ${res.bad ? 'bad' : ''}"><div class="l">${res.l}</div><div class="v">${cjMoney(res.v)}</div></div></div>`;
+  let estado = '';
+  if(aplica){
+    const hoy = isoLocal(new Date()), hastaC = rangoCierreActual().hasta, ref = hastaC < hoy ? hastaC : hoy, dsin = ult ? efDifDias(ref, ult.hasta) : 0;
+    estado = `<div class="cj-estado"><span class="sk-bdg" style="${fin > 0.004 ? 'background:#EEF5FC;color:#1B5C9E;border:1px solid #BDD5F0' : 'background:#EAF7EE;color:#2E7D4F;border:1px solid #A8D8B4'}">${fin > 0.004 ? '🟡 Por entregar' : '✅ Sin efectivo por entregar'}</span>`
+      + `<span class="sp">${ult ? `Última entrega: <b>${fmtFechaISO(ult.fecha)}</b> · ${skMoney(ult.monto)} · cubrió ${efCorto(ult.desde)}–${efCorto(ult.hasta)}${fin > 0.004 && dsin > 0 ? ' · <b>' + dsin + ' día(s)</b> desde ese corte' : ''}` : 'Aún sin entregas registradas'}</span>`
+      + (window.MI_ROL_ADMIN ? '<button class="appbtn appbtn-p" id="cj-btn-entrega" type="button" style="font-size:11px;padding:6px 12px">💵 Registrar entrega</button>' : '') + '</div>';
+  }
+  const entList = entregas.length ? '<div class="cj-nota info" style="margin:10px 0 0">' + entregas.map(e => `📥 <b>Entrega #${e.n}</b> del ${fmtFechaISO(e.fecha)}: −${skMoney(e.monto)} · cubre ${efCorto(e.desde)}–${efCorto(e.hasta)} · recibió ${esc2(e.recibio)}`).join('<br>') + '</div>' : '';
+  const notas = (falt > 0.004 ? `<div class="cj-nota red" style="margin:10px 0 0">⚠️ Las salidas ${per} superaron el efectivo que había en caja por <b>${skMoney(falt)}</b>.</div>` : '')
+    + (!aplica ? `<div class="cj-nota muted" style="margin:10px 0 0">El control de caja empieza el ${fmtFechaISO(caja.inicio)}${window.MI_ROL_ADMIN ? ' (se cambia en ⚙️ Configuración → Control de caja)' : ''}.</div>` : '');
   const lista = salidas.length ? salidas.map(sa => { const k = gstCat(sa.categoria); return `<div class="cj-salrow"><span class="sk-bdg" style="background:${k.color}1a;color:${k.color}">${k.label}</span><div>${esc2(sa.descripcion)}<small>${dia ? '' : fmtFechaISO(sa.fecha) + ' · '}${sa.registro ? 'Registró: ' + esc2(sa.registro) : 'Salida de efectivo'}</small></div><span class="m">−${skMoney(sa.monto)}</span></div>`; }).join('')
     : `<div class="cj-vacio">✓ Sin salidas de efectivo ${dia ? 'este día' : 'en el periodo'}</div>`;
-  el.innerHTML = aviso + `<div class="cj-corte"><h4>💵 Corte de caja · ${per}</h4>
-    <div class="cj-eq"><div class="cj-it"><div class="l">Efectivo cobrado</div><div class="v" style="color:#2E7D4F">${skMoney(ef)}</div></div><div class="cj-op">−</div>
-      <div class="cj-it"><div class="l">Salidas de efectivo (${salidas.length})</div><div class="v" style="color:#B8481F">${skMoney(totSal)}</div></div><div class="cj-op">=</div>
-      <div class="cj-it net ${neto < 0 ? 'bad' : ''}"><div class="l">Efectivo neto ${per}</div><div class="v">${cjMoney(neto)}</div></div></div>
-    ${rem}<div class="cj-sal"><div class="h">Salidas de efectivo ${per}</div>${lista}</div></div>`;
+  el.innerHTML = aviso + `<div class="cj-corte"><h4>💵 Corte de caja · ${per}</h4>${eq}${estado}${entList}${notas}<div class="cj-sal"><div class="h">Salidas de efectivo ${per}</div>${lista}</div></div>`;
+  const b = el.querySelector('#cj-btn-entrega'); if(b) b.addEventListener('click', efAbrirDesdeCierre);
 }
 async function cargarCierre(){
   actualizarLabelCierre();
@@ -4217,6 +4303,410 @@ document.getElementById('gasto-btn-exportar').addEventListener('click', async ()
   XLSX.writeFile(wb, `CUIVAN_Gastos_${isoLocal(new Date())}.xlsx`);
 });
 gstPoblarCategorias();
+
+// ═══════════════════════════════════════════════════════════
+// EFECTIVO — entregas del efectivo al administrador (periodo libre desde–hasta), estado de la caja e informe PDF.
+// Solo admin. La caja baja el día en que se entrega; la base de datos valida todo (no entregar de más, periodos sin traslape, nota si hay diferencia).
+// ═══════════════════════════════════════════════════════════
+let EF = null, EF_EDIT = null;
+const efAddD = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return isoLocal(d); };
+const efDifDias = (a, b) => Math.round((new Date(a + 'T12:00:00') - new Date(b + 'T12:00:00')) / 86400000);
+const efCorto = iso => iso.slice(8, 10) + '/' + iso.slice(5, 7);
+const efPer = (a, b) => fmtFechaISO(a) + ' – ' + fmtFechaISO(b);
+
+async function efCargar(){
+  const { data, error } = await sb.rpc('caja_resumen', { p_desde: '2000-01-01', p_hasta: isoLocal(new Date()) });
+  if(error || !data || data.permitido === false){ console.error('[CUIVAN] Error cargando efectivo:', error); EF = null; return false; }
+  EF = data; return true;
+}
+const efDia = f => EF.dias.find(d => d.f === f);
+// efectivo por entregar al inicio de la fecha f (sin contar otras entregas del mismo día)
+function efDisp(f, excluirId){
+  const d = efDia(f); if(!d) return 0;
+  const otras = EF.entregas.filter(e => e.fecha_entrega === f && e.id !== excluirId).reduce((a, e) => a + Number(e.monto), 0);
+  return Math.max(0, Number(d.caja_antes) - otras);
+}
+function efSumaPeriodo(desde, hasta){
+  const ds = EF.dias.filter(d => d.f >= desde && d.f <= hasta);
+  return { cob: ds.reduce((a, d) => a + Number(d.cob), 0), sal: ds.reduce((a, d) => a + Number(d.sal), 0), dias: ds };
+}
+function efRefrescarPantallas(){
+  if(document.getElementById('app-screen-efectivo').classList.contains('act')) cargarEfectivo();
+  if(document.getElementById('app-screen-cierre').classList.contains('act')) cargarCierre();
+}
+
+async function cargarEfectivo(){
+  if(!window.MI_ROL_ADMIN) return;
+  const tbody = document.getElementById('ef-tbody');
+  if(!EF) tbody.innerHTML = '<tr><td colspan="9" class="sk-empty">Cargando…</td></tr>';
+  const ok = await efCargar();
+  if(!ok){ tbody.innerHTML = '<tr><td colspan="9" class="sk-empty">No se pudo cargar el efectivo.</td></tr>'; return; }
+  efRender();
+}
+function efRender(){
+  const hoy = EF.hoy, ents = EF.entregas, ult = ents[ents.length - 1];
+  const dHoy = EF.dias[EF.dias.length - 1], caja = dHoy ? Number(dHoy.caja_fin) : 0;
+  const mes = hoy.slice(0, 7), entMes = ents.filter(e => e.fecha_entrega.slice(0, 7) === mes);
+  document.getElementById('ef-hero-ini').textContent = fmtFechaISO(EF.inicio_control);
+  const hace = ult ? efDifDias(hoy, ult.fecha_entrega) : null;
+  document.getElementById('ef-kpis').innerHTML = `
+    <div class="kpi-tile sk-k-tr"><div class="ico">💵</div><div class="lbl3">En caja ahora (por entregar)</div><div class="val">${skMoney(caja)}</div><div class="sk-ks">al cierre de hoy</div></div>
+    <div class="kpi-tile sk-k-ef"><div class="ico">✅</div><div class="lbl3">Entregado en ${SK_MESES[parseInt(mes.slice(5, 7)) - 1].toLowerCase()}</div><div class="val">${skMoney(entMes.reduce((a, e) => a + Number(e.monto), 0))}</div><div class="sk-ks">${entMes.length} entrega(s)</div></div>
+    <div class="kpi-tile"><div class="ico">📥</div><div class="lbl3">Última entrega</div><div class="val">${ult ? fmtFechaISO(ult.fecha_entrega) : '—'}</div><div class="sk-ks">${ult ? skMoney(ult.monto) + ' · ' + (hace === 0 ? 'hoy' : hace === 1 ? 'ayer' : 'hace ' + hace + ' días') : 'aún sin entregas'}</div></div>
+    <div class="kpi-tile"><div class="ico">↪️</div><div class="lbl3">Arrastre de la última</div><div class="val" style="${ult && Number(ult.quedo) > 0.004 ? 'color:#C0392B' : ''}">${ult ? skMoney(Math.max(0, Number(ult.quedo))) : '—'}</div><div class="sk-ks">${ult && Number(ult.quedo) > 0.004 ? 'quedó en caja al entregar' : 'sin arrastre'}</div></div>`;
+  // pendiente de entregar
+  const lastHasta = ult ? ult.hasta : efAddD(EF.inicio_control, -1), desdePend = efAddD(lastHasta, 1), nd = efDifDias(hoy, desdePend) + 1;
+  document.getElementById('ef-pend').innerHTML = caja > 0.004 && nd >= 1
+    ? `<span class="sk-bdg" style="background:#EEF5FC;color:#1B5C9E;border:1px solid #BDD5F0">🟡 Pendiente de entregar</span><span class="sp">Efectivo del <b>${fmtFechaISO(desdePend)}</b> al <b>${fmtFechaISO(hoy)}</b> (${nd} día(s)) · en caja <b>${skMoney(caja)}</b>${ult && Number(ult.quedo) > 0.004 ? ' (incluye ' + skMoney(ult.quedo) + ' arrastrados)' : ''}</span>`
+    : `<span class="sk-bdg" style="background:#EAF7EE;color:#2E7D4F;border:1px solid #A8D8B4">✅ Sin efectivo pendiente</span><span class="sp">No hay efectivo por entregar en caja.</span>`;
+  // tabla (más reciente primero)
+  const tbody = document.getElementById('ef-tbody'), empty = document.getElementById('ef-empty');
+  if(!ents.length){ tbody.innerHTML = ''; empty.style.display = 'block'; }
+  else {
+    empty.style.display = 'none';
+    tbody.innerHTML = [...ents].reverse().map(e => {
+      const q = Number(e.quedo), dif = q > 0.004, nDias = efDifDias(e.hasta, e.desde) + 1;
+      return `<tr data-id="${e.id}" class="${dif ? 'legacy' : ''}">
+        <td data-l="Entrega" class="ct-nw"><b>#${e.n} · ${fmtFechaISO(e.fecha_entrega)}</b><br><span class="au">Recibió ${esc2(e.recibio)}</span></td>
+        <td data-l="Periodo que cubre"><b>${efPer(e.desde, e.hasta)}</b><br><span class="au">${nDias} día(s)</span></td>
+        <td data-l="Cobrado" class="r"><span class="mo" style="color:#2E7D4F">${skMoney(e.cobrado)}</span></td>
+        <td data-l="Salidas" class="r"><span class="mo">${skMoney(e.salidas)}</span></td>
+        <td data-l="Por entregar" class="r"><span class="mo" style="color:var(--navy)">${skMoney(e.por_entregar)}</span></td>
+        <td data-l="Entregado" class="r"><span class="mo" style="color:#2E7D4F">${skMoney(e.monto)}</span></td>
+        <td data-l="Queda en caja" class="r"><span class="mo" style="color:${dif ? '#C0392B' : '#2E7D4F'}">${skMoney(Math.max(0, q))}</span></td>
+        <td data-l="Estado"><span class="sk-fb ${dif ? 'no' : 'si'}" style="${dif ? 'background:#FDF6EC;color:#9A6010;border-color:#EDD49A' : ''}">${dif ? '⚠️ Con diferencia' : '✅ Completa'}</span>${e.notas ? `<div class="au" style="margin-top:3px;max-width:200px">${esc2(e.notas)}</div>` : ''}</td>
+        <td><div style="display:flex;gap:6px"><button class="appbtn appbtn-s ef-ed" type="button" title="Editar" style="padding:5px 9px;font-size:11px">✏️</button><button class="appbtn appbtn-danger-soft ef-del" type="button" title="Eliminar" style="padding:5px 9px;font-size:11px">🗑️</button></div></td>
+      </tr>`;
+    }).join('');
+  }
+  efInformeRefrescar();
+}
+document.getElementById('ef-tbody').addEventListener('click', async e => {
+  const tr = e.target.closest('tr[data-id]'); if(!tr) return;
+  const id = tr.dataset.id, ent = EF && EF.entregas.find(x => x.id === id); if(!ent) return;
+  if(e.target.closest('.ef-ed')) { efAbrirModal(id); return; }
+  if(e.target.closest('.ef-del')){
+    const ok = await confirmarAsync({ titulo: '¿Eliminar esta entrega?', mensaje: `<b>#${ent.n}</b> · ${fmtFechaISO(ent.fecha_entrega)} · ${skMoney(ent.monto)}<br>El efectivo volverá a la caja y quedará anotado en la actividad reciente.`, textoConfirmar: 'Eliminar', danger: true, icono: '🗑️' });
+    if(!ok) return;
+    const { error } = await sb.from('entregas_efectivo').delete().eq('id', id);
+    if(error){ console.error('[CUIVAN] Error eliminando entrega:', error); toast('⚠️ ' + (error.message || 'No se pudo eliminar la entrega')); return; }
+    toast('✓ Entrega eliminada'); efRefrescarPantallas();
+  }
+});
+document.getElementById('ef-btn-nueva').addEventListener('click', () => efAbrirModal(null));
+
+/* ── modal: registrar / editar entrega ── */
+async function efAbrirDesdeCierre(){ if(!EF){ const ok = await efCargar(); if(!ok){ toast('⚠️ No se pudo cargar el efectivo'); return; } } efAbrirModal(null); }
+function efAbrirModal(id){
+  if(!EF){ cargarEfectivo(); return; }
+  EF_EDIT = id || null;
+  const $ = x => document.getElementById(x), hoy = EF.hoy, ents = EF.entregas;
+  document.getElementById('ent-titulo').textContent = id ? '✏️ Editar entrega de efectivo' : '💵 Registrar entrega de efectivo';
+  if(id){
+    const e = ents.find(x => x.id === id); if(!e) return;
+    $('ent-fecha').value = e.fecha_entrega; $('ent-desde').value = e.desde; $('ent-hasta').value = e.hasta; $('ent-monto').value = Number(e.monto).toFixed(2);
+    $('ent-entrego').value = e.entrego; $('ent-recibio').value = e.recibio; $('ent-notas').value = e.notas || '';
+  } else {
+    const ult = ents[ents.length - 1], desde = ult ? efAddD(ult.hasta, 1) : EF.inicio_control, ayer = efAddD(hoy, -1);
+    $('ent-fecha').value = hoy; $('ent-desde').value = desde; $('ent-hasta').value = ayer >= desde ? ayer : desde;
+    $('ent-monto').value = efDisp(hoy, null).toFixed(2); $('ent-entrego').value = 'Recepción CUIVAN'; $('ent-recibio').value = MI_PERFIL?.nombre || ''; $('ent-notas').value = '';
+  }
+  document.getElementById('modal-entrega').classList.add('show');
+  efModalActualizar(true);
+}
+function efModalErrores(){
+  const $ = x => document.getElementById(x).value, hoy = EF.hoy;
+  const f = $('ent-fecha'), d = $('ent-desde'), h = $('ent-hasta'), m = Number($('ent-monto')) || 0, disp = efDisp(f, EF_EDIT);
+  if(!f || !d || !h) return 'Completa las fechas de la entrega y del periodo.';
+  if(f > hoy) return 'La fecha de entrega no puede ser futura.';
+  if(f < EF.inicio_control) return 'La fecha es anterior al inicio del control de caja (' + fmtFechaISO(EF.inicio_control) + ').';
+  if(d > h) return 'El “desde” no puede ser posterior al “hasta”.';
+  if(h >= f) return 'El efectivo debe cubrir fechas anteriores a la fecha de entrega.';
+  const tras = EF.entregas.find(e => e.id !== EF_EDIT && e.desde <= h && e.hasta >= d);
+  if(tras) return 'El periodo se traslapa con la entrega #' + tras.n + ' (' + efPer(tras.desde, tras.hasta) + ').';
+  if(!(m > 0)) return 'El monto debe ser mayor a $0.';
+  if(m > disp + 0.004) return 'No puedes entregar más de lo que hay por entregar (' + skMoney(disp) + ').';
+  if(!document.getElementById('ent-recibio').value.trim()) return 'Indica quién recibió el efectivo.';
+  return null;
+}
+function efModalActualizar(inicial){
+  const $ = x => document.getElementById(x), f = $('ent-fecha').value, d = $('ent-desde').value, h = $('ent-hasta').value, m = Number($('ent-monto').value) || 0;
+  const disp = f ? efDisp(f, EF_EDIT) : 0;
+  $('ent-disp').textContent = skMoney(disp);
+  if(d && h && d <= h){ const s = efSumaPeriodo(d, h); $('ent-periodo').innerHTML = `Periodo de ${efDifDias(h, d) + 1} día(s): cobrado <b>${skMoney(s.cob)}</b> · salidas <b>${skMoney(s.sal)}</b> · neto <b>${skMoney(s.cob - s.sal)}</b>`; }
+  else $('ent-periodo').textContent = 'Elige el periodo de efectivo que estás entregando.';
+  const err = efModalErrores(), box = $('ent-dif'), dif = disp - m;
+  if(err && !(inicial && !$('ent-notas').value && err.startsWith('Indica quién'))){ box.className = 'cj-nota red'; box.innerHTML = '⚠️ ' + err; $('ent-notas-req').textContent = ''; return; }
+  if(Math.abs(dif) < 0.005){ box.className = 'cj-nota info'; box.innerHTML = '✅ Entrega completa: no queda efectivo pendiente de ese corte.'; $('ent-notas-req').textContent = ''; }
+  else { box.className = 'cj-nota warn'; box.innerHTML = `⚠️ Entregas ${skMoney(m)} de ${skMoney(disp)}. <b>Quedan ${skMoney(dif)} en caja</b> y se arrastran a la siguiente entrega.`; $('ent-notas-req').textContent = '(obligatoria si hay diferencia)'; }
+}
+['ent-fecha', 'ent-desde', 'ent-hasta', 'ent-monto', 'ent-recibio'].forEach(id => document.getElementById(id).addEventListener('input', () => efModalActualizar(false)));
+['ent-fecha', 'ent-desde', 'ent-hasta'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+  if(id === 'ent-fecha' && !EF_EDIT){ document.getElementById('ent-monto').value = efDisp(document.getElementById('ent-fecha').value, null).toFixed(2); }
+  efModalActualizar(false);
+}));
+function efCerrarModal(){ document.getElementById('modal-entrega').classList.remove('show'); EF_EDIT = null; }
+document.getElementById('ent-btn-cancelar').addEventListener('click', efCerrarModal);
+document.getElementById('ent-btn-guardar').addEventListener('click', async () => {
+  const $ = x => document.getElementById(x), err = efModalErrores();
+  if(err){ toast('⚠️ ' + err); return; }
+  const f = $('ent-fecha').value, m = Number($('ent-monto').value), notas = $('ent-notas').value.trim(), dif = efDisp(f, EF_EDIT) - m;
+  if(dif > 0.004 && !notas){ toast('⚠️ Hay una diferencia: explica el motivo en las notas.'); $('ent-notas').focus(); return; }
+  const payload = { fecha_entrega: f, periodo_desde: $('ent-desde').value, periodo_hasta: $('ent-hasta').value, monto: m, entrego: $('ent-entrego').value.trim() || 'Recepción CUIVAN', recibio: $('ent-recibio').value.trim(), notas: notas || null };
+  const btn = $('ent-btn-guardar'); btn.disabled = true; btn.textContent = 'Guardando…';
+  let res;
+  if(EF_EDIT) res = await sb.from('entregas_efectivo').update(payload).eq('id', EF_EDIT);
+  else res = await sb.from('entregas_efectivo').insert({ ...payload, creado_por: await miPersonalId() });
+  btn.disabled = false; btn.textContent = 'Guardar entrega';
+  if(res.error){ console.error('[CUIVAN] Error guardando entrega:', res.error); toast('⚠️ ' + (res.error.message || 'No se pudo guardar la entrega')); return; }
+  toast(EF_EDIT ? '✓ Entrega actualizada' : '✓ Entrega registrada' + (dif > 0.004 ? ' · quedan ' + skMoney(dif) + ' en caja' : ''));
+  efCerrarModal(); await efCargar(); efRefrescarPantallas();
+});
+
+/* ── informe PDF: rango de fechas y opciones ── */
+const EF_PRESETS = [['mes', 'Este mes'], ['mes_pasado', 'Mes pasado'], ['30', 'Últimos 30 días'], ['todo', 'Todo desde el inicio']];
+let EF_PRESET = 'mes';
+function efRangoPreset(p){
+  const hoy = EF.hoy, ini = EF.inicio_control, mx = (a, b) => a > b ? a : b;
+  if(p === 'mes') return [mx(hoy.slice(0, 8) + '01', ini), hoy];
+  if(p === 'mes_pasado'){ const d = new Date(hoy.slice(0, 8) + '01T12:00:00'); d.setDate(0); const fin = isoLocal(d); return [mx(fin.slice(0, 8) + '01', ini), fin]; }
+  if(p === '30') return [mx(efAddD(hoy, -29), ini), hoy];
+  return [ini, hoy];
+}
+function efInformeRefrescar(){
+  if(!EF) return;
+  const cont = document.getElementById('ef-presets');
+  cont.innerHTML = EF_PRESETS.map(([k, t]) => `<div class="sk-pill ${EF_PRESET === k ? 'act' : ''}" data-p="${k}">${t}</div>`).join('') + `<div class="sk-pill ${EF_PRESET === 'libre' ? 'act' : ''}" data-p="libre">Rango libre</div>`;
+  const d = document.getElementById('ef-r-desde'), h = document.getElementById('ef-r-hasta');
+  if(!d.value || !h.value){ const [a, b] = efRangoPreset(EF_PRESET === 'libre' ? 'mes' : EF_PRESET); d.value = a; h.value = b; }
+  d.min = h.min = EF.inicio_control; d.max = h.max = EF.hoy;
+  let a = d.value, b = h.value; if(a > b){ const t = a; a = b; b = t; }
+  const s = efSumaPeriodo(a, b), ents = EF.entregas.filter(e => e.fecha_entrega >= a && e.fecha_entrega <= b), ds = s.dias;
+  document.getElementById('ef-r-resumen').innerHTML = ds.length
+    ? `Del <b>${fmtFechaISO(a)}</b> al <b>${fmtFechaISO(b)}</b>: cobrado <b>${skMoney(s.cob)}</b> · salidas <b>${skMoney(s.sal)}</b> · entregado <b>${skMoney(ents.reduce((x, e) => x + Number(e.monto), 0))}</b> (${ents.length} entrega(s)) · en caja al cierre <b>${skMoney(Number(ds[ds.length - 1].caja_fin))}</b>`
+    : 'No hay datos de caja en ese rango.';
+}
+document.getElementById('ef-presets').addEventListener('click', e => {
+  const p = e.target.closest('.sk-pill'); if(!p) return;
+  EF_PRESET = p.dataset.p;
+  if(EF_PRESET !== 'libre'){ const [a, b] = efRangoPreset(EF_PRESET); document.getElementById('ef-r-desde').value = a; document.getElementById('ef-r-hasta').value = b; }
+  efInformeRefrescar();
+});
+['ef-r-desde', 'ef-r-hasta'].forEach(id => document.getElementById(id).addEventListener('change', () => { EF_PRESET = 'libre'; efInformeRefrescar(); }));
+document.getElementById('ef-btn-informe').addEventListener('click', () => {
+  const p = document.getElementById('ef-informe'); p.style.display = p.style.display === 'none' ? '' : 'none';
+  if(p.style.display !== 'none') p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+document.getElementById('ef-btn-pdf').addEventListener('click', async () => {
+  let a = document.getElementById('ef-r-desde').value, b = document.getElementById('ef-r-hasta').value;
+  if(!a || !b){ toast('⚠️ Elige el rango de fechas del informe'); return; }
+  if(a > b){ const t = a; a = b; b = t; }
+  const btn = document.getElementById('ef-btn-pdf'); btn.disabled = true; btn.textContent = 'Generando…';
+  try {
+    await exportarInformeEfectivo(a, b, { salidas: document.getElementById('ef-o-salidas').checked, doctores: document.getElementById('ef-o-doctores').checked, firmas: document.getElementById('ef-o-firmas').checked });
+    toast('✓ Informe generado');
+  } catch(err){ console.error('[CUIVAN] Error generando informe de efectivo:', err); toast('⚠️ No se pudo generar el informe'); }
+  btn.disabled = false; btn.textContent = '⬇️ Descargar PDF';
+});
+
+// ═══ Informe PDF de efectivo entregado (diseño Editorial minimal con contraste) ═══
+async function exportarInformeEfectivo(desde, hasta, op){
+  await cargarJSPDF();
+  const { jsPDF } = window.jspdf;
+  const { data: res, error } = await sb.rpc('caja_resumen', { p_desde: desde, p_hasta: hasta });
+  if(error || !res || res.permitido === false) throw error || new Error('sin permiso');
+  const dias = res.dias || [], ents = (res.entregas || []).filter(e => e.fecha_entrega >= desde && e.fecha_entrega <= hasta);
+  const suma = (arr, k) => arr.reduce((a, x) => a + Number(x[k] || 0), 0);
+  const cob = suma(dias, 'cob'), sal = suma(dias, 'sal'), entregado = suma(dias, 'entrega'), falt = suma(dias, 'falt');
+  const inicio = dias.length ? Number(dias[0].caja_antes) : 0, fin = dias.length ? Number(dias[dias.length - 1].caja_fin) : 0;
+  const rc = await sb.from('gastos').select('id', { count: 'exact', head: true }).eq('medio_pago', 'efectivo').gte('fecha', desde).lte('fecha', hasta);
+  const nSal = rc.count || 0;
+  let sals = [];
+  if(op.salidas){
+    const r = await traerTodo(() => sb.from('gastos').select('fecha, categoria, monto, descripcion').eq('medio_pago', 'efectivo').gte('fecha', desde).lte('fecha', hasta).order('id'));
+    sals = (r.data || []).sort((a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0);
+  }
+  let docs = [];
+  if(op.doctores){
+    const r = await traerTodo(() => sb.from('consultas').select('monto, medio_pago, monto_2, medio_pago_2, personal!consultas_doctor_id_fkey(nombre)').eq('deleted', false).eq('no_vino', false).gte('fecha', desde).lte('fecha', hasta).order('id'));
+    const m = {};
+    (r.data || []).forEach(c => { const v = (c.medio_pago === 'Efectivo' ? Number(c.monto || 0) : 0) + (c.medio_pago_2 === 'Efectivo' ? Number(c.monto_2 || 0) : 0); if(v > 0){ const n = c.personal?.nombre || 'Sin doctor'; m[n] = (m[n] || 0) + v; } });
+    docs = Object.entries(m).sort((a, b) => b[1] - a[1]);
+  }
+
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+  const SB = 176, MX0 = SB + 26, MX1 = W - 30, MW = MX1 - MX0;
+  const m2 = v => '$' + Number(v).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const m0 = v => '$' + Math.round(Number(v)).toLocaleString('es-MX');
+  const pad = n => String(n).padStart(2, '0'), ahora = new Date();
+  const folio = 'EF-' + isoLocal(ahora).replace(/-/g, '') + '-' + pad(ahora.getHours()) + pad(ahora.getMinutes());
+  const gen = fmtFechaISO(isoLocal(ahora)) + ' ' + pad(ahora.getHours()) + ':' + pad(ahora.getMinutes());
+  const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  const NAVY = [11, 22, 40], TEAL = [42, 191, 191], GREEN = [22, 163, 74], GREEN_L = [74, 222, 128], ORANGE = [234, 88, 12], ORANGE_L = [255, 154, 107], AMBER = [217, 119, 6], AMBER_L = [251, 191, 36], GREY = [100, 116, 139], MUTED = [153, 166, 189];
+  const MES3 = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const perTxt = (a, b) => { const da = parseInt(a.slice(8, 10)), db = parseInt(b.slice(8, 10)), ma = MES3[parseInt(a.slice(5, 7)) - 1], mb = MES3[parseInt(b.slice(5, 7)) - 1]; return a.slice(0, 7) === b.slice(0, 7) ? (da === db ? da + ' ' + ma : da + '–' + db + ' ' + ma) : da + ' ' + ma + ' – ' + db + ' ' + mb; };
+  const logoEl = document.querySelector('.s3-brand-left img');
+  const logo = (x, y, h) => { try { if(logoEl && logoEl.src && logoEl.naturalHeight) doc.addImage(logoEl.src, 'PNG', x, y, h * logoEl.naturalWidth / logoEl.naturalHeight, h); } catch(_) {} };
+  const stop = (t, st) => { for(let i = 1; i < st.length; i++){ if(t <= st[i][0]){ const a = st[i - 1], b = st[i], u = (t - a[0]) / ((b[0] - a[0]) || 1); return a[1].map((v, k) => Math.round(v + (b[1][k] - v) * u)); } } return st[st.length - 1][1]; };
+  const gradV = (x, y, w, h, st) => { const n = 80; for(let i = 0; i < n; i++){ doc.setFillColor(...stop(i / (n - 1), st)); doc.rect(x, y + i * h / n, w, h / n + 0.8, 'F'); } };
+  const alpha = (a, fn) => { doc.setGState(new doc.GState({ opacity: a })); fn(); doc.setGState(new doc.GState({ opacity: 1 })); };
+  const cs = v => { if(typeof doc.setCharSpace === 'function') doc.setCharSpace(v); };
+  const etiqueta = (txt, x, y, size, color, opts) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(size); doc.setTextColor(...color); cs(0.7); doc.text(txt, x, y, opts); cs(0); };
+  const fit = (txt, size, maxW) => { let s = size; doc.setFont('helvetica', 'bold'); doc.setFontSize(s); while(doc.getTextWidth(txt) > maxW && s > 8){ s -= 0.5; doc.setFontSize(s); } return s; };
+  const quien = MI_PERFIL?.nombre || 'Admin';
+  const ult = ents.length ? ents[ents.length - 1] : null;
+
+  // ── barra lateral oscura (en todas las hojas; la 1ª con cifras clave y línea de entregas) ──
+  const lat = new Set();
+  const lateral = () => {
+    const pn = doc.internal.getCurrentPageInfo().pageNumber; if(lat.has(pn)) return; lat.add(pn);
+    const full = pn === 1;
+    gradV(0, 0, SB, H, [[0, [16, 50, 108]], [0.35, [7, 18, 36]], [1, [14, 42, 87]]]);
+    gradV(SB - 3.6, 0, 3.6, H, [[0, TEAL], [0.45, [123, 224, 208]], [1, [10, 40, 72]]]);
+    logo(20, 24, 22);
+    etiqueta('INFORME DE EFECTIVO', 20, 82, 5.8, [123, 224, 208]);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(19); doc.setTextColor(255, 255, 255); doc.text(perTxt(desde, hasta), 20, 104);
+    doc.setFontSize(9.5); doc.setTextColor(...MUTED); doc.text(hasta.slice(0, 4), 20, 117);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(130, 148, 175); doc.text('Folio ' + folio, 20, 133); doc.text(dias.length + ' días · ' + ents.length + ' entrega(s)', 20, 142);
+    const bloque = (y, lbl, val, col) => { doc.setDrawColor(255, 255, 255); alpha(0.16, () => { doc.setLineWidth(0.6); doc.line(20, y, SB - 20, y); }); etiqueta(lbl, 20, y + 13, 5.4, MUTED); const sz = fit(val, 19, SB - 40); doc.setTextColor(...col); doc.text(val, 20, y + 13 + sz + 3); };
+    if(full){
+      bloque(160, 'EFECTIVO COBRADO', m2(cob), [255, 255, 255]); bloque(204, 'SALIDAS DE EFECTIVO', m2(sal), ORANGE_L); bloque(248, 'EFECTIVO ENTREGADO', m2(entregado), GREEN_L);
+      alpha(0.14, () => { doc.setFillColor(...AMBER_L); doc.roundedRect(18, 296, SB - 36, 52, 6, 6, 'F'); });
+      doc.setDrawColor(...AMBER_L); doc.setLineWidth(1); doc.roundedRect(18, 296, SB - 36, 52, 6, 6, 'S');
+      etiqueta('EN CAJA AL ' + efCorto(hasta), 28, 311, 5.4, MUTED); const sz = fit(m2(fin), 19, SB - 56); doc.setTextColor(...AMBER_L); doc.text(m2(fin), 28, 311 + sz + 4);
+      // línea de entregas
+      doc.setDrawColor(255, 255, 255); alpha(0.16, () => { doc.setLineWidth(0.6); doc.line(20, 366, SB - 20, 366); }); etiqueta('LÍNEA DE ENTREGAS', 20, 380, 5.4, MUTED);
+      const tl = ents.slice(-4); let ty = 398;
+      tl.forEach((e, i) => {
+        if(i < tl.length - 1){ doc.setDrawColor(...TEAL); doc.setLineWidth(0.9); alpha(0.4, () => doc.line(24, ty + 4, 24, ty + 34)); }
+        alpha(0.25, () => { doc.setFillColor(...TEAL); doc.circle(24, ty, 5.2, 'F'); }); doc.setFillColor(...TEAL); doc.circle(24, ty, 3.2, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255); doc.text(efCorto(e.fecha_entrega), 36, ty + 3);
+        doc.setTextColor(...GREEN_L); doc.text(m0(e.monto), SB - 20, ty + 3, { align: 'right' });
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(...MUTED); doc.text('cubre ' + perTxt(e.desde, e.hasta), 36, ty + 12); ty += 34;
+      });
+      // bloque inferior anclado: conciliación + última entrega
+      let cy = H - 214; const fila = (t, v, neg) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(200, 211, 228); doc.text(t, 20, cy); doc.text(v, SB - 20, cy, { align: 'right' }); doc.setDrawColor(255, 255, 255); doc.setLineDashPattern([1, 1.4], 0); alpha(0.25, () => { doc.setLineWidth(0.4); doc.line(20, cy + 3, SB - 20, cy + 3); }); doc.setLineDashPattern([], 0); cy += 12; };
+      fila('En caja al inicio', m2(inicio)); fila('+ Cobrado', m2(cob)); fila('− Salidas'.replace('−', '-'), m2(sal)); fila('- Entregado', m2(entregado));
+      doc.setDrawColor(255, 255, 255); doc.setLineWidth(1.4); doc.line(20, cy - 6, SB - 20, cy - 6);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.4); doc.setTextColor(255, 255, 255); doc.text('= En caja al cierre', 20, cy + 6); doc.text(m2(fin), SB - 20, cy + 6, { align: 'right' });
+      if(ult){
+        doc.setDrawColor(255, 255, 255); alpha(0.16, () => { doc.setLineWidth(0.6); doc.line(20, H - 128, SB - 20, H - 128); }); etiqueta('ÚLTIMA ENTREGA', 20, H - 114, 5.4, MUTED);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(255, 255, 255); doc.text(fmtFechaISO(ult.fecha_entrega), 20, H - 97);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(...MUTED); doc.text(m2(ult.monto) + ' · cubrió ' + perTxt(ult.desde, ult.hasta), 20, H - 85); doc.text(ult.recibio + ' recibió', 20, H - 76);
+      }
+    } else {
+      bloque(160, 'TOTAL SALIDAS DE EFECTIVO', m2(sal), ORANGE_L); bloque(204, 'GASTOS EN EFECTIVO', String(nSal), [255, 255, 255]); bloque(248, 'EN CAJA AL ' + efCorto(hasta), m2(fin), AMBER_L);
+    }
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(120, 138, 165); doc.text('Generado ' + gen, 20, H - 40); doc.text('por ' + quien + ' (admin)', 20, H - 31);
+  };
+  const nuevaHoja = () => { doc.addPage(); lateral(); return 40; };
+  const hook = () => lateral();
+  let y = 0;
+  const ensure = h => { if(y + h > H - 56) y = nuevaHoja(); };
+  const seccion = (txt, der, yy) => { etiqueta(txt.toUpperCase(), MX0, yy, 6.4, NAVY); if(der){ doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(...GREY); doc.text(der, MX1, yy, { align: 'right' }); } doc.setDrawColor(...NAVY); doc.setLineWidth(1.7); doc.line(MX0, yy + 5, MX1, yy + 5); return yy + 18; };
+  const titulo = (l1, l2, size, yy) => { doc.setFillColor(...TEAL); doc.rect(MX0, yy - 24, 44, 5, 'F'); doc.setFont('helvetica', 'bold'); doc.setFontSize(size); doc.setTextColor(...NAVY); doc.text(l1, MX0, yy + size * 0.55); doc.text(l2, MX0, yy + size * 1.5); return yy + size * 1.5; };
+  const barras = (items, maxV, fmt, total) => items.forEach(([n, v, c]) => {
+    ensure(18);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.4); doc.setTextColor(...NAVY); doc.text(n, MX0, y + 6);
+    const bx = MX0 + 84, bw = MW - 84 - 78;
+    doc.setFillColor(230, 235, 244); doc.roundedRect(bx, y, bw, 9, 4.5, 4.5, 'F');
+    if(v > 0){ doc.setFillColor(...c); doc.roundedRect(bx, y, Math.max(8, bw * v / maxV), 9, 4.5, 4.5, 'F'); }
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...NAVY); doc.text(fmt(v), MX1 - 28, y + 7, { align: 'right' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.4); doc.setTextColor(...GREY); doc.text(total ? (v / total * 100).toFixed(1) + '%' : '', MX1, y + 7, { align: 'right' }); y += 17;
+  });
+  const tablaBase = { margin: { left: MX0, right: W - MX1, top: 40, bottom: 56 }, styles: { font: 'helvetica', fontSize: 7.4, cellPadding: { top: 5.5, bottom: 5.5, left: 5, right: 5 }, lineColor: [207, 216, 232], lineWidth: 0.4, textColor: NAVY, valign: 'middle' }, headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontSize: 6.2, fontStyle: 'bold', lineWidth: 0 }, footStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontStyle: 'bold', lineWidth: 0 }, alternateRowStyles: { fillColor: [241, 245, 251] }, didDrawPage: hook };
+
+  // ═════════ HOJA 1 ═════════
+  lateral();
+  y = titulo('Efectivo', 'entregado', 34, 58);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(71, 85, 105);
+  doc.splitTextToSize('Entregas de efectivo recibidas entre el ' + fmtFechaISO(desde) + ' y el ' + fmtFechaISO(hasta) + '. Cada una cubre el periodo que definió el administrador.', 330).forEach((l, i) => doc.text(l, MX0, y + 22 + i * 11));
+  y += 54;
+  // ¿a dónde fue el efectivo?
+  const base = (entregado + sal + fin) || 1, pe = entregado / base * 100, ps = sal / base * 100, pc = fin / base * 100;
+  y = seccion('¿A dónde fue el efectivo?', 'sobre ' + m0(base) + ' disponibles', y);
+  let fx = MX0; [[pe, GREEN], [ps, ORANGE], [pc, AMBER]].forEach(([p, c], i, arr) => { const w = MW * p / 100; if(w > 0){ doc.setFillColor(...c); doc.rect(fx, y, w, 24, 'F'); } if(i === 0 && w > 80){ doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255); doc.text('Entregado ' + pe.toFixed(1) + '%', MX0 + 8, y + 15); } fx += w; });
+  y += 36; let lx = MX0; [[GREEN, 'Entregado ' + m0(entregado)], [ORANGE, 'Salidas ' + m0(sal) + ' (' + ps.toFixed(1) + '%)'], [AMBER, 'En caja ' + m0(fin) + ' (' + pc.toFixed(1) + '%)']].forEach(([c, t]) => { doc.setFillColor(...c); doc.rect(lx, y - 6, 6, 6, 'F'); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(71, 85, 105); doc.text(t, lx + 9, y); lx += doc.getTextWidth(t) + 24; });
+  y += 20;
+  // entregas
+  y = seccion('Entregas', ents.length + ' en el periodo', y);
+  if(!ents.length){ doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...GREY); doc.text('No hubo entregas de efectivo en el rango elegido.', MX0, y + 4); y += 24; }
+  ents.forEach(e => {
+    ensure(70);
+    const dif = Number(e.quedo) > 0.004, nDias = efDifDias(e.hasta, e.desde) + 1, arr = Number(e.por_entregar) - (Number(e.cobrado) - Number(e.salidas));
+    doc.setFillColor(...NAVY); doc.roundedRect(MX0, y, 40, 40, 5, 5, 'F'); doc.setFont('helvetica', 'bold'); doc.setFontSize(17); doc.setTextColor(...TEAL); doc.text(pad(e.n), MX0 + 20, y + 26, { align: 'center' });
+    doc.setFontSize(10.2); doc.setTextColor(...NAVY); doc.text('Entrega del ' + fmtFechaISO(e.fecha_entrega), MX0 + 52, y + 11);
+    doc.setFontSize(6.8); doc.text('Cubre ' + perTxt(e.desde, e.hasta), MX0 + 52, y + 22); const w1 = doc.getTextWidth('Cubre ' + perTxt(e.desde, e.hasta));
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(71, 85, 105); doc.text(' · ' + nDias + ' día(s) · recibió ' + e.recibio, MX0 + 52 + w1, y + 22);
+    doc.text('Cobrado ' + m0(e.cobrado) + ' · salidas ' + m0(e.salidas) + (arr > 0.004 ? ' · arrastre ' + m0(arr) : '') + (dif ? ' · quedan ' + m0(e.quedo) + ' en caja' : ''), MX0 + 52, y + 32);
+    const pw = MW - 52 - 112; doc.setFillColor(...NAVY); doc.roundedRect(MX0 + 52, y + 38, pw, 5, 2.5, 2.5, 'F'); const ratio = Number(e.por_entregar) > 0 ? Math.min(1, Number(e.monto) / Number(e.por_entregar)) : 0; if(ratio > 0){ doc.setFillColor(34, 197, 94); doc.roundedRect(MX0 + 52, y + 38, Math.max(5, pw * ratio), 5, 2.5, 2.5, 'F'); }
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(...NAVY); doc.text(m2(e.monto), MX1, y + 13, { align: 'right' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(...GREY); doc.text('de ' + m2(e.por_entregar) + ' por entregar', MX1, y + 23, { align: 'right' });
+    const lbl = dif ? 'CON DIFERENCIA' : 'COMPLETA'; doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); cs(0.3); const pwid = doc.getTextWidth(lbl) + 14; doc.setFillColor(...(dif ? [245, 158, 11] : GREEN)); doc.roundedRect(MX1 - pwid, y + 29, pwid, 11, 5.5, 5.5, 'F'); doc.setTextColor(...(dif ? NAVY : [255, 255, 255])); doc.text(lbl, MX1 - pwid / 2, y + 36.6, { align: 'center' }); cs(0);
+    doc.setDrawColor(211, 219, 233); doc.setLineWidth(0.6); doc.line(MX0, y + 55, MX1, y + 55); y += 64;
+  });
+  // categorías y doctores
+  if(op.salidas && sals.length){
+    const porC = {}; sals.forEach(s => { porC[s.categoria] = (porC[s.categoria] || 0) + Number(s.monto); }); const cats = Object.keys(porC).sort((a, b) => porC[b] - porC[a]);
+    ensure(40 + cats.length * 17); y = seccion('Salidas de efectivo por categoría', m0(sal), y + 6);
+    barras(cats.map(c => [gstNombreCat(c), porC[c], hex(gstCat(c).color)]), Math.max(...cats.map(c => porC[c]), 1), m0, sal); y += 2;
+  }
+  if(op.doctores && docs.length){
+    const tot = docs.reduce((a, d) => a + d[1], 0), pal = [[27, 58, 107], TEAL, [125, 60, 152], ORANGE, GREEN];
+    ensure(40 + docs.length * 17); y = seccion('Efectivo cobrado por doctor', m0(tot), y + 6);
+    barras(docs.map(([n, v], i) => [n.split(' ').slice(0, 2).join(' '), v, pal[i % pal.length]]), Math.max(...docs.map(d => d[1]), 1), m0, tot);
+  }
+
+  // ═════════ HOJA 2: registro y detalle ═════════
+  y = nuevaHoja(); y = titulo(op.salidas ? 'Detalle de salidas' : 'Registro de', op.salidas ? 'de efectivo' : 'entregas', 24, 58) + 26;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(71, 85, 105); doc.text((op.salidas ? nSal + ' salida(s) de efectivo' : ents.length + ' entrega(s)') + ' entre el ' + fmtFechaISO(desde) + ' y el ' + fmtFechaISO(hasta) + '.', MX0, y); y += 18;
+  if(ents.length){
+    y = seccion('Registro de entregas', 'periodos definidos por el admin', y);
+    doc.autoTable({ ...tablaBase, startY: y - 4,
+      head: [['Entrega', 'Periodo que cubre', 'Por entregar', 'Entregado', 'Queda en caja', 'Estado']],
+      body: ents.map(e => ['#' + e.n + ' · ' + efCorto(e.fecha_entrega), perTxt(e.desde, e.hasta) + '\n' + (efDifDias(e.hasta, e.desde) + 1) + ' día(s)', m2(e.por_entregar), m2(e.monto), m2(Math.max(0, Number(e.quedo))), Number(e.quedo) > 0.004 ? 'CON DIFERENCIA' : 'COMPLETA']),
+      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 52 }, 2: { halign: 'right' }, 3: { halign: 'right', fontStyle: 'bold' }, 4: { halign: 'right' } },
+      didParseCell: d => { if(d.section === 'head' && d.column.index >= 2 && d.column.index <= 4) d.cell.styles.halign = 'right'; if(d.section === 'body' && d.column.index === 5){ const dif = Number(ents[d.row.index].quedo) > 0.004; d.cell.styles.textColor = dif ? [180, 83, 9] : [21, 128, 61]; d.cell.styles.fontStyle = 'bold'; d.cell.styles.fontSize = 6.2; } } });
+    y = doc.lastAutoTable.finalY + 14;
+  }
+  if(op.salidas){
+    if(!sals.length){ ensure(40); y = seccion('Detalle de salidas de efectivo', '0 movimientos', y); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...GREY); doc.text('No hubo salidas de efectivo en este rango.', MX0, y + 2); y += 22; }
+    else {
+      ensure(70); y = seccion('Detalle de salidas de efectivo', sals.length + ' movimientos', y);
+      doc.autoTable({ ...tablaBase, startY: y - 4, head: [['Fecha', 'Categoría', 'Descripción', 'Monto']],
+        body: sals.map(s => [fmtFechaISO(s.fecha), gstNombreCat(s.categoria), s.descripcion || '', m2(s.monto)]),
+        foot: [[{ content: 'TOTAL SALIDAS DE EFECTIVO', colSpan: 3 }, m2(suma(sals, 'monto'))]],
+        columnStyles: { 0: { cellWidth: 52 }, 1: { cellWidth: 78 }, 3: { halign: 'right', fontStyle: 'bold', textColor: [194, 65, 12], cellWidth: 58 } },
+        didParseCell: d => { if((d.section === 'head' || d.section === 'foot') && d.column.index === 3) d.cell.styles.halign = 'right'; if(d.section === 'foot' && d.column.index === 3){ d.cell.styles.textColor = AMBER_L; d.cell.styles.fontSize = 8.5; } if(d.section === 'foot'){ d.cell.styles.cellPadding = { top: 7, bottom: 7, left: 5, right: 5 }; } } });
+      y = doc.lastAutoTable.finalY + 14;
+    }
+  }
+  const obs = ents.filter(e => Number(e.quedo) > 0.004 && e.notas);
+  if(obs.length){
+    const lineas = obs.map(e => doc.splitTextToSize('Entrega ' + e.n + ' (' + efCorto(e.fecha_entrega) + '): ' + e.notas, MW - 24)), alto = 20 + lineas.reduce((a, l) => a + l.length * 9, 0);
+    ensure(alto + 10); doc.setFillColor(255, 247, 230); doc.rect(MX0, y, MW, alto, 'F'); doc.setFillColor(245, 158, 11); doc.rect(MX0, y, 4, alto, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(59, 42, 6); doc.text('Observaciones', MX0 + 14, y + 12);
+    doc.setFont('helvetica', 'normal'); let yy = y + 22; lineas.forEach(l => { doc.text(l, MX0 + 14, yy); yy += l.length * 9; }); y += alto + 12;
+  }
+  if(op.firmas){
+    if(y > H - 150) y = nuevaHoja();
+    const ys = H - 96, cw = (MW - 40) / 2;
+    [[ult ? ult.entrego : 'Recepción CUIVAN', 'Entregó · Fecha y firma', MX0], [quien, 'Recibió · Fecha y firma', MX0 + cw + 40]].forEach(([n, t, x]) => {
+      doc.setDrawColor(...NAVY); doc.setLineWidth(1.8); doc.line(x, ys, x + cw, ys);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...NAVY); doc.text(n, x + cw / 2, ys + 13, { align: 'center' });
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(...GREY); doc.text(t, x + cw / 2, ys + 23, { align: 'center' });
+    });
+  }
+  // ── pie en todas las hojas ──
+  const total = doc.internal.getNumberOfPages();
+  for(let i = 1; i <= total; i++){
+    doc.setPage(i); doc.setDrawColor(...NAVY); doc.setLineWidth(1.7); doc.line(MX0, H - 34, MX1, H - 34);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(...GREY); doc.text('Documento generado por el sistema de CUIVAN · Confidencial · Uso interno', MX0, H - 22);
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY); doc.text('Página ' + i + ' de ' + total, MX1, H - 22, { align: 'right' });
+  }
+  doc.save('CUIVAN_Informe_Efectivo_' + desde + '_a_' + hasta + '.pdf');
+}
 
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD — rediseñado al estilo de Skin Fabric: periodo por Mes/Rango/Recientes/Todo,
@@ -4802,6 +5292,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-1</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-3</div>
 </body>
 </html>
