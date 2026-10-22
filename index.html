@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.22-3"/>
+<meta name="app-version" content="2026.10.22-4"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -667,6 +667,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
   .ef-table td:nth-child(9){order:9;grid-column:1/-1;padding:6px 0 0}
   .ent-g2{grid-template-columns:1fr 1fr}
 }
+.cj-solo{font-size:10px;color:var(--g6);margin:-4px 0 10px}
 </style>
 </head>
 <body>
@@ -1040,7 +1041,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       <div class="sk-hero">
         <div class="sk-hero-top">
           <div class="sk-hero-ico">💵</div>
-          <div><h1>Efectivo</h1><p>Entregas al administrador y estado de caja · control desde <b id="ef-hero-ini">—</b></p></div>
+          <div><h1>Efectivo</h1><p>Entregas al administrador y estado de caja · <b>solo efectivo</b> · control desde <b id="ef-hero-ini">—</b></p></div>
         </div>
       </div>
       <div class="sk-kpis" id="ef-kpis"></div>
@@ -1062,7 +1063,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       </div>
       <div class="sk-tw">
         <table class="sk-table ef-table">
-          <thead><tr><th>Entrega</th><th>Periodo que cubre</th><th class="r">Cobrado</th><th class="r">Salidas</th><th class="r">Por entregar</th><th class="r">Entregado</th><th class="r">Queda en caja</th><th>Estado</th><th></th></tr></thead>
+          <thead><tr><th>Entrega</th><th>Periodo que cubre</th><th class="r">Efectivo cobrado</th><th class="r">Salidas</th><th class="r">Por entregar</th><th class="r">Entregado</th><th class="r">Queda en caja</th><th>Estado</th><th></th></tr></thead>
           <tbody id="ef-tbody"></tbody>
         </table>
         <div class="sk-empty" id="ef-empty" style="display:none">Aún no hay entregas registradas. Cuando recibas el efectivo, usa “Registrar entrega”.</div>
@@ -1188,7 +1189,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       <h3 id="ent-titulo">💵 Registrar entrega de efectivo</h3>
       <div class="ent-g2" style="margin-top:12px">
         <div class="sk-fg"><label class="lb" for="ent-fecha">Fecha de entrega</label><input class="app-input" type="date" id="ent-fecha"/></div>
-        <div class="sk-fg"><label class="lb">Por entregar a esa fecha</label><div class="app-input" id="ent-disp" style="background:#F3FBF5;border-color:#A8D8B4;font-weight:800;color:#2E7D4F">—</div></div>
+        <div class="sk-fg"><label class="lb">Efectivo por entregar a esa fecha</label><div class="app-input" id="ent-disp" style="background:#F3FBF5;border-color:#A8D8B4;font-weight:800;color:#2E7D4F">—</div></div>
       </div>
       <div class="ent-g2">
         <div class="sk-fg"><label class="lb" for="ent-desde">Efectivo desde</label><input class="app-input" type="date" id="ent-desde"/></div>
@@ -3756,7 +3757,7 @@ const cjEfectivoCobrado = data => data.reduce((a, r) => a + (r.medio_pago === 'E
 function cjNetbox(c){
   const l = (t, v, extra) => `<div class="r"><span>${t}</span><b ${extra || ''}>${v}</b></div>`;
   if(!c.aplica) return `<div class="cj-netbox">${l('Efectivo cobrado', skMoney(c.ef))}${l('− Salidas de efectivo', skMoney(c.totSal), 'style="color:#B8481F"')}<div class="r net"><span>= Efectivo neto</span><span class="${c.ef - c.totSal < 0 ? 'cj-neg' : ''}">${cjMoney(c.ef - c.totSal)}</span></div></div>`;
-  return `<div class="cj-netbox">${l('En caja al inicio', skMoney(c.antes))}${c.entregado > 0.004 ? l('− Entregado', skMoney(c.entregado), 'style="color:#2E7D4F"') : ''}${l('+ Efectivo cobrado', skMoney(c.ef))}${l('− Salidas de efectivo', skMoney(c.totSal), 'style="color:#B8481F"')}<div class="r net"><span>= En caja al cierre</span><span>${skMoney(c.fin)}</span></div></div>`;
+  return `<div class="cj-netbox">${l('Efectivo en caja al inicio', skMoney(c.antes))}${c.entregado > 0.004 ? l('− Entregado', skMoney(c.entregado), 'style="color:#2E7D4F"') : ''}${l('+ Efectivo cobrado', skMoney(c.ef))}${l('− Salidas de efectivo', skMoney(c.totSal), 'style="color:#B8481F"')}<div class="r net"><span>= Efectivo en caja al cierre</span><span>${skMoney(c.fin)}</span></div></div>`;
 }
 function renderCorteCaja(data, doctorFiltro){
   const el = document.getElementById('cierre-corte');
@@ -3773,7 +3774,7 @@ function renderCorteCaja(data, doctorFiltro){
   // ecuación: en caja al inicio − entregado + cobrado − salidas = en caja al cierre
   const it = [];
   if(aplica){
-    it.push({ l: 'En caja al inicio', v: antes, c: 'var(--navy)' });
+    it.push({ l: 'Efectivo en caja al inicio', v: antes, c: 'var(--navy)' });
     if(entregado > 0.004) it.push({ op: '−', l: 'Entregado', v: entregado, c: '#2E7D4F' });
     it.push({ op: '+', l: 'Efectivo cobrado', v: ef, c: '#2E7D4F' });
     it.push({ op: '−', l: 'Salidas de efectivo (' + salidas.length + ')', v: totSal, c: '#B8481F' });
@@ -3781,14 +3782,14 @@ function renderCorteCaja(data, doctorFiltro){
     it.push({ l: 'Efectivo cobrado', v: ef, c: '#2E7D4F' });
     it.push({ op: '−', l: 'Salidas de efectivo (' + salidas.length + ')', v: totSal, c: '#B8481F' });
   }
-  const res = aplica ? { l: 'En caja al cierre', v: fin, bad: false } : { l: 'Efectivo neto ' + per, v: ef - totSal, bad: ef - totSal < 0 };
+  const res = aplica ? { l: 'Efectivo en caja al cierre', v: fin, bad: false } : { l: 'Efectivo neto ' + per, v: ef - totSal, bad: ef - totSal < 0 };
   const cols = it.map((_, i) => (i ? 'auto ' : '') + '1fr').join(' ') + ' auto 1.2fr';
   const eq = `<div class="cj-eq" style="grid-template-columns:${cols}">` + it.map((x, i) => (i ? `<div class="cj-op">${x.op}</div>` : '') + `<div class="cj-it"><div class="l">${x.l}</div><div class="v" style="color:${x.c}">${skMoney(x.v)}</div></div>`).join('')
     + `<div class="cj-op">=</div><div class="cj-it net ${res.bad ? 'bad' : ''}"><div class="l">${res.l}</div><div class="v">${cjMoney(res.v)}</div></div></div>`;
   let estado = '';
   if(aplica){
     const hoy = isoLocal(new Date()), hastaC = rangoCierreActual().hasta, ref = hastaC < hoy ? hastaC : hoy, dsin = ult ? efDifDias(ref, ult.hasta) : 0;
-    estado = `<div class="cj-estado"><span class="sk-bdg" style="${fin > 0.004 ? 'background:#EEF5FC;color:#1B5C9E;border:1px solid #BDD5F0' : 'background:#EAF7EE;color:#2E7D4F;border:1px solid #A8D8B4'}">${fin > 0.004 ? '🟡 Por entregar' : '✅ Sin efectivo por entregar'}</span>`
+    estado = `<div class="cj-estado"><span class="sk-bdg" style="${fin > 0.004 ? 'background:#EEF5FC;color:#1B5C9E;border:1px solid #BDD5F0' : 'background:#EAF7EE;color:#2E7D4F;border:1px solid #A8D8B4'}">${fin > 0.004 ? '🟡 Efectivo por entregar' : '✅ Sin efectivo por entregar'}</span>`
       + `<span class="sp">${ult ? `Última entrega: <b>${fmtFechaISO(ult.fecha)}</b> · ${skMoney(ult.monto)} · cubrió ${efCorto(ult.desde)}–${efCorto(ult.hasta)}${fin > 0.004 && dsin > 0 ? ' · <b>' + dsin + ' día(s)</b> desde ese corte' : ''}` : 'Aún sin entregas registradas'}</span>`
       + (window.MI_ROL_ADMIN ? '<button class="appbtn appbtn-p" id="cj-btn-entrega" type="button" style="font-size:11px;padding:6px 12px">💵 Registrar entrega</button>' : '') + '</div>';
   }
@@ -3797,7 +3798,7 @@ function renderCorteCaja(data, doctorFiltro){
     + (!aplica ? `<div class="cj-nota muted" style="margin:10px 0 0">El control de caja empieza el ${fmtFechaISO(caja.inicio)}${window.MI_ROL_ADMIN ? ' (se cambia en ⚙️ Configuración → Control de caja)' : ''}.</div>` : '');
   const lista = salidas.length ? salidas.map(sa => { const k = gstCat(sa.categoria); return `<div class="cj-salrow"><span class="sk-bdg" style="background:${k.color}1a;color:${k.color}">${k.label}</span><div>${esc2(sa.descripcion)}<small>${dia ? '' : fmtFechaISO(sa.fecha) + ' · '}${sa.registro ? 'Registró: ' + esc2(sa.registro) : 'Salida de efectivo'}</small></div><span class="m">−${skMoney(sa.monto)}</span></div>`; }).join('')
     : `<div class="cj-vacio">✓ Sin salidas de efectivo ${dia ? 'este día' : 'en el periodo'}</div>`;
-  el.innerHTML = aviso + `<div class="cj-corte"><h4>💵 Corte de caja · ${per}</h4>${eq}${estado}${entList}${notas}<div class="cj-sal"><div class="h">Salidas de efectivo ${per}</div>${lista}</div></div>`;
+  el.innerHTML = aviso + `<div class="cj-corte"><h4>💵 Corte de caja · ${per}</h4><div class="cj-solo">Solo efectivo: no incluye pagos con tarjeta, transferencia ni cortesía.</div>${eq}${estado}${entList}${notas}<div class="cj-sal"><div class="h">Salidas de efectivo ${per}</div>${lista}</div></div>`;
   const b = el.querySelector('#cj-btn-entrega'); if(b) b.addEventListener('click', efAbrirDesdeCierre);
 }
 async function cargarCierre(){
@@ -4350,14 +4351,14 @@ function efRender(){
   document.getElementById('ef-hero-ini').textContent = fmtFechaISO(EF.inicio_control);
   const hace = ult ? efDifDias(hoy, ult.fecha_entrega) : null;
   document.getElementById('ef-kpis').innerHTML = `
-    <div class="kpi-tile sk-k-tr"><div class="ico">💵</div><div class="lbl3">En caja ahora (por entregar)</div><div class="val">${skMoney(caja)}</div><div class="sk-ks">al cierre de hoy</div></div>
+    <div class="kpi-tile sk-k-tr"><div class="ico">💵</div><div class="lbl3">Efectivo en caja ahora (por entregar)</div><div class="val">${skMoney(caja)}</div><div class="sk-ks">solo efectivo · al cierre de hoy</div></div>
     <div class="kpi-tile sk-k-ef"><div class="ico">✅</div><div class="lbl3">Entregado en ${SK_MESES[parseInt(mes.slice(5, 7)) - 1].toLowerCase()}</div><div class="val">${skMoney(entMes.reduce((a, e) => a + Number(e.monto), 0))}</div><div class="sk-ks">${entMes.length} entrega(s)</div></div>
     <div class="kpi-tile"><div class="ico">📥</div><div class="lbl3">Última entrega</div><div class="val">${ult ? fmtFechaISO(ult.fecha_entrega) : '—'}</div><div class="sk-ks">${ult ? skMoney(ult.monto) + ' · ' + (hace === 0 ? 'hoy' : hace === 1 ? 'ayer' : 'hace ' + hace + ' días') : 'aún sin entregas'}</div></div>
     <div class="kpi-tile"><div class="ico">↪️</div><div class="lbl3">Arrastre de la última</div><div class="val" style="${ult && Number(ult.quedo) > 0.004 ? 'color:#C0392B' : ''}">${ult ? skMoney(Math.max(0, Number(ult.quedo))) : '—'}</div><div class="sk-ks">${ult && Number(ult.quedo) > 0.004 ? 'quedó en caja al entregar' : 'sin arrastre'}</div></div>`;
   // pendiente de entregar
   const lastHasta = ult ? ult.hasta : efAddD(EF.inicio_control, -1), desdePend = efAddD(lastHasta, 1), nd = efDifDias(hoy, desdePend) + 1;
   document.getElementById('ef-pend').innerHTML = caja > 0.004 && nd >= 1
-    ? `<span class="sk-bdg" style="background:#EEF5FC;color:#1B5C9E;border:1px solid #BDD5F0">🟡 Pendiente de entregar</span><span class="sp">Efectivo del <b>${fmtFechaISO(desdePend)}</b> al <b>${fmtFechaISO(hoy)}</b> (${nd} día(s)) · en caja <b>${skMoney(caja)}</b>${ult && Number(ult.quedo) > 0.004 ? ' (incluye ' + skMoney(ult.quedo) + ' arrastrados)' : ''}</span>`
+    ? `<span class="sk-bdg" style="background:#EEF5FC;color:#1B5C9E;border:1px solid #BDD5F0">🟡 Pendiente de entregar</span><span class="sp">Efectivo del <b>${fmtFechaISO(desdePend)}</b> al <b>${fmtFechaISO(hoy)}</b> (${nd} día(s)) · efectivo en caja <b>${skMoney(caja)}</b>${ult && Number(ult.quedo) > 0.004 ? ' (incluye ' + skMoney(ult.quedo) + ' arrastrados)' : ''}</span>`
     : `<span class="sk-bdg" style="background:#EAF7EE;color:#2E7D4F;border:1px solid #A8D8B4">✅ Sin efectivo pendiente</span><span class="sp">No hay efectivo por entregar en caja.</span>`;
   // tabla (más reciente primero)
   const tbody = document.getElementById('ef-tbody'), empty = document.getElementById('ef-empty');
@@ -4433,7 +4434,7 @@ function efModalActualizar(inicial){
   const $ = x => document.getElementById(x), f = $('ent-fecha').value, d = $('ent-desde').value, h = $('ent-hasta').value, m = Number($('ent-monto').value) || 0;
   const disp = f ? efDisp(f, EF_EDIT) : 0;
   $('ent-disp').textContent = skMoney(disp);
-  if(d && h && d <= h){ const s = efSumaPeriodo(d, h); $('ent-periodo').innerHTML = `Periodo de ${efDifDias(h, d) + 1} día(s): cobrado <b>${skMoney(s.cob)}</b> · salidas <b>${skMoney(s.sal)}</b> · neto <b>${skMoney(s.cob - s.sal)}</b>`; }
+  if(d && h && d <= h){ const s = efSumaPeriodo(d, h); $('ent-periodo').innerHTML = `Periodo de ${efDifDias(h, d) + 1} día(s): efectivo cobrado <b>${skMoney(s.cob)}</b> · salidas de efectivo <b>${skMoney(s.sal)}</b> · neto <b>${skMoney(s.cob - s.sal)}</b>`; }
   else $('ent-periodo').textContent = 'Elige el periodo de efectivo que estás entregando.';
   const err = efModalErrores(), box = $('ent-dif'), dif = disp - m;
   if(err && !(inicial && !$('ent-notas').value && err.startsWith('Indica quién'))){ box.className = 'cj-nota red'; box.innerHTML = '⚠️ ' + err; $('ent-notas-req').textContent = ''; return; }
@@ -4483,7 +4484,7 @@ function efInformeRefrescar(){
   let a = d.value, b = h.value; if(a > b){ const t = a; a = b; b = t; }
   const s = efSumaPeriodo(a, b), ents = EF.entregas.filter(e => e.fecha_entrega >= a && e.fecha_entrega <= b), ds = s.dias;
   document.getElementById('ef-r-resumen').innerHTML = ds.length
-    ? `Del <b>${fmtFechaISO(a)}</b> al <b>${fmtFechaISO(b)}</b>: cobrado <b>${skMoney(s.cob)}</b> · salidas <b>${skMoney(s.sal)}</b> · entregado <b>${skMoney(ents.reduce((x, e) => x + Number(e.monto), 0))}</b> (${ents.length} entrega(s)) · en caja al cierre <b>${skMoney(Number(ds[ds.length - 1].caja_fin))}</b>`
+    ? `Del <b>${fmtFechaISO(a)}</b> al <b>${fmtFechaISO(b)}</b>: efectivo cobrado <b>${skMoney(s.cob)}</b> · salidas de efectivo <b>${skMoney(s.sal)}</b> · entregado <b>${skMoney(ents.reduce((x, e) => x + Number(e.monto), 0))}</b> (${ents.length} entrega(s)) · efectivo en caja al cierre <b>${skMoney(Number(ds[ds.length - 1].caja_fin))}</b>`
     : 'No hay datos de caja en ese rango.';
 }
 document.getElementById('ef-presets').addEventListener('click', e => {
@@ -4574,7 +4575,7 @@ async function exportarInformeEfectivo(desde, hasta, op){
       bloque(160, 'EFECTIVO COBRADO', m2(cob), [255, 255, 255]); bloque(204, 'SALIDAS DE EFECTIVO', m2(sal), ORANGE_L); bloque(248, 'EFECTIVO ENTREGADO', m2(entregado), GREEN_L);
       alpha(0.14, () => { doc.setFillColor(...AMBER_L); doc.roundedRect(18, 296, SB - 36, 52, 6, 6, 'F'); });
       doc.setDrawColor(...AMBER_L); doc.setLineWidth(1); doc.roundedRect(18, 296, SB - 36, 52, 6, 6, 'S');
-      etiqueta('EN CAJA AL ' + efCorto(hasta), 28, 311, 5.4, MUTED); const sz = fit(m2(fin), 19, SB - 56); doc.setTextColor(...AMBER_L); doc.text(m2(fin), 28, 311 + sz + 4);
+      etiqueta('EFECTIVO EN CAJA AL ' + efCorto(hasta), 28, 311, 5.4, MUTED); const sz = fit(m2(fin), 19, SB - 56); doc.setTextColor(...AMBER_L); doc.text(m2(fin), 28, 311 + sz + 4);
       // línea de entregas
       doc.setDrawColor(255, 255, 255); alpha(0.16, () => { doc.setLineWidth(0.6); doc.line(20, 366, SB - 20, 366); }); etiqueta('LÍNEA DE ENTREGAS', 20, 380, 5.4, MUTED);
       const tl = ents.slice(-4); let ty = 398;
@@ -4587,16 +4588,16 @@ async function exportarInformeEfectivo(desde, hasta, op){
       });
       // bloque inferior anclado: conciliación + última entrega
       let cy = H - 214; const fila = (t, v, neg) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(200, 211, 228); doc.text(t, 20, cy); doc.text(v, SB - 20, cy, { align: 'right' }); doc.setDrawColor(255, 255, 255); doc.setLineDashPattern([1, 1.4], 0); alpha(0.25, () => { doc.setLineWidth(0.4); doc.line(20, cy + 3, SB - 20, cy + 3); }); doc.setLineDashPattern([], 0); cy += 12; };
-      fila('En caja al inicio', m2(inicio)); fila('+ Cobrado', m2(cob)); fila('− Salidas'.replace('−', '-'), m2(sal)); fila('- Entregado', m2(entregado));
+      fila('Efectivo en caja al inicio', m2(inicio)); fila('+ Cobrado', m2(cob)); fila('− Salidas'.replace('−', '-'), m2(sal)); fila('- Entregado', m2(entregado));
       doc.setDrawColor(255, 255, 255); doc.setLineWidth(1.4); doc.line(20, cy - 6, SB - 20, cy - 6);
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.4); doc.setTextColor(255, 255, 255); doc.text('= En caja al cierre', 20, cy + 6); doc.text(m2(fin), SB - 20, cy + 6, { align: 'right' });
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.4); doc.setTextColor(255, 255, 255); doc.text('= Efectivo al cierre', 20, cy + 6); doc.text(m2(fin), SB - 20, cy + 6, { align: 'right' });
       if(ult){
         doc.setDrawColor(255, 255, 255); alpha(0.16, () => { doc.setLineWidth(0.6); doc.line(20, H - 128, SB - 20, H - 128); }); etiqueta('ÚLTIMA ENTREGA', 20, H - 114, 5.4, MUTED);
         doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(255, 255, 255); doc.text(fmtFechaISO(ult.fecha_entrega), 20, H - 97);
         doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(...MUTED); doc.text(m2(ult.monto) + ' · cubrió ' + perTxt(ult.desde, ult.hasta), 20, H - 85); doc.text(ult.recibio + ' recibió', 20, H - 76);
       }
     } else {
-      bloque(160, 'TOTAL SALIDAS DE EFECTIVO', m2(sal), ORANGE_L); bloque(204, 'GASTOS EN EFECTIVO', String(nSal), [255, 255, 255]); bloque(248, 'EN CAJA AL ' + efCorto(hasta), m2(fin), AMBER_L);
+      bloque(160, 'TOTAL SALIDAS DE EFECTIVO', m2(sal), ORANGE_L); bloque(204, 'GASTOS EN EFECTIVO', String(nSal), [255, 255, 255]); bloque(248, 'EFECTIVO EN CAJA AL ' + efCorto(hasta), m2(fin), AMBER_L);
     }
     doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(120, 138, 165); doc.text('Generado ' + gen, 20, H - 40); doc.text('por ' + quien + ' (admin)', 20, H - 31);
   };
@@ -4621,13 +4622,14 @@ async function exportarInformeEfectivo(desde, hasta, op){
   lateral();
   y = titulo('Efectivo', 'entregado', 34, 58);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(71, 85, 105);
-  doc.splitTextToSize('Entregas de efectivo recibidas entre el ' + fmtFechaISO(desde) + ' y el ' + fmtFechaISO(hasta) + '. Cada una cubre el periodo que definió el administrador.', 330).forEach((l, i) => doc.text(l, MX0, y + 22 + i * 11));
-  y += 54;
+  const lead = doc.splitTextToSize('Entregas de efectivo recibidas entre el ' + fmtFechaISO(desde) + ' y el ' + fmtFechaISO(hasta) + '. Cada una cubre el periodo que definió el administrador. Todas las cifras son solo de efectivo: no incluyen pagos con tarjeta, transferencia ni cortesía.', 340);
+  lead.forEach((l, i) => doc.text(l, MX0, y + 22 + i * 11));
+  y += 22 + lead.length * 11 + 10;
   // ¿a dónde fue el efectivo?
   const base = (entregado + sal + fin) || 1, pe = entregado / base * 100, ps = sal / base * 100, pc = fin / base * 100;
-  y = seccion('¿A dónde fue el efectivo?', 'sobre ' + m0(base) + ' disponibles', y);
+  y = seccion('¿A dónde fue el efectivo?', 'sobre ' + m0(base) + ' de efectivo disponible', y);
   let fx = MX0; [[pe, GREEN], [ps, ORANGE], [pc, AMBER]].forEach(([p, c], i, arr) => { const w = MW * p / 100; if(w > 0){ doc.setFillColor(...c); doc.rect(fx, y, w, 24, 'F'); } if(i === 0 && w > 80){ doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255); doc.text('Entregado ' + pe.toFixed(1) + '%', MX0 + 8, y + 15); } fx += w; });
-  y += 36; let lx = MX0; [[GREEN, 'Entregado ' + m0(entregado)], [ORANGE, 'Salidas ' + m0(sal) + ' (' + ps.toFixed(1) + '%)'], [AMBER, 'En caja ' + m0(fin) + ' (' + pc.toFixed(1) + '%)']].forEach(([c, t]) => { doc.setFillColor(...c); doc.rect(lx, y - 6, 6, 6, 'F'); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(71, 85, 105); doc.text(t, lx + 9, y); lx += doc.getTextWidth(t) + 24; });
+  y += 36; let lx = MX0; [[GREEN, 'Entregado ' + m0(entregado)], [ORANGE, 'Salidas ' + m0(sal) + ' (' + ps.toFixed(1) + '%)'], [AMBER, 'Efectivo en caja ' + m0(fin) + ' (' + pc.toFixed(1) + '%)']].forEach(([c, t]) => { doc.setFillColor(...c); doc.rect(lx, y - 6, 6, 6, 'F'); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(71, 85, 105); doc.text(t, lx + 9, y); lx += doc.getTextWidth(t) + 24; });
   y += 20;
   // entregas
   y = seccion('Entregas', ents.length + ' en el periodo', y);
@@ -5292,6 +5294,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-3</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-4</div>
 </body>
 </html>
