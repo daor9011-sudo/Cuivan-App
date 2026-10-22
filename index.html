@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.22-6"/>
+<meta name="app-version" content="2026.10.22-8"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -1176,7 +1176,9 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       <div class="fac2" style="margin-bottom:14px">
         <p style="font-size:11px;color:var(--g6);line-height:1.5;margin-bottom:12px">El <b>efectivo en caja</b> se cuenta desde esta fecha: cada día suma lo cobrado en efectivo, resta las salidas de efectivo y baja con cada entrega que registres en la pestaña 💵 Efectivo. Antes de esta fecha no se arrastra nada.</p>
         <div class="fi2" style="max-width:260px"><label class="lbl2">Llevar el control de caja desde</label><input class="app-input" type="date" id="caja-inicio"/></div>
-        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin:8px 0 10px">Normalmente no hace falta cambiarla: cada entrega baja la caja. Cámbiala solo si quieres empezar el control en otra fecha.</p>
+        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin:8px 0 14px">Normalmente no hace falta cambiarla: cada entrega baja la caja. Cámbiala solo si quieres empezar el control en otra fecha.</p>
+        <div class="fi2" style="max-width:380px"><label class="lbl2">Nombre de Dirección médica (firma del informe de efectivo)</label><input class="app-input" type="text" id="caja-dir" maxlength="120" placeholder="Ej. nombre completo, tal como debe aparecer"/></div>
+        <p style="font-size:10.5px;color:var(--g4);line-height:1.5;margin:8px 0 10px">Aparece bajo “Dirección médica · CUIVAN Salud Integral” en la firma del informe PDF. Si lo dejas vacío, la firma sale solo con el cargo.</p>
         <button class="appbtn appbtn-p" id="btn-caja-guardar">Guardar</button>
       </div>
 
@@ -3514,18 +3516,18 @@ document.addEventListener('visibilitychange', () => { if(!document.hidden && CT.
 // ── Control de caja: fecha desde la que se lleva el remanente (solo admin) ──
 async function cajaCfgCargar(){
   if(!window.MI_ROL_ADMIN) return;
-  const { data, error } = await sb.from('caja_config').select('inicio_control').eq('id', true).maybeSingle();
+  const { data, error } = await sb.from('caja_config').select('inicio_control, direccion_medica').eq('id', true).maybeSingle();
   if(error){ console.error('[CUIVAN] Error leyendo control de caja:', error); return; }
-  if(data) document.getElementById('caja-inicio').value = data.inicio_control;
+  if(data){ document.getElementById('caja-inicio').value = data.inicio_control; document.getElementById('caja-dir').value = data.direccion_medica || ''; }
 }
 document.getElementById('btn-caja-guardar').addEventListener('click', async () => {
   const v = document.getElementById('caja-inicio').value;
   if(!v){ toast('⚠️ Elige la fecha desde la que se lleva el remanente'); return; }
   const btn = document.getElementById('btn-caja-guardar'); btn.disabled = true;
-  const { error } = await sb.from('caja_config').update({ inicio_control: v }).eq('id', true);
+  const { error } = await sb.from('caja_config').update({ inicio_control: v, direccion_medica: document.getElementById('caja-dir').value.trim() || null }).eq('id', true);
   btn.disabled = false;
   if(error){ console.error('[CUIVAN] Error guardando control de caja:', error); toast('⚠️ No se pudo guardar: ' + error.message); return; }
-  toast('✅ Control de caja actualizado: el remanente se lleva desde el ' + fmtFechaISO(v));
+  toast('✅ Guardado: el control de caja se lleva desde el ' + fmtFechaISO(v));
 });
 
 // ── Horario de acceso (solo Recepción se restringe) ──
@@ -3835,6 +3837,7 @@ const AUDIT_LABEL = {
   gasto_editar: '✏️ Editó un gasto',
   gasto_eliminar: '🗑️ Eliminó un gasto',
   caja_config: '💵 Cambió la fecha de inicio del control de caja',
+  caja_firma: '✍️ Cambió el nombre de Dirección médica en las firmas del informe',
   entrega_registrar: '💵 Registró una entrega de efectivo',
   entrega_editar: '✏️ Editó una entrega de efectivo',
   entrega_eliminar: '🗑️ Eliminó una entrega de efectivo'
@@ -4460,10 +4463,31 @@ const efDifDias = (a, b) => Math.round((new Date(a + 'T12:00:00') - new Date(b +
 const efCorto = iso => iso.slice(8, 10) + '/' + iso.slice(5, 7);
 const efPer = (a, b) => fmtFechaISO(a) + ' – ' + fmtFechaISO(b);
 
+let EF_REQ = 0, EF_ULT = 0;
 async function efCargar(){
+  const mi = ++EF_REQ;                                   // si llegan dos lecturas, la más reciente es la que vale
   const { data, error } = await sb.rpc('caja_resumen', { p_desde: '2000-01-01', p_hasta: isoLocal(new Date()) });
+  if(mi !== EF_REQ) return !!EF;
   if(error || !data || data.permitido === false){ console.error('[CUIVAN] Error cargando efectivo:', error); EF = null; return false; }
-  EF = data; return true;
+  EF = data; EF_ULT = Date.now(); return true;
+}
+// Tras guardar/eliminar: vuelve a leer hasta que lo leído YA refleje el cambio (evita quedarse con el dato anterior).
+async function efConfirmarCambio(id, payload, cantidadAntes, borrado){
+  // lo que acabas de hacer se ve al instante en el cuadro; enseguida se confirma con la lectura de la base
+  if(EF){
+    if(borrado) { EF.entregas = EF.entregas.filter(x => x.id !== id); efRender(); }
+    else if(id && payload){ const p = EF.entregas.find(x => x.id === id); if(p){ Object.assign(p, { fecha_entrega: payload.fecha_entrega, desde: payload.periodo_desde, hasta: payload.periodo_hasta, monto: payload.monto, entrego: payload.entrego, recibio: payload.recibio, notas: payload.notas }); efRender(); } }
+  }
+  for(let i = 0; i < 5; i++){
+    await efCargar(); if(!EF) return;
+    const e = id ? EF.entregas.find(x => x.id === id) : null;
+    let ok;
+    if(borrado) ok = !e;
+    else if(id) ok = !!e && e.recibio === payload.recibio && e.entrego === payload.entrego && Number(e.monto) === Number(payload.monto) && e.fecha_entrega === payload.fecha_entrega && e.desde === payload.periodo_desde && e.hasta === payload.periodo_hasta && (e.notas || null) === (payload.notas || null);
+    else ok = EF.entregas.length > cantidadAntes;
+    if(ok) return;
+    await new Promise(r => setTimeout(r, 600));
+  }
 }
 const efDia = f => EF.dias.find(d => d.f === f);
 // efectivo por entregar al inicio de la fecha f (sin contar otras entregas del mismo día)
@@ -4477,7 +4501,7 @@ function efSumaPeriodo(desde, hasta){
   return { cob: ds.reduce((a, d) => a + Number(d.cob), 0), sal: ds.reduce((a, d) => a + Number(d.sal), 0), dias: ds };
 }
 function efRefrescarPantallas(){
-  if(document.getElementById('app-screen-efectivo').classList.contains('act')) cargarEfectivo();
+  if(EF) efRender();                                       // el cuadro siempre se redibuja con lo último leído
   if(document.getElementById('app-screen-cierre').classList.contains('act')) cargarCierre();
 }
 
@@ -4489,6 +4513,16 @@ async function cargarEfectivo(){
   if(!ok){ tbody.innerHTML = '<tr><td colspan="9" class="sk-empty">No se pudo cargar el efectivo.</td></tr>'; return; }
   efRender();
 }
+async function efRefrescarSiVisible(){
+  if(!window.MI_ROL_ADMIN || document.visibilityState !== 'visible') return;
+  if(!document.getElementById('app-screen-efectivo').classList.contains('act')) return;
+  if(document.querySelector('.modal-overlay2.show')) return;      // no mientras se está registrando/editando
+  if(Date.now() - EF_ULT < 15000) return;
+  await cargarEfectivo();
+}
+document.addEventListener('visibilitychange', efRefrescarSiVisible);
+window.addEventListener('focus', efRefrescarSiVisible);
+setInterval(efRefrescarSiVisible, 60000);
 function efRender(){
   const hoy = EF.hoy, ents = EF.entregas, ult = ents[ents.length - 1];
   const dHoy = EF.dias[EF.dias.length - 1], caja = dHoy ? Number(dHoy.caja_fin) : 0;
@@ -4536,7 +4570,7 @@ document.getElementById('ef-tbody').addEventListener('click', async e => {
     if(!ok) return;
     const { error } = await sb.from('entregas_efectivo').delete().eq('id', id);
     if(error){ console.error('[CUIVAN] Error eliminando entrega:', error); toast('⚠️ ' + (error.message || 'No se pudo eliminar la entrega')); return; }
-    toast('✓ Entrega eliminada'); efRefrescarPantallas();
+    toast('✓ Entrega eliminada'); await efConfirmarCambio(id, null, 0, true); efRefrescarPantallas();
   }
 });
 document.getElementById('ef-btn-nueva').addEventListener('click', () => efAbrirModal(null));
@@ -4606,7 +4640,8 @@ document.getElementById('ent-btn-guardar').addEventListener('click', async () =>
   btn.disabled = false; btn.textContent = 'Guardar entrega';
   if(res.error){ console.error('[CUIVAN] Error guardando entrega:', res.error); toast('⚠️ ' + (res.error.message || 'No se pudo guardar la entrega')); return; }
   toast(EF_EDIT ? '✓ Entrega actualizada' : '✓ Entrega registrada' + (dif > 0.004 ? ' · quedan ' + skMoney(dif) + ' en caja' : ''));
-  efCerrarModal(); await efCargar(); efRefrescarPantallas();
+  const idEdit = EF_EDIT, cantAntes = EF ? EF.entregas.length : 0;
+  efCerrarModal(); await efConfirmarCambio(idEdit, payload, cantAntes, false); efRefrescarPantallas();
 });
 
 /* ── informe PDF: rango de fechas y opciones ── */
@@ -4680,142 +4715,130 @@ async function exportarInformeEfectivo(desde, hasta, op){
     docs = Object.entries(m).sort((a, b) => b[1] - a[1]);
   }
 
+  // nombre de quien firma por Dirección médica (se captura en Configuración → Control de caja)
+  let dirNombre = '';
+  try { const rcfg = await sb.from('caja_config').select('direccion_medica').eq('id', true).maybeSingle(); dirNombre = ((rcfg.data && rcfg.data.direccion_medica) || '').trim(); } catch(_) {}
+
   const doc = new jsPDF({ unit: 'pt', format: 'letter' });
   const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
-  const SB = 176, MX0 = SB + 26, MX1 = W - 30, MW = MX1 - MX0;
+  const MX0 = 36, MX1 = W - 36, MW = MX1 - MX0;
   const m2 = v => '$' + Number(v).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const m0 = v => '$' + Math.round(Number(v)).toLocaleString('es-MX');
   const pad = n => String(n).padStart(2, '0'), ahora = new Date();
   const folio = 'EF-' + isoLocal(ahora).replace(/-/g, '') + '-' + pad(ahora.getHours()) + pad(ahora.getMinutes());
   const gen = fmtFechaISO(isoLocal(ahora)) + ' ' + pad(ahora.getHours()) + ':' + pad(ahora.getMinutes());
-  const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-  const NAVY = [11, 22, 40], TEAL = [42, 191, 191], GREEN = [22, 163, 74], GREEN_L = [74, 222, 128], ORANGE = [234, 88, 12], ORANGE_L = [255, 154, 107], AMBER = [217, 119, 6], AMBER_L = [251, 191, 36], GREY = [100, 116, 139], MUTED = [153, 166, 189];
+  // paleta equilibrada: azul marino y turquesa de la marca; estados en tonos suaves
+  const NAVY = [11, 22, 40], NAVY2 = [27, 58, 107], TEAL = [42, 191, 191], TEAL_D = [31, 158, 158], TEAL_DD = [11, 110, 110], AMBER_T = [138, 90, 6], GREY = [100, 116, 139], MUTED = [148, 163, 184], LINE = [211, 219, 233];
+  const CAT_COL = [[27, 58, 107], [44, 79, 135], [71, 106, 163], [111, 137, 184], [160, 179, 210], [195, 208, 230]], DOC_COL = [TEAL_D, TEAL, [138, 220, 220]];
   const MES3 = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   const perTxt = (a, b) => { const da = parseInt(a.slice(8, 10)), db = parseInt(b.slice(8, 10)), ma = MES3[parseInt(a.slice(5, 7)) - 1], mb = MES3[parseInt(b.slice(5, 7)) - 1]; return a.slice(0, 7) === b.slice(0, 7) ? (da === db ? da + ' ' + ma : da + '–' + db + ' ' + ma) : da + ' ' + ma + ' – ' + db + ' ' + mb; };
+  // logo en azul marino (el de la pantalla es blanco): se tiñe en un canvas para que se vea sobre la hoja blanca
   const logoEl = document.querySelector('.s3-brand-left img');
-  const logo = (x, y, h) => { try { if(logoEl && logoEl.src && logoEl.naturalHeight) doc.addImage(logoEl.src, 'PNG', x, y, h * logoEl.naturalWidth / logoEl.naturalHeight, h); } catch(_) {} };
-  const stop = (t, st) => { for(let i = 1; i < st.length; i++){ if(t <= st[i][0]){ const a = st[i - 1], b = st[i], u = (t - a[0]) / ((b[0] - a[0]) || 1); return a[1].map((v, k) => Math.round(v + (b[1][k] - v) * u)); } } return st[st.length - 1][1]; };
-  const gradV = (x, y, w, h, st) => { const n = 80; for(let i = 0; i < n; i++){ doc.setFillColor(...stop(i / (n - 1), st)); doc.rect(x, y + i * h / n, w, h / n + 0.8, 'F'); } };
-  const alpha = (a, fn) => { doc.setGState(new doc.GState({ opacity: a })); fn(); doc.setGState(new doc.GState({ opacity: 1 })); };
+  let logoOscuro = null;
+  try { if(logoEl && logoEl.naturalHeight){ const c = document.createElement('canvas'); c.width = logoEl.naturalWidth; c.height = logoEl.naturalHeight; const cx = c.getContext('2d'); cx.drawImage(logoEl, 0, 0); cx.globalCompositeOperation = 'source-in'; cx.fillStyle = '#0B1628'; cx.fillRect(0, 0, c.width, c.height); logoOscuro = c.toDataURL('image/png'); } } catch(_) {}
+  const logo = (x, y, h) => { try { if(logoOscuro) doc.addImage(logoOscuro, 'PNG', x, y, h * logoEl.naturalWidth / logoEl.naturalHeight, h); else { doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(...NAVY); doc.text('Mediconsulting', x, y + h * 0.7); } } catch(_) {} };
   const cs = v => { if(typeof doc.setCharSpace === 'function') doc.setCharSpace(v); };
   const etiqueta = (txt, x, y, size, color, opts) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(size); doc.setTextColor(...color); cs(0.7); doc.text(txt, x, y, opts); cs(0); };
-  const fit = (txt, size, maxW) => { let s = size; doc.setFont('helvetica', 'bold'); doc.setFontSize(s); while(doc.getTextWidth(txt) > maxW && s > 8){ s -= 0.5; doc.setFontSize(s); } return s; };
+  const fit = (txt, size, maxW) => { let s = size; doc.setFont('helvetica', 'bold'); doc.setFontSize(s); while(doc.getTextWidth(txt) > maxW && s > 7){ s -= 0.5; doc.setFontSize(s); } return s; };
   const quien = MI_PERFIL?.nombre || 'Admin';
   const ult = ents.length ? ents[ents.length - 1] : null;
 
-  // ── barra lateral oscura (en todas las hojas; la 1ª con cifras clave y línea de entregas) ──
-  const lat = new Set();
-  const lateral = () => {
-    const pn = doc.internal.getCurrentPageInfo().pageNumber; if(lat.has(pn)) return; lat.add(pn);
-    const full = pn === 1;
-    gradV(0, 0, SB, H, [[0, [16, 50, 108]], [0.35, [7, 18, 36]], [1, [14, 42, 87]]]);
-    gradV(SB - 3.6, 0, 3.6, H, [[0, TEAL], [0.45, [123, 224, 208]], [1, [10, 40, 72]]]);
-    logo(20, 24, 22);
-    etiqueta('INFORME DE EFECTIVO', 20, 82, 5.8, [123, 224, 208]);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(19); doc.setTextColor(255, 255, 255); doc.text(perTxt(desde, hasta), 20, 104);
-    doc.setFontSize(9.5); doc.setTextColor(...MUTED); doc.text(hasta.slice(0, 4), 20, 117);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(130, 148, 175); doc.text('Folio ' + folio, 20, 133); doc.text(dias.length + ' días · ' + ents.length + ' entrega(s)', 20, 142);
-    const bloque = (y, lbl, val, col) => { doc.setDrawColor(255, 255, 255); alpha(0.16, () => { doc.setLineWidth(0.6); doc.line(20, y, SB - 20, y); }); etiqueta(lbl, 20, y + 13, 5.4, MUTED); const sz = fit(val, 19, SB - 40); doc.setTextColor(...col); doc.text(val, 20, y + 13 + sz + 3); };
-    if(full){
-      bloque(160, 'EFECTIVO COBRADO', m2(cob), [255, 255, 255]); bloque(204, 'SALIDAS DE EFECTIVO', m2(sal), ORANGE_L); bloque(248, 'EFECTIVO ENTREGADO', m2(entregado), GREEN_L);
-      alpha(0.14, () => { doc.setFillColor(...AMBER_L); doc.roundedRect(18, 296, SB - 36, 52, 6, 6, 'F'); });
-      doc.setDrawColor(...AMBER_L); doc.setLineWidth(1); doc.roundedRect(18, 296, SB - 36, 52, 6, 6, 'S');
-      etiqueta('EFECTIVO EN CAJA AL ' + efCorto(hasta), 28, 311, 5.4, MUTED); const sz = fit(m2(fin), 19, SB - 56); doc.setTextColor(...AMBER_L); doc.text(m2(fin), 28, 311 + sz + 4);
-      // línea de entregas
-      doc.setDrawColor(255, 255, 255); alpha(0.16, () => { doc.setLineWidth(0.6); doc.line(20, 366, SB - 20, 366); }); etiqueta('LÍNEA DE ENTREGAS', 20, 380, 5.4, MUTED);
-      const tl = ents.slice(-4); let ty = 398;
-      tl.forEach((e, i) => {
-        if(i < tl.length - 1){ doc.setDrawColor(...TEAL); doc.setLineWidth(0.9); alpha(0.4, () => doc.line(24, ty + 4, 24, ty + 34)); }
-        alpha(0.25, () => { doc.setFillColor(...TEAL); doc.circle(24, ty, 5.2, 'F'); }); doc.setFillColor(...TEAL); doc.circle(24, ty, 3.2, 'F');
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(255, 255, 255); doc.text(efCorto(e.fecha_entrega), 36, ty + 3);
-        doc.setTextColor(...GREEN_L); doc.text(m0(e.monto), SB - 20, ty + 3, { align: 'right' });
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(...MUTED); doc.text('cubre ' + perTxt(e.desde, e.hasta), 36, ty + 12); ty += 34;
-      });
-      // bloque inferior anclado: conciliación + última entrega
-      let cy = H - 214; const fila = (t, v, neg) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(200, 211, 228); doc.text(t, 20, cy); doc.text(v, SB - 20, cy, { align: 'right' }); doc.setDrawColor(255, 255, 255); doc.setLineDashPattern([1, 1.4], 0); alpha(0.25, () => { doc.setLineWidth(0.4); doc.line(20, cy + 3, SB - 20, cy + 3); }); doc.setLineDashPattern([], 0); cy += 12; };
-      fila('Efectivo en caja al inicio', m2(inicio)); fila('+ Cobrado', m2(cob)); fila('− Salidas'.replace('−', '-'), m2(sal)); fila('- Entregado', m2(entregado));
-      doc.setDrawColor(255, 255, 255); doc.setLineWidth(1.4); doc.line(20, cy - 6, SB - 20, cy - 6);
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.4); doc.setTextColor(255, 255, 255); doc.text('= Efectivo al cierre', 20, cy + 6); doc.text(m2(fin), SB - 20, cy + 6, { align: 'right' });
-      if(ult){
-        doc.setDrawColor(255, 255, 255); alpha(0.16, () => { doc.setLineWidth(0.6); doc.line(20, H - 128, SB - 20, H - 128); }); etiqueta('ÚLTIMA ENTREGA', 20, H - 114, 5.4, MUTED);
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(255, 255, 255); doc.text(fmtFechaISO(ult.fecha_entrega), 20, H - 97);
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(...MUTED); doc.text(m2(ult.monto) + ' · cubrió ' + perTxt(ult.desde, ult.hasta), 20, H - 85); doc.text(ult.recibio + ' recibió', 20, H - 76);
-      }
-    } else {
-      bloque(160, 'TOTAL SALIDAS DE EFECTIVO', m2(sal), ORANGE_L); bloque(204, 'GASTOS EN EFECTIVO', String(nSal), [255, 255, 255]); bloque(248, 'EFECTIVO EN CAJA AL ' + efCorto(hasta), m2(fin), AMBER_L);
-    }
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(120, 138, 165); doc.text('Generado ' + gen, 20, H - 40); doc.text('por ' + quien + ' (admin)', 20, H - 31);
+  // ── encabezado (en todas las hojas): logo grande a la izquierda, datos del informe a la derecha ──
+  const hdr = new Set();
+  const encabezado = () => {
+    const pn = doc.internal.getCurrentPageInfo().pageNumber; if(hdr.has(pn)) return; hdr.add(pn);
+    logo(MX0, 20, 42);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(...TEAL_D); cs(0.8); const eyeW = doc.getTextWidth('INFORME DE EFECTIVO') + 19 * 0.8; doc.text('INFORME DE EFECTIVO', MX1 - eyeW, 30); cs(0);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(...NAVY); doc.text(perTxt(desde, hasta) + ' ' + hasta.slice(0, 4), MX1, 46, { align: 'right' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(...GREY);
+    doc.text('Folio ' + folio + ' · ' + dias.length + ' días · ' + ents.length + ' entrega(s)', MX1, 56, { align: 'right' });
+    doc.text('Generado ' + gen + ' · ' + quien + ' (admin)', MX1, 65, { align: 'right' });
+    doc.setDrawColor(...LINE); doc.setLineWidth(0.8); doc.line(MX0, 76, MX1, 76);
   };
-  const nuevaHoja = () => { doc.addPage(); lateral(); return 40; };
-  const hook = () => lateral();
+  const nuevaHoja = () => { doc.addPage(); encabezado(); return 96; };
+  const hook = () => encabezado();
   let y = 0;
   const ensure = h => { if(y + h > H - 56) y = nuevaHoja(); };
-  const seccion = (txt, der, yy) => { etiqueta(txt.toUpperCase(), MX0, yy, 6.4, NAVY); if(der){ doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(...GREY); doc.text(der, MX1, yy, { align: 'right' }); } doc.setDrawColor(...NAVY); doc.setLineWidth(1.7); doc.line(MX0, yy + 5, MX1, yy + 5); return yy + 18; };
-  const titulo = (l1, l2, size, yy) => { doc.setFillColor(...TEAL); doc.rect(MX0, yy - 24, 44, 5, 'F'); doc.setFont('helvetica', 'bold'); doc.setFontSize(size); doc.setTextColor(...NAVY); doc.text(l1, MX0, yy + size * 0.55); doc.text(l2, MX0, yy + size * 1.5); return yy + size * 1.5; };
+  const seccion = (txt, der, yy) => { etiqueta(txt.toUpperCase(), MX0, yy, 6.4, NAVY); if(der){ doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(...GREY); doc.text(der, MX1, yy, { align: 'right' }); } doc.setDrawColor(...NAVY2); doc.setLineWidth(1.4); doc.line(MX0, yy + 5, MX1, yy + 5); return yy + 17; };
+  const titulo = (txt, size, yy) => { doc.setFillColor(...TEAL); doc.rect(MX0, yy, 44, 4, 'F'); doc.setFont('helvetica', 'bold'); doc.setFontSize(size); doc.setTextColor(...NAVY); const by = yy + 4 + 8 + size * 0.78; doc.text(txt, MX0, by); return by; };
   const barras = (items, maxV, fmt, total) => items.forEach(([n, v, c]) => {
-    ensure(18);
+    ensure(16);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.4); doc.setTextColor(...NAVY); doc.text(n, MX0, y + 6);
     const bx = MX0 + 84, bw = MW - 84 - 78;
-    doc.setFillColor(230, 235, 244); doc.roundedRect(bx, y, bw, 9, 4.5, 4.5, 'F');
+    doc.setFillColor(226, 232, 243); doc.roundedRect(bx, y, bw, 9, 4.5, 4.5, 'F');
     if(v > 0){ doc.setFillColor(...c); doc.roundedRect(bx, y, Math.max(8, bw * v / maxV), 9, 4.5, 4.5, 'F'); }
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...NAVY); doc.text(fmt(v), MX1 - 28, y + 7, { align: 'right' });
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.4); doc.setTextColor(...GREY); doc.text(total ? (v / total * 100).toFixed(1) + '%' : '', MX1, y + 7, { align: 'right' }); y += 17;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.4); doc.setTextColor(...GREY); doc.text(total ? (v / total * 100).toFixed(1) + '%' : '', MX1, y + 7, { align: 'right' }); y += 15;
   });
-  const tablaBase = { margin: { left: MX0, right: W - MX1, top: 40, bottom: 56 }, styles: { font: 'helvetica', fontSize: 7.4, cellPadding: { top: 5.5, bottom: 5.5, left: 5, right: 5 }, lineColor: [207, 216, 232], lineWidth: 0.4, textColor: NAVY, valign: 'middle' }, headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontSize: 6.2, fontStyle: 'bold', lineWidth: 0 }, footStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontStyle: 'bold', lineWidth: 0 }, alternateRowStyles: { fillColor: [241, 245, 251] }, didDrawPage: hook };
+  const tablaBase = { margin: { left: MX0, right: W - MX1, top: 90, bottom: 56 }, styles: { font: 'helvetica', fontSize: 7.4, cellPadding: { top: 5.5, bottom: 5.5, left: 5, right: 5 }, lineColor: [207, 216, 232], lineWidth: 0.4, textColor: NAVY, valign: 'middle' }, headStyles: { fillColor: NAVY2, textColor: [255, 255, 255], fontSize: 6.2, fontStyle: 'bold', lineWidth: 0 }, footStyles: { fillColor: [230, 237, 247], textColor: NAVY2, fontStyle: 'bold', lineWidth: 0 }, alternateRowStyles: { fillColor: [243, 246, 251] }, didDrawPage: hook };
 
   // ═════════ HOJA 1 ═════════
-  lateral();
-  y = titulo('Efectivo', 'entregado', 34, 58);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(71, 85, 105);
-  const lead = doc.splitTextToSize('Entregas de efectivo recibidas entre el ' + fmtFechaISO(desde) + ' y el ' + fmtFechaISO(hasta) + '. Cada una cubre el periodo que definió el administrador. Todas las cifras son solo de efectivo: no incluyen pagos con tarjeta, transferencia ni cortesía.', 340);
-  lead.forEach((l, i) => doc.text(l, MX0, y + 22 + i * 11));
-  y += 22 + lead.length * 11 + 10;
+  encabezado();
+  y = titulo('Efectivo entregado', 27, 94);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(71, 85, 105);
+  const lead = doc.splitTextToSize('Entregas de efectivo recibidas entre el ' + fmtFechaISO(desde) + ' y el ' + fmtFechaISO(hasta) + '. Cada una cubre el periodo que definió el administrador. Todas las cifras son solo de efectivo: no incluyen pagos con tarjeta, transferencia ni cortesía.', 470);
+  lead.forEach((l, i) => doc.text(l, MX0, y + 15 + i * 10.5));
+  y += 15 + (lead.length - 1) * 10.5 + 16;
+  // franja de cifras: inicio + cobrado − salidas − entregado = en caja
+  const SH = 44, GAP = 13, unit = (MW - GAP * 4) / 5.15;
+  const celdas = [['EFECTIVO AL INICIO', m2(inicio)], ['EFECTIVO COBRADO', m2(cob)], ['SALIDAS', m2(sal)], ['ENTREGADO', m2(entregado)], ['EN CAJA AL ' + efCorto(hasta), m2(fin)]], ops = ['+', '-', '-', '='];
+  doc.setDrawColor(...NAVY2); doc.setLineWidth(1.5); doc.line(MX0, y, MX1, y); doc.setDrawColor(207, 216, 232); doc.setLineWidth(0.6); doc.line(MX0, y + SH, MX1, y + SH);
+  let cx = MX0;
+  celdas.forEach(([lbl, val], i) => {
+    const w = i === 4 ? unit * 1.15 : unit, hl = i === 4;
+    if(hl){ doc.setFillColor(232, 248, 248); doc.rect(cx, y, w, SH, 'F'); doc.setFillColor(...TEAL); doc.rect(cx, y - 0.7, w, 2.8, 'F'); }
+    etiqueta(lbl, cx + 8, y + 15, 5, GREY);
+    const sz = fit(val, 12.5, w - 14); doc.setTextColor(...(hl ? TEAL_DD : NAVY)); doc.text(val, cx + 8, y + 15 + sz + 3);
+    cx += w;
+    if(i < 4){ doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...MUTED); doc.text(ops[i], cx + GAP / 2, y + SH / 2 + 4, { align: 'center' }); cx += GAP; }
+  });
+  y += SH + 24;
   // ¿a dónde fue el efectivo?
-  const base = (entregado + sal + fin) || 1, pe = entregado / base * 100, ps = sal / base * 100, pc = fin / base * 100;
+  const base = (entregado + sal + fin) || 1, pe = entregado / base * 100, ps = sal / base * 100, pc = fin / base * 100, FLOW = [NAVY2, [169, 187, 214], TEAL];
   y = seccion('¿A dónde fue el efectivo?', 'sobre ' + m0(base) + ' de efectivo disponible', y);
-  let fx = MX0; [[pe, GREEN], [ps, ORANGE], [pc, AMBER]].forEach(([p, c], i, arr) => { const w = MW * p / 100; if(w > 0){ doc.setFillColor(...c); doc.rect(fx, y, w, 24, 'F'); } if(i === 0 && w > 80){ doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255); doc.text('Entregado ' + pe.toFixed(1) + '%', MX0 + 8, y + 15); } fx += w; });
-  y += 36; let lx = MX0; [[GREEN, 'Entregado ' + m0(entregado)], [ORANGE, 'Salidas ' + m0(sal) + ' (' + ps.toFixed(1) + '%)'], [AMBER, 'Efectivo en caja ' + m0(fin) + ' (' + pc.toFixed(1) + '%)']].forEach(([c, t]) => { doc.setFillColor(...c); doc.rect(lx, y - 6, 6, 6, 'F'); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(71, 85, 105); doc.text(t, lx + 9, y); lx += doc.getTextWidth(t) + 24; });
+  let fx = MX0; [pe, ps, pc].forEach((p, i) => { const w = MW * p / 100; if(w > 0){ doc.setFillColor(...FLOW[i]); doc.rect(fx, y, w, 20, 'F'); } if(i === 0 && w > 80){ doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255); doc.text('Entregado ' + pe.toFixed(1) + '%', MX0 + 8, y + 13); } fx += w; });
+  y += 32; let lx = MX0; [[FLOW[0], 'Entregado ' + m0(entregado)], [FLOW[1], 'Salidas ' + m0(sal) + ' (' + ps.toFixed(1) + '%)'], [FLOW[2], 'Efectivo en caja ' + m0(fin) + ' (' + pc.toFixed(1) + '%)']].forEach(([c, t]) => { doc.setFillColor(...c); doc.rect(lx, y - 6, 6, 6, 'F'); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(71, 85, 105); doc.text(t, lx + 9, y); lx += doc.getTextWidth(t) + 24; });
   y += 20;
   // entregas
   y = seccion('Entregas', ents.length + ' en el periodo', y);
   if(!ents.length){ doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...GREY); doc.text('No hubo entregas de efectivo en el rango elegido.', MX0, y + 4); y += 24; }
   ents.forEach(e => {
-    ensure(70);
+    ensure(58);
     const dif = Number(e.quedo) > 0.004, nDias = efDifDias(e.hasta, e.desde) + 1, arr = Number(e.por_entregar) - (Number(e.cobrado) - Number(e.salidas));
-    doc.setFillColor(...NAVY); doc.roundedRect(MX0, y, 40, 40, 5, 5, 'F'); doc.setFont('helvetica', 'bold'); doc.setFontSize(17); doc.setTextColor(...TEAL); doc.text(pad(e.n), MX0 + 20, y + 26, { align: 'center' });
-    doc.setFontSize(10.2); doc.setTextColor(...NAVY); doc.text('Entrega del ' + fmtFechaISO(e.fecha_entrega), MX0 + 52, y + 11);
-    doc.setFontSize(6.8); doc.text('Cubre ' + perTxt(e.desde, e.hasta), MX0 + 52, y + 22); const w1 = doc.getTextWidth('Cubre ' + perTxt(e.desde, e.hasta));
-    doc.setFont('helvetica', 'normal'); doc.setTextColor(71, 85, 105); doc.text(' · ' + nDias + ' día(s) · recibió ' + e.recibio, MX0 + 52 + w1, y + 22);
-    doc.text('Cobrado ' + m0(e.cobrado) + ' · salidas ' + m0(e.salidas) + (arr > 0.004 ? ' · arrastre ' + m0(arr) : '') + (dif ? ' · quedan ' + m0(e.quedo) + ' en caja' : ''), MX0 + 52, y + 32);
-    const pw = MW - 52 - 112; doc.setFillColor(...NAVY); doc.roundedRect(MX0 + 52, y + 38, pw, 5, 2.5, 2.5, 'F'); const ratio = Number(e.por_entregar) > 0 ? Math.min(1, Number(e.monto) / Number(e.por_entregar)) : 0; if(ratio > 0){ doc.setFillColor(34, 197, 94); doc.roundedRect(MX0 + 52, y + 38, Math.max(5, pw * ratio), 5, 2.5, 2.5, 'F'); }
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(...NAVY); doc.text(m2(e.monto), MX1, y + 13, { align: 'right' });
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(...GREY); doc.text('de ' + m2(e.por_entregar) + ' por entregar', MX1, y + 23, { align: 'right' });
-    const lbl = dif ? 'CON DIFERENCIA' : 'COMPLETA'; doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); cs(0.3); const pwid = doc.getTextWidth(lbl) + 14; doc.setFillColor(...(dif ? [245, 158, 11] : GREEN)); doc.roundedRect(MX1 - pwid, y + 29, pwid, 11, 5.5, 5.5, 'F'); doc.setTextColor(...(dif ? NAVY : [255, 255, 255])); doc.text(lbl, MX1 - pwid / 2, y + 36.6, { align: 'center' }); cs(0);
-    doc.setDrawColor(211, 219, 233); doc.setLineWidth(0.6); doc.line(MX0, y + 55, MX1, y + 55); y += 64;
+    doc.setFillColor(...NAVY2); doc.roundedRect(MX0, y, 36, 36, 5, 5, 'F'); doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(255, 255, 255); doc.text(pad(e.n), MX0 + 18, y + 23, { align: 'center' });
+    doc.setFontSize(9.8); doc.setTextColor(...NAVY); doc.text('Entrega del ' + fmtFechaISO(e.fecha_entrega), MX0 + 48, y + 10);
+    doc.setFontSize(6.6); doc.text('Cubre ' + perTxt(e.desde, e.hasta), MX0 + 48, y + 20); const w1 = doc.getTextWidth('Cubre ' + perTxt(e.desde, e.hasta));
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(71, 85, 105); doc.text(' · ' + nDias + ' día(s) · recibió ' + e.recibio, MX0 + 48 + w1, y + 20);
+    doc.text('Cobrado ' + m0(e.cobrado) + ' · salidas ' + m0(e.salidas) + (arr > 0.004 ? ' · arrastre ' + m0(arr) : '') + (dif ? ' · quedan ' + m0(e.quedo) + ' en caja' : ''), MX0 + 48, y + 29);
+    const pw = MW - 48 - 110; doc.setFillColor(219, 229, 243); doc.roundedRect(MX0 + 48, y + 35, pw, 4.5, 2.2, 2.2, 'F'); const ratio = Number(e.por_entregar) > 0 ? Math.min(1, Number(e.monto) / Number(e.por_entregar)) : 0; if(ratio > 0){ doc.setFillColor(...TEAL); doc.roundedRect(MX0 + 48, y + 35, Math.max(5, pw * ratio), 4.5, 2.2, 2.2, 'F'); }
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(...NAVY); doc.text(m2(e.monto), MX1, y + 12, { align: 'right' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(...GREY); doc.text('de ' + m2(e.por_entregar) + ' por entregar', MX1, y + 22, { align: 'right' });
+    const lbl = dif ? 'CON DIFERENCIA' : 'COMPLETA'; doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); cs(0.3); const pwid = doc.getTextWidth(lbl) + 14; doc.setFillColor(...(dif ? [253, 241, 216] : [224, 246, 246])); doc.roundedRect(MX1 - pwid, y + 27, pwid, 11, 5.5, 5.5, 'F'); doc.setTextColor(...(dif ? AMBER_T : TEAL_DD)); doc.text(lbl, MX1 - pwid / 2, y + 34.6, { align: 'center' }); cs(0);
+    doc.setDrawColor(...LINE); doc.setLineWidth(0.6); doc.line(MX0, y + 46, MX1, y + 46); y += 56;
   });
   // categorías y doctores
   if(op.salidas && sals.length){
     const porC = {}; sals.forEach(s => { porC[s.categoria] = (porC[s.categoria] || 0) + Number(s.monto); }); const cats = Object.keys(porC).sort((a, b) => porC[b] - porC[a]);
-    ensure(40 + cats.length * 17); y = seccion('Salidas de efectivo por categoría', m0(sal), y + 6);
-    barras(cats.map(c => [gstNombreCat(c), porC[c], hex(gstCat(c).color)]), Math.max(...cats.map(c => porC[c]), 1), m0, sal); y += 2;
+    ensure(44 + cats.length * 15); y = seccion('Salidas de efectivo por categoría', m0(sal), y + 10);
+    barras(cats.map((c, i) => [gstNombreCat(c), porC[c], CAT_COL[Math.min(i, CAT_COL.length - 1)]]), Math.max(...cats.map(c => porC[c]), 1), m0, sal); y += 2;
   }
   if(op.doctores && docs.length){
-    const tot = docs.reduce((a, d) => a + d[1], 0), pal = [[27, 58, 107], TEAL, [125, 60, 152], ORANGE, GREEN];
-    ensure(40 + docs.length * 17); y = seccion('Efectivo cobrado por doctor', m0(tot), y + 6);
-    barras(docs.map(([n, v], i) => [n.split(' ').slice(0, 2).join(' '), v, pal[i % pal.length]]), Math.max(...docs.map(d => d[1]), 1), m0, tot);
+    const tot = docs.reduce((a, d) => a + d[1], 0);
+    ensure(48 + docs.length * 15); y = seccion('Efectivo cobrado por doctor', m0(tot), y + 16);
+    barras(docs.map(([n, v], i) => [n.split(' ').slice(0, 2).join(' '), v, DOC_COL[i % DOC_COL.length]]), Math.max(...docs.map(d => d[1]), 1), m0, tot);
   }
 
   // ═════════ HOJA 2: registro y detalle ═════════
-  y = nuevaHoja(); y = titulo(op.salidas ? 'Detalle de salidas' : 'Registro de', op.salidas ? 'de efectivo' : 'entregas', 24, 58) + 26;
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(71, 85, 105); doc.text((op.salidas ? nSal + ' salida(s) de efectivo' : ents.length + ' entrega(s)') + ' entre el ' + fmtFechaISO(desde) + ' y el ' + fmtFechaISO(hasta) + '.', MX0, y); y += 18;
+  y = nuevaHoja(); y = titulo(op.salidas ? 'Detalle de salidas de efectivo' : 'Registro de entregas', 21, 94);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(71, 85, 105); doc.text((op.salidas ? nSal + ' salida(s) de efectivo' : ents.length + ' entrega(s)') + ' entre el ' + fmtFechaISO(desde) + ' y el ' + fmtFechaISO(hasta) + '.', MX0, y + 16); y += 16 + 20;
   if(ents.length){
     y = seccion('Registro de entregas', 'periodos definidos por el admin', y);
     doc.autoTable({ ...tablaBase, startY: y - 4,
       head: [['Entrega', 'Periodo que cubre', 'Por entregar', 'Entregado', 'Queda en caja', 'Estado']],
       body: ents.map(e => ['#' + e.n + ' · ' + efCorto(e.fecha_entrega), perTxt(e.desde, e.hasta) + '\n' + (efDifDias(e.hasta, e.desde) + 1) + ' día(s)', m2(e.por_entregar), m2(e.monto), m2(Math.max(0, Number(e.quedo))), Number(e.quedo) > 0.004 ? 'CON DIFERENCIA' : 'COMPLETA']),
       columnStyles: { 0: { fontStyle: 'bold', cellWidth: 52 }, 2: { halign: 'right' }, 3: { halign: 'right', fontStyle: 'bold' }, 4: { halign: 'right' } },
-      didParseCell: d => { if(d.section === 'head' && d.column.index >= 2 && d.column.index <= 4) d.cell.styles.halign = 'right'; if(d.section === 'body' && d.column.index === 5){ const dif = Number(ents[d.row.index].quedo) > 0.004; d.cell.styles.textColor = dif ? [180, 83, 9] : [21, 128, 61]; d.cell.styles.fontStyle = 'bold'; d.cell.styles.fontSize = 6.2; } } });
-    y = doc.lastAutoTable.finalY + 14;
+      didParseCell: d => { if(d.section === 'head' && d.column.index >= 2 && d.column.index <= 4) d.cell.styles.halign = 'right'; if(d.section === 'body' && d.column.index === 5){ const dif = Number(ents[d.row.index].quedo) > 0.004; d.cell.styles.textColor = dif ? AMBER_T : TEAL_DD; d.cell.styles.fontStyle = 'bold'; d.cell.styles.fontSize = 6.2; } } });
+    y = doc.lastAutoTable.finalY + 26;
   }
   if(op.salidas){
     if(!sals.length){ ensure(40); y = seccion('Detalle de salidas de efectivo', '0 movimientos', y); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...GREY); doc.text('No hubo salidas de efectivo en este rango.', MX0, y + 2); y += 22; }
@@ -4824,36 +4847,40 @@ async function exportarInformeEfectivo(desde, hasta, op){
       doc.autoTable({ ...tablaBase, startY: y - 4, head: [['Fecha', 'Categoría', 'Descripción', 'Monto']],
         body: sals.map(s => [fmtFechaISO(s.fecha), gstNombreCat(s.categoria), s.descripcion || '', m2(s.monto)]),
         foot: [[{ content: 'TOTAL SALIDAS DE EFECTIVO', colSpan: 3 }, m2(suma(sals, 'monto'))]],
-        columnStyles: { 0: { cellWidth: 52 }, 1: { cellWidth: 78 }, 3: { halign: 'right', fontStyle: 'bold', textColor: [194, 65, 12], cellWidth: 58 } },
-        didParseCell: d => { if((d.section === 'head' || d.section === 'foot') && d.column.index === 3) d.cell.styles.halign = 'right'; if(d.section === 'foot' && d.column.index === 3){ d.cell.styles.textColor = AMBER_L; d.cell.styles.fontSize = 8.5; } if(d.section === 'foot'){ d.cell.styles.cellPadding = { top: 7, bottom: 7, left: 5, right: 5 }; } } });
+        columnStyles: { 0: { cellWidth: 52 }, 1: { cellWidth: 78 }, 3: { halign: 'right', fontStyle: 'bold', textColor: NAVY2, cellWidth: 58 } },
+        didParseCell: d => { if((d.section === 'head' || d.section === 'foot') && d.column.index === 3) d.cell.styles.halign = 'right'; if(d.section === 'foot' && d.column.index === 3) d.cell.styles.fontSize = 8.5; if(d.section === 'foot'){ d.cell.styles.cellPadding = { top: 7, bottom: 7, left: 5, right: 5 }; } } });
       y = doc.lastAutoTable.finalY + 14;
     }
   }
   const obs = ents.filter(e => Number(e.quedo) > 0.004 && e.notas);
   if(obs.length){
     const lineas = obs.map(e => doc.splitTextToSize('Entrega ' + e.n + ' (' + efCorto(e.fecha_entrega) + '): ' + e.notas, MW - 24)), alto = 20 + lineas.reduce((a, l) => a + l.length * 9, 0);
-    ensure(alto + 10); doc.setFillColor(255, 247, 230); doc.rect(MX0, y, MW, alto, 'F'); doc.setFillColor(245, 158, 11); doc.rect(MX0, y, 4, alto, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(59, 42, 6); doc.text('Observaciones', MX0 + 14, y + 12);
+    ensure(alto + 10); doc.setFillColor(241, 245, 251); doc.rect(MX0, y, MW, alto, 'F'); doc.setFillColor(...TEAL); doc.rect(MX0, y, 4, alto, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...NAVY); doc.text('Observaciones', MX0 + 14, y + 12);
     doc.setFont('helvetica', 'normal'); let yy = y + 22; lineas.forEach(l => { doc.text(l, MX0 + 14, yy); yy += l.length * 9; }); y += alto + 12;
   }
   if(op.firmas){
     if(y > H - 150) y = nuevaHoja();
-    const ys = H - 96, cw = (MW - 40) / 2;
-    [[ult ? ult.entrego : 'Recepción CUIVAN', 'Entregó · Fecha y firma', MX0], [quien, 'Recibió · Fecha y firma', MX0 + cw + 40]].forEach(([n, t, x]) => {
-      doc.setDrawColor(...NAVY); doc.setLineWidth(1.8); doc.line(x, ys, x + cw, ys);
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...NAVY); doc.text(n, x + cw / 2, ys + 13, { align: 'center' });
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(...GREY); doc.text(t, x + cw / 2, ys + 23, { align: 'center' });
+    // firmas: Dirección médica (CUIVAN) entrega · quien recibe (de la última entrega del periodo) firma por Mediconsulting
+    const ys = H - 100, cw = (MW - 56) / 2;
+    [{ nom: dirNombre, rol: 'Dirección médica · CUIVAN Salud Integral', acc: 'Entregó · Fecha y firma', x: MX0 },
+     { nom: ult ? ult.recibio : '', rol: 'Mediconsulting', acc: 'Recibió · Fecha y firma', x: MX0 + cw + 56 }].forEach(f => {
+      doc.setDrawColor(...NAVY2); doc.setLineWidth(1.6); doc.line(f.x, ys, f.x + cw, ys);
+      if(f.nom){ doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...NAVY); doc.text(f.nom, f.x + cw / 2, ys + 13, { align: 'center' }); }
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(6.8); doc.setTextColor(...NAVY); doc.text(f.rol, f.x + cw / 2, ys + 24, { align: 'center' });
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.4); doc.setTextColor(...GREY); doc.text(f.acc, f.x + cw / 2, ys + 33, { align: 'center' });
     });
   }
   // ── pie en todas las hojas ──
   const total = doc.internal.getNumberOfPages();
   for(let i = 1; i <= total; i++){
-    doc.setPage(i); doc.setDrawColor(...NAVY); doc.setLineWidth(1.7); doc.line(MX0, H - 34, MX1, H - 34);
+    doc.setPage(i); doc.setDrawColor(...NAVY2); doc.setLineWidth(1.2); doc.line(MX0, H - 34, MX1, H - 34);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(...GREY); doc.text('Documento generado por el sistema de CUIVAN · Confidencial · Uso interno', MX0, H - 22);
     doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY); doc.text('Página ' + i + ' de ' + total, MX1, H - 22, { align: 'right' });
   }
   doc.save('CUIVAN_Informe_Efectivo_' + desde + '_a_' + hasta + '.pdf');
 }
+
 
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD — rediseñado al estilo de Skin Fabric: periodo por Mes/Rango/Recientes/Todo,
@@ -5439,6 +5466,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-6</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-8</div>
 </body>
 </html>
