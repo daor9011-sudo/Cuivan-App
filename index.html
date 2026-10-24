@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.10.22-8"/>
+<meta name="app-version" content="2026.10.22-10"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -3898,56 +3898,30 @@ function actualizarLabelCierre(){
     document.getElementById('cierre-month-picker').value = isoLocal(CIERRE_FECHA).slice(0,7);
   }
 }
-// ═══ CORTE DE CAJA (Cierre): efectivo cobrado − salidas de efectivo = efectivo neto. Si el efectivo del día no alcanza se toma remanente de días anteriores. ═══
+// ═══ EFECTIVO DEL DÍA (Cierre): efectivo cobrado − gastos en efectivo = efectivo neto. Sin acumulado de caja (confidencial). ═══
 let CIERRE_CORTE = null, CIERRE_CJ = null;
 const cjMoney = v => (v < 0 ? '−' : '') + skMoney(Math.abs(v));
 const cjEfectivoCobrado = data => data.reduce((a, r) => a + (r.medio_pago === 'Efectivo' ? Number(r.monto || 0) : 0) + (r.medio_pago_2 === 'Efectivo' ? Number(r.monto_2 || 0) : 0), 0);
 function cjNetbox(c){
   const l = (t, v, extra) => `<div class="r"><span>${t}</span><b ${extra || ''}>${v}</b></div>`;
-  if(!c.aplica) return `<div class="cj-netbox">${l('Efectivo cobrado', skMoney(c.ef))}${l('− Salidas de efectivo', skMoney(c.totSal), 'style="color:#B8481F"')}<div class="r net"><span>= Efectivo neto</span><span class="${c.ef - c.totSal < 0 ? 'cj-neg' : ''}">${cjMoney(c.ef - c.totSal)}</span></div></div>`;
-  return `<div class="cj-netbox">${l('Efectivo en caja al inicio', skMoney(c.antes))}${c.entregado > 0.004 ? l('− Entregado', skMoney(c.entregado), 'style="color:#2E7D4F"') : ''}${l('+ Efectivo cobrado', skMoney(c.ef))}${l('− Salidas de efectivo', skMoney(c.totSal), 'style="color:#B8481F"')}<div class="r net"><span>= Efectivo en caja al cierre</span><span>${skMoney(c.fin)}</span></div></div>`;
+  return `<div class="cj-netbox">${l('Efectivo cobrado', skMoney(c.ef))}${l('− Gastos en efectivo', skMoney(c.totSal), 'style="color:#B8481F"')}<div class="r net"><span>= Efectivo neto</span><span class="${c.ef - c.totSal < 0 ? 'cj-neg' : ''}">${cjMoney(c.ef - c.totSal)}</span></div></div>`;
 }
+// El Cierre muestra SOLO lo del día (o periodo): efectivo cobrado − gastos en efectivo. El efectivo acumulado de la caja es confidencial (pestaña Efectivo, solo admin).
 function renderCorteCaja(data, doctorFiltro){
   const el = document.getElementById('cierre-corte');
   CIERRE_CJ = null;
   if(!CIERRE_CORTE){ el.innerHTML = ''; return; }
-  if(doctorFiltro){ el.innerHTML = '<div class="cj-nota info">💵 Las salidas de efectivo y la caja son generales de la clínica, no de un doctor. Quita el filtro de doctor para ver el corte de caja.</div>'; return; }
-  const c = CIERRE_CORTE, salidas = c.salidas || [], caja = c.caja || {}, entregas = c.entregas || [], ult = c.ultima;
+  if(doctorFiltro){ el.innerHTML = '<div class="cj-nota info">💵 Las salidas de efectivo son generales de la clínica, no de un doctor. Quita el filtro de doctor para ver el efectivo del día.</div>'; return; }
+  const salidas = CIERRE_CORTE.salidas || [];
   const ef = cjEfectivoCobrado(data), totSal = salidas.reduce((a, s) => a + Number(s.monto || 0), 0);
-  const dia = CIERRE_MODO === 'dia', per = dia ? 'del día' : 'del periodo', aplica = !!caja.aplica;
-  const antes = Number(caja.caja_antes || 0), entregado = Number(caja.entregado || 0), fin = Number(caja.caja_fin || 0), falt = Number(caja.faltante || 0);
-  CIERRE_CJ = { ef, totSal, antes, entregado, fin, aplica };
-  const sm = c.sin_medio || { n: 0, total: 0 };
+  const dia = CIERRE_MODO === 'dia', per = dia ? 'del día' : 'del periodo', neto = ef - totSal;
+  CIERRE_CJ = { ef, totSal };
+  const sm = CIERRE_CORTE.sin_medio || { n: 0, total: 0 };
   const aviso = sm.n > 0 ? `<div class="cj-nota warn">⚠️ <b>${sm.n} gasto(s) sin medio de pago</b> en ${dia ? 'este día' : 'el periodo'} (${skMoney(sm.total)}): no se descuentan del efectivo hasta que se les asigne uno.${window.MI_VE_GASTOS ? '' : ' Avisa a quien administra los gastos.'}</div>` : '';
-  // ecuación: en caja al inicio − entregado + cobrado − salidas = en caja al cierre
-  const it = [];
-  if(aplica){
-    it.push({ l: 'Efectivo en caja al inicio', v: antes, c: 'var(--navy)' });
-    if(entregado > 0.004) it.push({ op: '−', l: 'Entregado', v: entregado, c: '#2E7D4F' });
-    it.push({ op: '+', l: 'Efectivo cobrado', v: ef, c: '#2E7D4F' });
-    it.push({ op: '−', l: 'Salidas de efectivo (' + salidas.length + ')', v: totSal, c: '#B8481F' });
-  } else {
-    it.push({ l: 'Efectivo cobrado', v: ef, c: '#2E7D4F' });
-    it.push({ op: '−', l: 'Salidas de efectivo (' + salidas.length + ')', v: totSal, c: '#B8481F' });
-  }
-  const res = aplica ? { l: 'Efectivo en caja al cierre', v: fin, bad: false } : { l: 'Efectivo neto ' + per, v: ef - totSal, bad: ef - totSal < 0 };
-  const cols = it.map((_, i) => (i ? 'auto ' : '') + '1fr').join(' ') + ' auto 1.2fr';
-  const eq = `<div class="cj-eq" style="grid-template-columns:${cols}">` + it.map((x, i) => (i ? `<div class="cj-op">${x.op}</div>` : '') + `<div class="cj-it"><div class="l">${x.l}</div><div class="v" style="color:${x.c}">${skMoney(x.v)}</div></div>`).join('')
-    + `<div class="cj-op">=</div><div class="cj-it net ${res.bad ? 'bad' : ''}"><div class="l">${res.l}</div><div class="v">${cjMoney(res.v)}</div></div></div>`;
-  let estado = '';
-  if(aplica){
-    const hoy = isoLocal(new Date()), hastaC = rangoCierreActual().hasta, ref = hastaC < hoy ? hastaC : hoy, dsin = ult ? efDifDias(ref, ult.hasta) : 0;
-    estado = `<div class="cj-estado"><span class="sk-bdg" style="${fin > 0.004 ? 'background:#EEF5FC;color:#1B5C9E;border:1px solid #BDD5F0' : 'background:#EAF7EE;color:#2E7D4F;border:1px solid #A8D8B4'}">${fin > 0.004 ? '🟡 Efectivo por entregar' : '✅ Sin efectivo por entregar'}</span>`
-      + `<span class="sp">${ult ? `Última entrega: <b>${fmtFechaISO(ult.fecha)}</b> · ${skMoney(ult.monto)} · cubrió ${efCorto(ult.desde)}–${efCorto(ult.hasta)}${fin > 0.004 && dsin > 0 ? ' · <b>' + dsin + ' día(s)</b> desde ese corte' : ''}` : 'Aún sin entregas registradas'}</span>`
-      + (window.MI_ROL_ADMIN ? '<button class="appbtn appbtn-p" id="cj-btn-entrega" type="button" style="font-size:11px;padding:6px 12px">💵 Registrar entrega</button>' : '') + '</div>';
-  }
-  const entList = entregas.length ? '<div class="cj-nota info" style="margin:10px 0 0">' + entregas.map(e => `📥 <b>Entrega #${e.n}</b> del ${fmtFechaISO(e.fecha)}: −${skMoney(e.monto)} · cubre ${efCorto(e.desde)}–${efCorto(e.hasta)} · recibió ${esc2(e.recibio)}`).join('<br>') + '</div>' : '';
-  const notas = (falt > 0.004 ? `<div class="cj-nota red" style="margin:10px 0 0">⚠️ Las salidas ${per} superaron el efectivo que había en caja por <b>${skMoney(falt)}</b>.</div>` : '')
-    + (!aplica ? `<div class="cj-nota muted" style="margin:10px 0 0">El control de caja empieza el ${fmtFechaISO(caja.inicio)}${window.MI_ROL_ADMIN ? ' (se cambia en ⚙️ Configuración → Control de caja)' : ''}.</div>` : '');
+  const eq = `<div class="cj-eq" style="grid-template-columns:1fr auto 1fr auto 1.2fr"><div class="cj-it"><div class="l">Efectivo cobrado</div><div class="v" style="color:#2E7D4F">${skMoney(ef)}</div></div><div class="cj-op">−</div><div class="cj-it"><div class="l">Gastos en efectivo (${salidas.length})</div><div class="v" style="color:#B8481F">${skMoney(totSal)}</div></div><div class="cj-op">=</div><div class="cj-it net ${neto < 0 ? 'bad' : ''}"><div class="l">Efectivo neto ${per}</div><div class="v">${cjMoney(neto)}</div></div></div>`;
   const lista = salidas.length ? salidas.map(sa => { const k = gstCat(sa.categoria); return `<div class="cj-salrow"><span class="sk-bdg" style="background:${k.color}1a;color:${k.color}">${k.label}</span><div>${esc2(sa.descripcion)}<small>${dia ? '' : fmtFechaISO(sa.fecha) + ' · '}${sa.registro ? 'Registró: ' + esc2(sa.registro) : 'Salida de efectivo'}</small></div><span class="m">−${skMoney(sa.monto)}</span></div>`; }).join('')
     : `<div class="cj-vacio">✓ Sin salidas de efectivo ${dia ? 'este día' : 'en el periodo'}</div>`;
-  el.innerHTML = aviso + `<div class="cj-corte"><h4>💵 Corte de caja · ${per}</h4><div class="cj-solo">Solo efectivo: no incluye pagos con tarjeta, transferencia ni cortesía.</div>${eq}${estado}${entList}${notas}<div class="cj-sal"><div class="h">Salidas de efectivo ${per}</div>${lista}</div></div>`;
-  const b = el.querySelector('#cj-btn-entrega'); if(b) b.addEventListener('click', efAbrirDesdeCierre);
+  el.innerHTML = aviso + `<div class="cj-corte"><h4>💵 Efectivo ${per}</h4><div class="cj-solo">Solo efectivo: no incluye pagos con tarjeta, transferencia ni cortesía.</div>${eq}<div class="cj-sal"><div class="h">Salidas de efectivo ${per}</div>${lista}</div></div>`;
 }
 async function cargarCierre(){
   actualizarLabelCierre();
@@ -3982,7 +3956,8 @@ async function cargarCierre(){
     <div class="kpi-tile"><div class="ico">🧾</div><div class="lbl3">Consultas</div><div class="val">${totalConsultas}</div></div>
     <div class="kpi-tile"><div class="ico">🎟️</div><div class="lbl3">Ticket promedio</div><div class="val">$${ticketProm.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
   `;
-  renderCorteCaja(data, doctorFiltro);
+  // el bloque de efectivo del día nunca debe impedir que se dibujen las vistas por doctor y por medio de pago
+  try { renderCorteCaja(data, doctorFiltro); } catch(e){ console.error('[CUIVAN] Error dibujando el efectivo del día:', e); document.getElementById('cierre-corte').innerHTML = ''; CIERRE_CJ = null; }
   const MEDIOS_INFO = {
     Efectivo:{cls:'efectivo', icon:'💵'},
     Tarjeta:{cls:'tarjeta', icon:'💳'},
@@ -4576,7 +4551,6 @@ document.getElementById('ef-tbody').addEventListener('click', async e => {
 document.getElementById('ef-btn-nueva').addEventListener('click', () => efAbrirModal(null));
 
 /* ── modal: registrar / editar entrega ── */
-async function efAbrirDesdeCierre(){ if(!EF){ const ok = await efCargar(); if(!ok){ toast('⚠️ No se pudo cargar el efectivo'); return; } } efAbrirModal(null); }
 function efAbrirModal(id){
   if(!EF){ cargarEfectivo(); return; }
   EF_EDIT = id || null;
@@ -5466,6 +5440,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-8</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.10.22-10</div>
 </body>
 </html>
