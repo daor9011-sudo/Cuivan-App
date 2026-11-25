@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="2026.11.02-3"/>
+<meta name="app-version" content="2026.11.25-1"/>
 <!-- Versión 2026.10.05-2: rol Enfermería con acceso exclusivo a Auditoría. Versión 2026.10.05: módulo Auditoría (solo admin), Historial sin tope de 300, búsqueda tolerante a espacios/acentos, carga paginada en Dashboard/PRM/Cierre -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CUIVAN Consultas — Iniciar sesión</title>
@@ -1237,6 +1237,7 @@ main.appmain:has(#app-screen-contratos.act) #ct-banner{display:none}
       <div class="cj-nota muted" id="ent-periodo" style="margin-bottom:11px"></div>
       <div class="sk-fg"><label class="lb" for="ent-monto">Monto entregado ($)</label><input class="app-input" type="number" id="ent-monto" min="0.01" step="0.01" inputmode="decimal"/></div>
       <div class="cj-nota info" id="ent-dif"></div>
+      <div class="cj-nota warn" id="ent-alerta" style="display:none"></div>
       <div class="ent-g2">
         <div class="sk-fg"><label class="lb" for="ent-entrego">Entregó</label><input class="app-input" type="text" id="ent-entrego" value="Recepción CUIVAN"/></div>
         <div class="sk-fg"><label class="lb" for="ent-recibio">Recibió</label><input class="app-input" type="text" id="ent-recibio"/></div>
@@ -4901,6 +4902,22 @@ function efModalErrores(){
   if(!document.getElementById('ent-recibio').value.trim()) return 'Indica quién recibió el efectivo.';
   return null;
 }
+// Alerta: salidas de efectivo posteriores al periodo y hasta la fecha de entrega (ya salieron de la caja física pero el periodo no las descuenta)
+function efModalAlerta(f, h, disp, m){
+  const el = document.getElementById('ent-alerta'); if(!el) return;
+  el.style.display = 'none'; el.innerHTML = '';
+  if(!f || !h || h >= f) return;
+  const post = EF.dias.filter(d => d.f > h && d.f <= f && Number(d.sal) > 0.004);
+  if(!post.length) return;
+  const sal = post.reduce((a, d) => a + Number(d.sal), 0);
+  const cobPost = EF.dias.filter(d => d.f > h && d.f <= f).reduce((a, d) => a + Number(d.cob), 0);
+  const fisico = disp + cobPost - sal;
+  const fechas = post.map(d => fmtFechaISO(d.f)).join(', ');
+  const exceso = m - fisico > 0.004;
+  el.className = 'cj-nota ' + (exceso ? 'red' : 'warn');
+  el.innerHTML = `${exceso ? '🚨' : '⚠️'} Hay <b>${skMoney(sal)}</b> de salidas de efectivo después del periodo (${fechas}). Si ya se pagaron de esta caja, el efectivo físico que puedes tener es de máximo <b>${skMoney(fisico)}</b> (${skMoney(disp)} del corte${cobPost > 0.004 ? ' + ' + skMoney(cobPost) + ' cobrados esos días' : ''} − ${skMoney(sal)} de salidas).` + (exceso ? ` Estás entregando <b>${skMoney(m)}</b>, que es <b>${skMoney(m - fisico)}</b> más de lo que debería haber físicamente. Revisa el monto o extiende el periodo hasta ese día.` : '');
+  el.style.display = '';
+}
 function efModalActualizar(inicial){
   const $ = x => document.getElementById(x), f = $('ent-fecha').value, d = $('ent-desde').value, h = $('ent-hasta').value, m = Number($('ent-monto').value) || 0;
   const disp = f ? efDisp(f, EF_EDIT) : 0;
@@ -4908,6 +4925,7 @@ function efModalActualizar(inicial){
   if(d && h && d <= h){ const s = efSumaPeriodo(d, h); $('ent-periodo').innerHTML = `Periodo de ${efDifDias(h, d) + 1} día(s): efectivo cobrado <b>${skMoney(s.cob)}</b> · salidas de efectivo <b>${skMoney(s.sal)}</b> · neto <b>${skMoney(s.cob - s.sal)}</b>`; }
   else $('ent-periodo').textContent = 'Elige el periodo de efectivo que estás entregando.';
   const err = efModalErrores(), box = $('ent-dif'), dif = disp - m;
+  efModalAlerta(f, h, disp, m);
   if(err && !(inicial && !$('ent-notas').value && err.startsWith('Indica quién'))){ box.className = 'cj-nota red'; box.innerHTML = '⚠️ ' + err; $('ent-notas-req').textContent = ''; return; }
   if(Math.abs(dif) < 0.005){ box.className = 'cj-nota info'; box.innerHTML = '✅ Entrega completa: no queda efectivo pendiente de ese corte.'; $('ent-notas-req').textContent = ''; }
   else { box.className = 'cj-nota warn'; box.innerHTML = `⚠️ Entregas ${skMoney(m)} de ${skMoney(disp)}. <b>Quedan ${skMoney(dif)} en caja</b> y se arrastran a la siguiente entrega.`; $('ent-notas-req').textContent = '(obligatoria si hay diferencia)'; }
@@ -5761,6 +5779,6 @@ document.getElementById('btn-aviso-legal-cerrar').addEventListener('click', ()=>
   document.getElementById('modal-aviso-legal').classList.remove('show');
 });
 </script>
-<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.11.02-3</div>
+<div class="app-version-wm" id="app-version-wm" aria-hidden="true">CUIVAN v2026.11.25-1</div>
 </body>
 </html>
